@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html class="light" lang="ko">
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>Retirement Simulator (Persistent + Pension + Filters + Presets)</title>
+  <title>은퇴 시뮬레이터 (영구 데이터 + 연금 + 필터 + 프리셋)</title>
 
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -55,14 +55,14 @@
   <div class="mb-8 flex items-center justify-between">
     <div>
       <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-        Retirement <span class="text-primary">Simulator</span>
+        은퇴 <span class="text-primary">시뮬레이터</span>
       </h1>
-      <p class="text-slate-500 text-sm mt-1">Persistent inputs • Pension cashflow • Range filter • Custom presets</p>
+      <p class="text-slate-500 text-sm mt-1">영구 입력 • 연금 현금 흐름 • 범위 필터 • 사용자 지정 프리셋</p>
     </div>
     <div class="flex items-center gap-4">
       <div class="text-right hidden sm:block">
-        <p class="text-xs font-bold text-slate-900 dark:text-slate-100 leading-none">Local Profile</p>
-        <p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Saved in browser</p>
+        <p class="text-xs font-bold text-slate-900 dark:text-slate-100 leading-none">로컬 프로필</p>
+        <p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">브라우저에 저장됨</p>
       </div>
       <div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden border-2 border-primary/20 flex items-center justify-center">
         <span class="material-symbols-outlined text-slate-500 dark:text-slate-200">person</span>
@@ -79,31 +79,31 @@
       <div class="bg-white dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
           <span class="material-symbols-outlined text-primary">tune</span>
-          Configuration
+          구성
         </h2>
 
         <div class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-1.5">
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Current Age</label>
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">현재 나이</label>
               <input id="ageNow" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2.5 px-4 focus:ring-primary focus:border-primary text-sm font-semibold"
                      type="number" min="0" max="120" value="30"/>
             </div>
             <div class="space-y-1.5">
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Retirement Age</label>
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">은퇴 연령</label>
               <input id="ageRetire" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2.5 px-4 focus:ring-primary focus:border-primary text-sm font-semibold"
                      type="number" min="0" max="120" value="65"/>
             </div>
           </div>
 
           <div class="space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Initial Investment ($)</label>
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">초기 투자액 (₩)</label>
             <input id="initialInvestment" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2.5 px-4 focus:ring-primary focus:border-primary text-sm font-semibold"
                    type="text" value="50,000"/>
           </div>
 
           <div class="space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Monthly Contribution ($)</label>
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">월 납입액 (₩)</label>
             <input id="monthlyContribution" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2.5 px-4 focus:ring-primary focus:border-primary text-sm font-semibold"
                    type="text" value="2,000"/>
           </div>
@@ -111,8 +111,8 @@
           <!-- Retirement auto switch -->
           <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-3">
             <div>
-              <p class="text-xs font-bold">Auto set contribution to 0 after retirement</p>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400">From retirement age onward, monthly contribution becomes 0</p>
+              <p class="text-xs font-bold">은퇴 후 납입액 자동 0으로 설정</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">은퇴 연령부터 월 납입액이 0이 됩니다</p>
             </div>
             <label class="inline-flex items-center cursor-pointer">
               <input id="autoZeroAfterRetire" type="checkbox" class="sr-only peer">
@@ -123,8 +123,7 @@
           <div class="pt-1 flex items-start gap-2">
             <span class="material-symbols-outlined text-primary text-base mt-0.5">info</span>
             <p class="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
-              Monthly timing: contribute at start of month → apply return & dividend → apply pension payout (if any).
-              Dividends are reinvested. Pension payouts reduce balance.
+              월별 타이밍: 월초 납입 → 수익 및 배당 적용 → 연금 지급(해당 시). 배당금은 재투자됩니다. 연금 지급으로 잔액이 감소합니다.
             </p>
           </div>
         </div>
@@ -135,41 +134,41 @@
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-bold flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">analytics</span>
-            Strategy Presets
+            전략 프리셋
           </h2>
           <button id="btnAddPreset" class="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition-colors">
-            <span class="material-symbols-outlined text-sm">add_circle</span> Add Preset
+            <span class="material-symbols-outlined text-sm">add_circle</span> 프리셋 추가
           </button>
         </div>
 
         <div class="space-y-3">
           <label class="block">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Select Preset</span>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">프리셋 선택</span>
             <select id="presetSelect" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"></select>
           </label>
 
           <div class="grid grid-cols-2 gap-3">
             <div class="bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2">
-              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Annual Return</p>
+              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">연간 수익률</p>
               <p id="presetReturn" class="text-sm font-extrabold text-primary">-</p>
             </div>
             <div class="bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2">
-              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Dividend Yield</p>
+              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">배당 수익률</p>
               <p id="presetDiv" class="text-sm font-extrabold text-slate-700 dark:text-slate-300">-</p>
             </div>
           </div>
 
           <div class="flex items-center justify-between gap-2">
             <button id="btnDeletePreset" class="px-3 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed">
-              Delete Selected Preset
+              선택된 프리셋 삭제
             </button>
             <button id="btnResetAll" class="px-3 py-2 rounded-lg text-xs font-bold bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-200 hover:bg-red-100 dark:hover:bg-red-900/30">
-              Reset Saved Data
+              저장된 데이터 초기화
             </button>
           </div>
 
           <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-            Presets are stored locally in your browser. You can add custom return/dividend assumptions.
+            프리셋은 브라우저에 로컬로 저장됩니다. 사용자 지정 수익/배당 가정을 추가할 수 있습니다.
           </p>
         </div>
       </div>
@@ -179,19 +178,19 @@
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-bold flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">event_note</span>
-            Scenario Events
+            시나리오 이벤트
           </h2>
           <button id="btnAddEvent" class="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition-colors">
-            <span class="material-symbols-outlined text-sm">add_circle</span> Add Point
+            <span class="material-symbols-outlined text-sm">add_circle</span> 이벤트 추가
           </button>
         </div>
 
         <div id="eventList" class="space-y-3"></div>
 
         <div class="mt-4 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-          Supported:
-          <span class="font-semibold">Monthly change</span>, <span class="font-semibold">Lump sum</span>,
-          <span class="font-semibold">Pension (monthly payout)</span>.
+          지원 항목:
+          <span class="font-semibold">월 납입액 변경</span>, <span class="font-semibold">일시불</span>,
+          <span class="font-semibold">연금(월 지급)</span>.
         </div>
       </div>
 
@@ -199,18 +198,18 @@
       <div class="bg-white dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
           <span class="material-symbols-outlined text-primary">filter_alt</span>
-          Table Filter (Age Range)
+          표 필터 (나이 범위)
         </h2>
 
         <div class="grid grid-cols-2 gap-3">
           <label class="block">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">From Age</span>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">시작 나이</span>
             <input id="filterAgeFrom" type="number" min="0" max="120"
                    class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"
                    value="30"/>
           </label>
           <label class="block">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">To Age</span>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">종료 나이</span>
             <input id="filterAgeTo" type="number" min="0" max="120"
                    class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"
                    value="100"/>
@@ -219,8 +218,8 @@
 
         <div class="mt-3 flex items-center justify-between bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-3">
           <div>
-            <p class="text-xs font-bold">Filter enabled</p>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">Only show years within selected age range</p>
+            <p class="text-xs font-bold">필터 활성화</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">선택한 나이 범위의 연도만 표시</p>
           </div>
           <label class="inline-flex items-center cursor-pointer">
             <input id="filterEnabled" type="checkbox" class="sr-only peer">
@@ -229,7 +228,7 @@
         </div>
 
         <p class="mt-3 text-[11px] text-slate-500 dark:text-slate-400">
-          Example: 55 ~ 65 shows just the decade around retirement.
+          예시: 55 ~ 65세는 은퇴 전후 10년만 표시합니다.
         </p>
       </div>
 
@@ -242,24 +241,24 @@
       <div class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col h-full overflow-hidden">
         <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-900 z-10">
           <div>
-            <h2 class="text-lg font-bold">Annual Growth Projections</h2>
-            <p id="rangeLabel" class="text-xs text-slate-500 mt-0.5">Projected breakdown</p>
+            <h2 class="text-lg font-bold">연간 성장 예측</h2>
+            <p id="rangeLabel" class="text-xs text-slate-500 mt-0.5">예상 분석</p>
           </div>
           <div class="flex gap-2 items-center">
-            <button id="btnToggleChart" class="size-10 flex items-center justify-center bg-primary text-white rounded-lg shadow-lg shadow-primary/20 hover:bg-secondary transition-all hover:scale-105 active:scale-95 group" title="Chart View">
+            <button id="btnToggleChart" class="size-10 flex items-center justify-center bg-primary text-white rounded-lg shadow-lg shadow-primary/20 hover:bg-secondary transition-all hover:scale-105 active:scale-95 group" title="차트 보기">
               <span class="material-symbols-outlined">bar_chart</span>
             </button>
             <div class="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-            <button id="btnExportCsv" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Export CSV</button>
-            <button id="btnPrint" class="px-4 py-2 bg-slate-900 dark:bg-slate-700 text-white rounded text-xs font-bold hover:bg-black dark:hover:bg-slate-600 transition-colors">Print Report</button>
+            <button id="btnExportCsv" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">CSV 내보내기</button>
+            <button id="btnPrint" class="px-4 py-2 bg-slate-900 dark:bg-slate-700 text-white rounded text-xs font-bold hover:bg-black dark:hover:bg-slate-600 transition-colors">보고서 인쇄</button>
           </div>
         </div>
 
         <!-- Chart Panel -->
         <div id="chartPanel" class="hidden border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 p-4">
           <div class="flex items-center justify-between mb-2">
-            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Balance Over Time</p>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">End balance by year</p>
+            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">기간별 잔액</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">연도별 최종 잔액</p>
           </div>
           <div class="bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 p-3">
             <canvas id="balanceChart" height="120"></canvas>
@@ -270,13 +269,13 @@
           <table class="w-full text-left text-sm">
             <thead class="sticky top-0 bg-slate-50 dark:bg-slate-800 z-10 shadow-sm">
               <tr class="text-slate-500 font-bold uppercase text-[11px] tracking-wider">
-                <th class="px-6 py-4">Year / Age</th>
-                <th class="px-6 py-4">Annual Contr.</th>
-                <th class="px-6 py-4">Return Earned</th>
-                <th class="px-6 py-4">Dividends</th>
-                <th class="px-6 py-4">Pension Out</th>
-                <th class="px-6 py-4">End Balance</th>
-                <th class="px-6 py-4">Event</th>
+                <th class="px-6 py-4">연도 / 나이</th>
+                <th class="px-6 py-4">연간 납입액</th>
+                <th class="px-6 py-4">투자 수익</th>
+                <th class="px-6 py-4">배당금</th>
+                <th class="px-6 py-4">연금 인출</th>
+                <th class="px-6 py-4">기말 잔액</th>
+                <th class="px-6 py-4">이벤트</th>
               </tr>
             </thead>
             <tbody id="annualTbody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
@@ -290,9 +289,9 @@
           <span class="material-symbols-outlined block">lightbulb</span>
         </div>
         <div>
-          <h4 class="text-sm font-bold text-slate-900 dark:text-white">Smart Observation</h4>
+          <h4 class="text-sm font-bold text-slate-900 dark:text-white">스마트 요약</h4>
           <p id="observation" class="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-            Adjust inputs to see your projection.
+            왼쪽 항목들을 수정하여 은퇴 계획을 시뮬레이션 해보세요.
           </p>
         </div>
       </div>
@@ -305,12 +304,12 @@
   <div class="max-w-[1440px] mx-auto px-10 flex flex-col md:flex-row items-center justify-between gap-6 text-slate-500 text-[11px] font-medium">
     <div class="flex items-center gap-4">
       <span class="material-symbols-outlined text-primary text-sm">verified_user</span>
-      <p>© 2024 RetireWise Pro. Saved locally in your browser. Not financial advice.</p>
+      <p>© 2024 은퇴계획 Pro. 데이터는 브라우저에 저장됩니다. 본 시뮬레이션은 투자 자문이 아닙니다.</p>
     </div>
     <div class="flex items-center gap-8">
-      <a class="hover:text-primary transition-colors" href="#">Privacy &amp; Security</a>
-      <a class="hover:text-primary transition-colors" href="#">System Status</a>
-      <a class="hover:text-primary transition-colors" href="#">Contact Support</a>
+      <a class="hover:text-primary transition-colors" href="#">개인정보보호</a>
+      <a class="hover:text-primary transition-colors" href="#">시스템 상태</a>
+      <a class="hover:text-primary transition-colors" href="#">고객 지원</a>
     </div>
   </div>
 </footer>
@@ -319,7 +318,7 @@
 <dialog id="eventDialog" class="rounded-xl p-0 w-[92vw] max-w-md bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl">
   <form method="dialog" class="p-5">
     <div class="flex items-center justify-between mb-3">
-      <h3 class="text-sm font-extrabold">Add Scenario Event</h3>
+      <h3 class="text-sm font-extrabold">시나리오 이벤트 추가</h3>
       <button value="cancel" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
         <span class="material-symbols-outlined">close</span>
       </button>
@@ -328,42 +327,42 @@
     <div class="space-y-3">
       <div class="grid grid-cols-2 gap-3">
         <label class="block">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Age</span>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">나이</span>
           <input id="dlgAge" type="number" min="0" max="120"
                  class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
         </label>
         <label class="block">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Type</span>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">종류</span>
           <select id="dlgType" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold">
-            <option value="monthly">Monthly change (contribution)</option>
-            <option value="lump">Lump sum deposit</option>
-            <option value="pension">Pension payout (monthly)</option>
+            <option value="monthly">월 납입액 변경</option>
+            <option value="lump">일시불 입금</option>
+            <option value="pension">연금 수령 (월)</option>
           </select>
         </label>
       </div>
 
       <label class="block">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Label</span>
-        <input id="dlgLabel" type="text" placeholder="e.g., Promotion / Apartment sale / 국민연금"
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">라벨</span>
+        <input id="dlgLabel" type="text" placeholder="예: 승진, 아파트 매매, 국민연금"
                class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
       </label>
 
       <label class="block">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Amount ($)</span>
-        <input id="dlgAmount" type="text" placeholder="e.g., 1,500 or 250,000"
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">금액 (₩)</span>
+        <input id="dlgAmount" type="text" placeholder="예: 1500000 또는 250000000"
                class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
       </label>
 
       <div class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-        Monthly change: sets the new monthly contribution from that age onward.<br/>
-        Lump sum: deposit at the start of that age year.<br/>
-        Pension payout: monthly withdrawal from balance starting that age (amount should be positive).
+        월 납입액 변경: 해당 연령부터 새로운 월 납입액을 설정합니다.<br/>
+        일시불: 해당 연령 시작 시점에 입금됩니다.<br/>
+        연금 수령: 해당 연령부터 잔액에서 매월 인출됩니다 (금액은 양수여야 합니다).
       </div>
     </div>
 
     <div class="mt-5 flex gap-2 justify-end">
-      <button value="cancel" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">Cancel</button>
-      <button id="dlgSave" value="ok" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary">Add</button>
+      <button value="cancel" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">취소</button>
+      <button id="dlgSave" value="ok" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary">추가</button>
     </div>
   </form>
 </dialog>
@@ -372,7 +371,7 @@
 <dialog id="presetDialog" class="rounded-xl p-0 w-[92vw] max-w-md bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl">
   <form method="dialog" class="p-5">
     <div class="flex items-center justify-between mb-3">
-      <h3 class="text-sm font-extrabold">Add Strategy Preset</h3>
+      <h3 class="text-sm font-extrabold">전략 프리셋 추가</h3>
       <button value="cancel" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
         <span class="material-symbols-outlined">close</span>
       </button>
@@ -380,32 +379,32 @@
 
     <div class="space-y-3">
       <label class="block">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Preset Name</span>
-        <input id="dlgPresetName" type="text" placeholder="e.g., My Aggressive Mix"
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">프리셋 이름</span>
+        <input id="dlgPresetName" type="text" placeholder="예: 공격적인 내 투자"
                class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
       </label>
 
       <div class="grid grid-cols-2 gap-3">
         <label class="block">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Annual Return (%)</span>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">연간 수익률 (%)</span>
           <input id="dlgPresetReturn" type="text" value="9.0"
                  class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
         </label>
         <label class="block">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Dividend Yield (%)</span>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">배당 수익률 (%)</span>
           <input id="dlgPresetDiv" type="text" value="2.0"
                  class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
         </label>
       </div>
 
       <div class="text-[11px] text-slate-500 dark:text-slate-400">
-        Tip: You can model S&P500/Nasdaq/SCHD or any custom assumptions here.
+        팁: S&P500/나스닥/SCHD 또는 사용자 지정 가정을 모델링할 수 있습니다.
       </div>
     </div>
 
     <div class="mt-5 flex gap-2 justify-end">
-      <button value="cancel" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">Cancel</button>
-      <button id="dlgPresetSave" value="ok" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary">Add</button>
+      <button value="cancel" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">취소</button>
+      <button id="dlgPresetSave" value="ok" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary">추가</button>
     </div>
   </form>
 </dialog>
@@ -452,8 +451,8 @@ function parseMoney(input) {
 
 function fmtMoney(n) {
   const num = Number(n);
-  if (!Number.isFinite(num)) return "$0";
-  return "$" + Math.round(num).toLocaleString();
+  if (!Number.isFinite(num)) return "0원";
+  return Math.round(num).toLocaleString() + "원";
 }
 
 function clamp(n, min, max) {
@@ -473,9 +472,9 @@ function uid() {
  *  State
  *  ============================= */
 const defaultPresets = [
-  { id: "sp500", name: "S&P 500 (Standard)", annualReturnPct: 10.0, dividendPct: 1.5, builtin: true },
-  { id: "nasdaq100", name: "Nasdaq 100 (Tech Focus)", annualReturnPct: 14.2, dividendPct: 0.8, builtin: true },
-  { id: "schd", name: "SCHD (Dividend Growth)", annualReturnPct: 8.5, dividendPct: 3.4, builtin: true },
+  { id: "sp500", name: "S&P 500 (표준)", annualReturnPct: 10.0, dividendPct: 1.5, builtin: true },
+  { id: "nasdaq100", name: "나스닥 100 (기술주 중심)", annualReturnPct: 14.2, dividendPct: 0.8, builtin: true },
+  { id: "schd", name: "SCHD (배당 성장)", annualReturnPct: 8.5, dividendPct: 3.4, builtin: true },
 ];
 
 const state = {
@@ -490,8 +489,8 @@ const state = {
   inputs: {
     ageNow: 30,
     ageRetire: 65,
-    initialInvestment: 50000,
-    monthlyContribution: 2000,
+    initialInvestment: 50000000,
+    monthlyContribution: 2000000,
     autoZeroAfterRetire: true,
     filterEnabled: false,
     filterAgeFrom: 30,
@@ -500,9 +499,9 @@ const state = {
 
   // events: monthly change, lump, pension
   events: [
-    { id: uid(), age: 45, type: "monthly", amount: 3500, label: "Promotion" },
-    { id: uid(), age: 55, type: "lump", amount: 250000, label: "Apartment Sale" },
-    { id: uid(), age: 65, type: "pension", amount: 1800, label: "국민연금" },
+    { id: uid(), age: 45, type: "monthly", amount: 3500000, label: "승진" },
+    { id: uid(), age: 55, type: "lump", amount: 250000000, label: "아파트 매매" },
+    { id: uid(), age: 65, type: "pension", amount: 1800000, label: "국민연금" },
   ],
 
   results: null,
@@ -571,7 +570,7 @@ function applySnapshot(snap) {
         age: clamp(Number(e.age), 0, 120),
         type: String(e.type),
         amount: Number(e.amount) || 0,
-        label: String(e.label || "Event")
+        label: String(e.label || "이벤트")
       }));
   }
 
@@ -626,7 +625,7 @@ function renderPresetSelect() {
   for (const p of state.presets) {
     const opt = document.createElement("option");
     opt.value = p.id;
-    opt.textContent = p.builtin ? `${p.name}` : `${p.name} (Custom)`;
+    opt.textContent = p.builtin ? `${p.name}` : `${p.name} (사용자 설정)`;
     if (p.id === state.presetId) opt.selected = true;
     sel.appendChild(opt);
   }
@@ -709,7 +708,7 @@ function renderEventList() {
 
   const sorted = [...state.events].sort((a,b) => a.age - b.age);
   if (sorted.length === 0) {
-    wrap.innerHTML = `<div class="text-[11px] text-slate-500 dark:text-slate-400">No events yet. Click “Add Point”.</div>`;
+    wrap.innerHTML = `<div class="text-[11px] text-slate-500 dark:text-slate-400">이벤트가 없습니다. “이벤트 추가”를 클릭하세요.</div>`;
     return;
   }
 
@@ -720,24 +719,24 @@ function renderEventList() {
 
     if (ev.type === "monthly") {
       border = "border-primary";
-      subtitle = `Monthly contribution becomes ${fmtMoney(ev.amount)}`;
+      subtitle = `월 납입액 ${fmtMoney(ev.amount)}으로 변경`;
       pill = `<span class="px-2 py-0.5 bg-primary text-white text-[10px] font-bold rounded-full uppercase inline-flex items-center gap-1">
-                <span class="material-symbols-outlined text-[10px]">trending_up</span> MONTHLY
+                <span class="material-symbols-outlined text-[10px]">trending_up</span> 월납입
               </span>`;
     } else if (ev.type === "lump") {
-      subtitle = `Lump sum deposit ${ev.amount >= 0 ? "+" : ""}${fmtMoney(ev.amount)}`;
+      subtitle = `일시불 입금 ${ev.amount >= 0 ? "+" : ""}${fmtMoney(ev.amount)}`;
       pill = `<span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-200 text-[10px] font-bold rounded-full uppercase inline-flex items-center gap-1">
-                <span class="material-symbols-outlined text-[10px]">savings</span> LUMP
+                <span class="material-symbols-outlined text-[10px]">savings</span> 일시불
               </span>`;
     } else if (ev.type === "pension") {
       border = "border-emerald-400";
-      subtitle = `Pension payout starts: ${fmtMoney(ev.amount)}/month (withdrawal)`;
+      subtitle = `연금 수령 시작: 매월 ${fmtMoney(ev.amount)} (인출)`;
       pill = `<span class="px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full uppercase inline-flex items-center gap-1">
-                <span class="material-symbols-outlined text-[10px]">paid</span> PENSION
+                <span class="material-symbols-outlined text-[10px]">paid</span> 연금
               </span>`;
     } else {
       subtitle = `${ev.type}: ${fmtMoney(ev.amount)}`;
-      pill = `<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 text-[10px] font-bold rounded-full uppercase">EVENT</span>`;
+      pill = `<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 text-[10px] font-bold rounded-full uppercase">이벤트</span>`;
     }
 
     const node = document.createElement("div");
@@ -746,12 +745,12 @@ function renderEventList() {
       <div class="flex justify-between items-start gap-2">
         <div class="min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
-            <p class="text-xs font-bold text-slate-900 dark:text-slate-100">Age ${ev.age}: ${ev.label || "Event"}</p>
+            <p class="text-xs font-bold text-slate-900 dark:text-slate-100">${ev.age}세: ${ev.label || "이벤트"}</p>
             ${pill}
           </div>
           <p class="text-[11px] text-slate-500 mt-0.5">${subtitle}</p>
         </div>
-        <button class="text-slate-400 hover:text-red-500 transition-colors shrink-0" data-del="${ev.id}" title="Delete">
+        <button class="text-slate-400 hover:text-red-500 transition-colors shrink-0" data-del="${ev.id}" title="삭제">
           <span class="material-symbols-outlined text-sm">delete</span>
         </button>
       </div>
@@ -786,8 +785,8 @@ function initEventDialog() {
     const age = clamp(Number($("dlgAge").value || 0), 0, 120);
     const type = $("dlgType").value;
     const label = ($("dlgLabel").value || "").trim() || (
-      type === "monthly" ? "Monthly Change" :
-      type === "lump" ? "Lump Sum" : "Pension"
+      type === "monthly" ? "월 납입액 변경" :
+      type === "lump" ? "일시불" : "연금"
     );
     const amount = parseMoney($("dlgAmount").value);
 
@@ -836,7 +835,7 @@ function getPensionMonthlyAtAge(age) {
 }
 
 function getEventLabelsAtAge(age) {
-  return state.events.filter(e => e.age === age).map(e => e.label || "Event");
+  return state.events.filter(e => e.age === age).map(e => e.label || "이벤트");
 }
 
 /**
@@ -946,12 +945,12 @@ function simulate() {
  *  Render table + monthly details
  *  ============================= */
 function buildAnnualRow(y, idx) {
-  const labels = (y.eventLabels && y.eventLabels.length) ? y.eventLabels.join(", ") : "Baseline";
+  const labels = (y.eventLabels && y.eventLabels.length) ? y.eventLabels.join(", ") : "기준";
   const badge = (y.eventLabels && y.eventLabels.length)
     ? `<span class="px-2 py-0.5 bg-primary text-white text-[10px] font-bold rounded-full uppercase inline-flex items-center gap-1">
          <span class="material-symbols-outlined text-[10px]">bolt</span> ${labels}
        </span>`
-    : `<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 text-[10px] font-bold rounded-full uppercase">Baseline</span>`;
+    : `<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 text-[10px] font-bold rounded-full uppercase">기준</span>`;
 
   const highlight = y.isRetirementYear
     ? "bg-emerald-50/60 dark:bg-emerald-900/10"
@@ -964,7 +963,7 @@ function buildAnnualRow(y, idx) {
           <span class="material-symbols-outlined row-chevron text-slate-400 text-base">chevron_right</span>
           <div class="flex flex-col">
             <span>${y.year}</span>
-            <span class="text-[10px] text-slate-400">Age ${y.age}${y.isRetirementYear ? " • Retire" : ""}</span>
+            <span class="text-[10px] text-slate-400">${y.age}세${y.isRetirementYear ? " • 은퇴" : ""}</span>
           </div>
         </div>
       </td>
@@ -981,24 +980,24 @@ function buildAnnualRow(y, idx) {
         <div class="mt-1 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-950">
           <div class="px-4 py-3 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
             <div class="text-[11px] text-slate-600 dark:text-slate-300 font-bold uppercase tracking-wider">
-              Monthly Breakdown • Age ${y.age} (${y.year})
+              월별 상세 • ${y.age}세 (${y.year})
             </div>
             <div class="text-[11px] text-slate-500 dark:text-slate-400">
-              Monthly Contr: <span class="font-semibold">${fmtMoney(y.monthlyApplied)}</span>
-              ${y.lumpApplied !== 0 ? ` • Lump: <span class="font-semibold">${fmtMoney(y.lumpApplied)}</span>` : ``}
-              ${y.pensionMonthlyApplied > 0 ? ` • Pension: <span class="font-semibold">-${fmtMoney(y.pensionMonthlyApplied)}/mo</span>` : ``}
+              월 납입액: <span class="font-semibold">${fmtMoney(y.monthlyApplied)}</span>
+              ${y.lumpApplied !== 0 ? ` • 일시불: <span class="font-semibold">${fmtMoney(y.lumpApplied)}</span>` : ``}
+              ${y.pensionMonthlyApplied > 0 ? ` • 연금: <span class="font-semibold">-${fmtMoney(y.pensionMonthlyApplied)}/월</span>` : ``}
             </div>
           </div>
           <div class="overflow-x-auto custom-scrollbar">
             <table class="w-full text-[12px]">
               <thead class="bg-white dark:bg-slate-950">
                 <tr class="text-slate-500 font-bold uppercase text-[11px] tracking-wider">
-                  <th class="px-4 py-3">Month</th>
-                  <th class="px-4 py-3">Contr.</th>
-                  <th class="px-4 py-3">Return</th>
-                  <th class="px-4 py-3">Dividend</th>
-                  <th class="px-4 py-3">Pension Out</th>
-                  <th class="px-4 py-3">End Balance</th>
+                  <th class="px-4 py-3">월</th>
+                  <th class="px-4 py-3">납입액</th>
+                  <th class="px-4 py-3">수익</th>
+                  <th class="px-4 py-3">배당</th>
+                  <th class="px-4 py-3">연금 인출</th>
+                  <th class="px-4 py-3">기말 잔액</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -1080,7 +1079,7 @@ function renderChart(results) {
     data: {
       labels,
       datasets: [{
-        label: "End Balance",
+        label: "기말 잔액",
         data,
         tension: 0.25,
         pointRadius: 0
@@ -1101,9 +1100,9 @@ function renderChart(results) {
             callback: (v) => {
               const n = Number(v);
               if (!Number.isFinite(n)) return v;
-              if (n >= 1_000_000_000) return (n/1_000_000_000).toFixed(1) + "B";
-              if (n >= 1_000_000) return (n/1_000_000).toFixed(1) + "M";
-              if (n >= 1_000) return (n/1_000).toFixed(1) + "K";
+              if (n >= 1_000_000_000) return (n/1_000_000_000).toFixed(1) + "십억";
+              if (n >= 1_000_000) return (n/1_000_000).toFixed(1) + "백만";
+              if (n >= 1_000) return (n/1_000).toFixed(1) + "천";
               return String(n);
             }
           }
@@ -1124,13 +1123,13 @@ function updateObservation(results) {
   const preset = results.preset;
   const pensionAtRetire = retireRow ? retireRow.pensionMonthlyApplied : 0;
 
-  let msg = `Preset: ${preset.name} • Return ${preset.annualReturnPct.toFixed(1)}% • Dividend ${preset.dividendPct.toFixed(1)}%. `;
+  let msg = `프리셋: ${preset.name} • 수익률 ${preset.annualReturnPct.toFixed(1)}% • 배당 ${preset.dividendPct.toFixed(1)}%. `;
   if (retireRow) {
-    msg += `At Age ${results.retireAge} (${retireRow.year}), balance is ${fmtMoney(retireRow.endBalance)}. `;
-    if (results.autoZero) msg += `Contributions auto-stop from retirement. `;
-    if (pensionAtRetire > 0) msg += `Pension active: -${fmtMoney(pensionAtRetire)}/month. `;
+    msg += `${results.retireAge}세 (${retireRow.year})에 잔액은 ${fmtMoney(retireRow.endBalance)} 입니다. `;
+    if (results.autoZero) msg += `은퇴 후 납입은 자동으로 중지됩니다. `;
+    if (pensionAtRetire > 0) msg += `연금 활성: -${fmtMoney(pensionAtRetire)}/월. `;
   }
-  msg += `By Age ${results.endAge} (${last.year}), balance could be ${fmtMoney(last.endBalance)}.`;
+  msg += `${results.endAge}세 (${last.year})까지 잔액은 ${fmtMoney(last.endBalance)}가 될 수 있습니다.`;
   $("observation").textContent = msg;
 }
 
@@ -1138,9 +1137,9 @@ function updateObservation(results) {
  *  CSV Export
  *  ============================= */
 function exportCsv(results) {
-  const header = ["Year","Age","AnnualContribution","ReturnEarned","Dividends","PensionOut","EndBalance","Events"].join(",");
+  const header = ["연도","나이","연간납입액","투자수익","배당금","연금인출","기말잔액","이벤트"].join(",");
   const lines = results.years.map(y => {
-    const events = (y.eventLabels && y.eventLabels.length) ? y.eventLabels.join(" | ") : "Baseline";
+    const events = (y.eventLabels && y.eventLabels.length) ? y.eventLabels.join(" | ") : "기준";
     return [
       y.year,
       y.age,
@@ -1154,7 +1153,7 @@ function exportCsv(results) {
   });
 
   const csv = [header, ...lines].join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
 
   const a = document.createElement("a");
@@ -1217,7 +1216,7 @@ function recalcAndRender() {
 
   // Labels
   $("rangeLabel").textContent =
-    `Start Year ${results.startYear} • Age ${results.ageNow} → ${results.endAge} • Retire @ ${results.retireAge} • Preset: ${results.preset.name}`;
+    `시작 연도 ${results.startYear} • ${results.ageNow}세 → ${results.endAge}세 • 은퇴 ${results.retireAge}세 • 프리셋: ${results.preset.name}`;
 
   renderPresetSelect();
   renderAnnualTable(results);
