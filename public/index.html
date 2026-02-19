@@ -259,11 +259,11 @@
         <!-- Chart Panel -->
         <div id="chartPanel" class="hidden border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 p-4">
           <div class="flex items-center justify-between mb-2">
-            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">기간별 잔액</p>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">연도별 최종 잔액</p>
+            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">자산 구성</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">연도별 누적 투자원금 및 투자수익</p>
           </div>
           <div class="bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 p-3">
-            <canvas id="balanceChart" height="120"></canvas>
+            <canvas id="balanceChart" height="360"></canvas>
           </div>
         </div>
 
@@ -460,8 +460,6 @@ function fmtMoney(n, compact = false) {
             return `${parseFloat((num / 1000000000000).toFixed(2))}조`;
         } else if (Math.abs(num) >= 100000000) {
             return `${parseFloat((num / 100000000).toFixed(1))}억`;
-        } else if (Math.abs(num) >= 10000000) {
-            return `${parseFloat((num / 10000000).toFixed(1))}천`;
         } else if (Math.abs(num) >= 10000) {
             return `${parseFloat((num / 10000).toFixed(2))}만`;
         }
@@ -1119,47 +1117,100 @@ function renderAnnualTable(results) {
  *  Chart
  *  ============================= */
 function renderChart(results) {
-  const labels = results.years.map(y => `${y.year}`);
-  const data = results.years.map(y => Math.round(y.endBalance));
+  // Data for the chart, will be filtered based on the table's filter
+  const labels = [];
+  const principalData = [];
+  const returnData = [];
+  const endBalanceData = [];
+
+  let cumulativePrincipal = results.initial;
+  for (const year of results.years) {
+    // We always calculate the cumulative principal over all years
+    cumulativePrincipal += year.annualContribution + year.lumpApplied;
+
+    // But only add data to the chart if it passes the filter
+    if (passesFilter(year)) {
+      labels.push(`${year.year}`);
+
+      const principalComponent = Math.min(cumulativePrincipal, year.endBalance);
+      const returnComponent = Math.max(0, year.endBalance - cumulativePrincipal);
+
+      principalData.push(principalComponent);
+      returnData.push(returnComponent);
+      endBalanceData.push(year.endBalance);
+    }
+  }
 
   const ctx = $("balanceChart").getContext("2d");
   if (state.chart) state.chart.destroy();
 
+  // If no data after filtering, don't render the chart
+  if (labels.length === 0) {
+      return;
+  }
+
   state.chart = new Chart(ctx, {
-    type: "line",
+    type: 'bar',
     data: {
       labels,
-      datasets: [{
-        label: "기말 잔액",
-        data,
-        tension: 0.25,
-        pointRadius: 0
-      }]
+      datasets: [
+        {
+          label: '누적 투자원금',
+          data: principalData,
+          backgroundColor: '#2563eb',
+        },
+        {
+          label: '누적 투자수익',
+          data: returnData,
+          backgroundColor: '#84cc16',
+        }
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { display: false },
+        legend: {
+          position: 'top',
+        },
         tooltip: {
-          callbacks: { label: (c) => fmtMoney(c.parsed.y, true) }
+          callbacks: {
+            label: function(context) {
+              let label = context.dataset.label || '';
+              if (label) {
+                label += ': ';
+              }
+              if (context.parsed.y !== null) {
+                label += fmtMoney(context.parsed.y, true);
+              }
+              return label;
+            },
+            footer: function(tooltipItems) {
+              const yearIndex = tooltipItems[0].dataIndex;
+              const totalBalance = endBalanceData[yearIndex];
+              return '기말잔액: ' + fmtMoney(totalBalance, true);
+            }
+          }
         }
       },
       scales: {
+        x: {
+          stacked: true,
+          ticks: { maxTicksLimit: 10 }
+        },
         y: {
+          stacked: true,
           ticks: {
             callback: (v) => {
               const n = Number(v);
               if (!Number.isFinite(n) || n === 0) return "0";
               if (Math.abs(n) >= 1000000000000) return `${parseFloat((n / 1000000000000).toFixed(1))}조`;
               if (Math.abs(n) >= 100000000) return `${parseFloat((n / 100000000).toFixed(1))}억`;
-              if (Math.abs(n) >= 10000000) return `${parseFloat((n / 10000000).toFixed(1))}천`;
               if (Math.abs(n) >= 10000) return `${parseFloat((n / 10000).toFixed(1))}만`;
               return n.toLocaleString();
             }
           }
-        },
-        x: { ticks: { maxTicksLimit: 10 } }
+        }
       }
     }
   });
@@ -1179,7 +1230,7 @@ function updateObservation(results) {
   if (retireRow) {
     msg += `${results.retireAge}세 (${retireRow.year})에 잔액은 ${fmtMoney(retireRow.endBalance, true)} 입니다. `;
     if (results.autoZero) msg += `은퇴 후 납입은 자동으로 중지됩니다. `;
-    if (pensionAtRetire > 0) msg += `연금 활성: -${fmtMoney(pensionAtRetire)}/월. `;
+    if (pensionAtRetire > 0) msg += `연금 활성: -${fmtMoney(pensionAtRetire, true)}/월. `;
   }
   msg += `${results.endAge}세 (${last.year})까지 잔액은 ${fmtMoney(last.endBalance, true)}가 될 수 있습니다.`;
   $("observation").textContent = msg;
