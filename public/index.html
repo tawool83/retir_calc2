@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Retirement Simulator (Persistent + Pension + Filters + Presets)</title>
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700&display=swap" rel="stylesheet"/>
+
+  <!-- Chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#2563eb",
+            "secondary": "#1e40af",
+            "background-light": "#f8fafc",
+            "background-dark": "#0f172a",
+          },
+          fontFamily: { "display": ["Manrope", "sans-serif"] },
+          borderRadius: {
+            "DEFAULT": "0.375rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+
+  <style type="text/tailwindcss">
+    @layer base { body { font-family: 'Manrope', sans-serif; } }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #2563eb; }
+    .table-scroll-area { max-height: 700px; overflow-y: auto; }
+    .row-chevron { transition: transform .15s ease; }
+    .row-open .row-chevron { transform: rotate(90deg); }
+    dialog::backdrop { background: rgba(0,0,0,.35); }
+  </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen font-display">
+<main class="max-w-[1440px] mx-auto px-6 lg:px-10 py-10">
+
+  <!-- Header -->
+  <div class="mb-8 flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+        Retirement <span class="text-primary">Simulator</span>
+      </h1>
+      <p class="text-slate-500 text-sm mt-1">Persistent inputs • Pension cashflow • Range filter • Custom presets</p>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="text-right hidden sm:block">
+        <p class="text-xs font-bold text-slate-900 dark:text-slate-100 leading-none">Local Profile</p>
+        <p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Saved in browser</p>
+      </div>
+      <div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden border-2 border-primary/20 flex items-center justify-center">
+        <span class="material-symbols-outlined text-slate-500 dark:text-slate-200">person</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-col lg:flex-row gap-8">
+
+    <!-- Left -->
+    <aside class="w-full lg:w-[440px] flex flex-col gap-6">
+
+      <!-- Config -->
+      <div class="bg-white dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">tune</span>
+          Configuration
+        </h2>
+
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Current Age</label>
+              <input id="ageNow" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2.5 px-4 focus:ring-primary focus:border-primary text-sm font-semibold"
+                     type="number" min="0" max="120" value="30"/>
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Retirement Age</label>
+              <input id="ageRetire" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2.5 px-4 focus:ring-primary focus:border-primary text-sm font-semibold"
+                     type="number" min="0" max="120" value="65"/>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Initial Investment ($)</label>
+            <input id="initialInvestment" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2.5 px-4 focus:ring-primary focus:border-primary text-sm font-semibold"
+                   type="text" value="50,000"/>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Monthly Contribution ($)</label>
+            <input id="monthlyContribution" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2.5 px-4 focus:ring-primary focus:border-primary text-sm font-semibold"
+                   type="text" value="2,000"/>
+          </div>
+
+          <!-- Retirement auto switch -->
+          <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-3">
+            <div>
+              <p class="text-xs font-bold">Auto set contribution to 0 after retirement</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">From retirement age onward, monthly contribution becomes 0</p>
+            </div>
+            <label class="inline-flex items-center cursor-pointer">
+              <input id="autoZeroAfterRetire" type="checkbox" class="sr-only peer">
+              <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 dark:peer-focus:ring-primary/30 rounded-full peer dark:bg-slate-600 peer-checked:bg-primary relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
+            </label>
+          </div>
+
+          <div class="pt-1 flex items-start gap-2">
+            <span class="material-symbols-outlined text-primary text-base mt-0.5">info</span>
+            <p class="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              Monthly timing: contribute at start of month → apply return & dividend → apply pension payout (if any).
+              Dividends are reinvested. Pension payouts reduce balance.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Presets -->
+      <div class="bg-white dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">analytics</span>
+            Strategy Presets
+          </h2>
+          <button id="btnAddPreset" class="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition-colors">
+            <span class="material-symbols-outlined text-sm">add_circle</span> Add Preset
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          <label class="block">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Select Preset</span>
+            <select id="presetSelect" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"></select>
+          </label>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2">
+              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Annual Return</p>
+              <p id="presetReturn" class="text-sm font-extrabold text-primary">-</p>
+            </div>
+            <div class="bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2">
+              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Dividend Yield</p>
+              <p id="presetDiv" class="text-sm font-extrabold text-slate-700 dark:text-slate-300">-</p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between gap-2">
+            <button id="btnDeletePreset" class="px-3 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed">
+              Delete Selected Preset
+            </button>
+            <button id="btnResetAll" class="px-3 py-2 rounded-lg text-xs font-bold bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-200 hover:bg-red-100 dark:hover:bg-red-900/30">
+              Reset Saved Data
+            </button>
+          </div>
+
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+            Presets are stored locally in your browser. You can add custom return/dividend assumptions.
+          </p>
+        </div>
+      </div>
+
+      <!-- Events -->
+      <div class="bg-white dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">event_note</span>
+            Scenario Events
+          </h2>
+          <button id="btnAddEvent" class="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition-colors">
+            <span class="material-symbols-outlined text-sm">add_circle</span> Add Point
+          </button>
+        </div>
+
+        <div id="eventList" class="space-y-3"></div>
+
+        <div class="mt-4 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+          Supported:
+          <span class="font-semibold">Monthly change</span>, <span class="font-semibold">Lump sum</span>,
+          <span class="font-semibold">Pension (monthly payout)</span>.
+        </div>
+      </div>
+
+      <!-- Filter -->
+      <div class="bg-white dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">filter_alt</span>
+          Table Filter (Age Range)
+        </h2>
+
+        <div class="grid grid-cols-2 gap-3">
+          <label class="block">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">From Age</span>
+            <input id="filterAgeFrom" type="number" min="0" max="120"
+                   class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"
+                   value="30"/>
+          </label>
+          <label class="block">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">To Age</span>
+            <input id="filterAgeTo" type="number" min="0" max="120"
+                   class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"
+                   value="100"/>
+          </label>
+        </div>
+
+        <div class="mt-3 flex items-center justify-between bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-3">
+          <div>
+            <p class="text-xs font-bold">Filter enabled</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Only show years within selected age range</p>
+          </div>
+          <label class="inline-flex items-center cursor-pointer">
+            <input id="filterEnabled" type="checkbox" class="sr-only peer">
+            <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 dark:peer-focus:ring-primary/30 rounded-full peer dark:bg-slate-600 peer-checked:bg-primary relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
+          </label>
+        </div>
+
+        <p class="mt-3 text-[11px] text-slate-500 dark:text-slate-400">
+          Example: 55 ~ 65 shows just the decade around retirement.
+        </p>
+      </div>
+
+    </aside>
+
+    <!-- Right -->
+    <section class="flex-1 flex flex-col gap-6">
+
+      <!-- Table Card -->
+      <div class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col h-full overflow-hidden">
+        <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-900 z-10">
+          <div>
+            <h2 class="text-lg font-bold">Annual Growth Projections</h2>
+            <p id="rangeLabel" class="text-xs text-slate-500 mt-0.5">Projected breakdown</p>
+          </div>
+          <div class="flex gap-2 items-center">
+            <button id="btnToggleChart" class="size-10 flex items-center justify-center bg-primary text-white rounded-lg shadow-lg shadow-primary/20 hover:bg-secondary transition-all hover:scale-105 active:scale-95 group" title="Chart View">
+              <span class="material-symbols-outlined">bar_chart</span>
+            </button>
+            <div class="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+            <button id="btnExportCsv" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Export CSV</button>
+            <button id="btnPrint" class="px-4 py-2 bg-slate-900 dark:bg-slate-700 text-white rounded text-xs font-bold hover:bg-black dark:hover:bg-slate-600 transition-colors">Print Report</button>
+          </div>
+        </div>
+
+        <!-- Chart Panel -->
+        <div id="chartPanel" class="hidden border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 p-4">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Balance Over Time</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">End balance by year</p>
+          </div>
+          <div class="bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 p-3">
+            <canvas id="balanceChart" height="120"></canvas>
+          </div>
+        </div>
+
+        <div class="table-scroll-area custom-scrollbar overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="sticky top-0 bg-slate-50 dark:bg-slate-800 z-10 shadow-sm">
+              <tr class="text-slate-500 font-bold uppercase text-[11px] tracking-wider">
+                <th class="px-6 py-4">Year / Age</th>
+                <th class="px-6 py-4">Annual Contr.</th>
+                <th class="px-6 py-4">Return Earned</th>
+                <th class="px-6 py-4">Dividends</th>
+                <th class="px-6 py-4">Pension Out</th>
+                <th class="px-6 py-4">End Balance</th>
+                <th class="px-6 py-4">Event</th>
+              </tr>
+            </thead>
+            <tbody id="annualTbody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Observation -->
+      <div class="bg-primary/5 border border-primary/20 p-5 rounded-xl flex items-start gap-4">
+        <div class="bg-primary text-white p-2.5 rounded-lg shadow-sm">
+          <span class="material-symbols-outlined block">lightbulb</span>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-slate-900 dark:text-white">Smart Observation</h4>
+          <p id="observation" class="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+            Adjust inputs to see your projection.
+          </p>
+        </div>
+      </div>
+
+    </section>
+  </div>
+</main>
+
+<footer class="mt-12 py-10 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+  <div class="max-w-[1440px] mx-auto px-10 flex flex-col md:flex-row items-center justify-between gap-6 text-slate-500 text-[11px] font-medium">
+    <div class="flex items-center gap-4">
+      <span class="material-symbols-outlined text-primary text-sm">verified_user</span>
+      <p>© 2024 RetireWise Pro. Saved locally in your browser. Not financial advice.</p>
+    </div>
+    <div class="flex items-center gap-8">
+      <a class="hover:text-primary transition-colors" href="#">Privacy &amp; Security</a>
+      <a class="hover:text-primary transition-colors" href="#">System Status</a>
+      <a class="hover:text-primary transition-colors" href="#">Contact Support</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Add Event Dialog -->
+<dialog id="eventDialog" class="rounded-xl p-0 w-[92vw] max-w-md bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl">
+  <form method="dialog" class="p-5">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-sm font-extrabold">Add Scenario Event</h3>
+      <button value="cancel" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="space-y-3">
+      <div class="grid grid-cols-2 gap-3">
+        <label class="block">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Age</span>
+          <input id="dlgAge" type="number" min="0" max="120"
+                 class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
+        </label>
+        <label class="block">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Type</span>
+          <select id="dlgType" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold">
+            <option value="monthly">Monthly change (contribution)</option>
+            <option value="lump">Lump sum deposit</option>
+            <option value="pension">Pension payout (monthly)</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="block">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Label</span>
+        <input id="dlgLabel" type="text" placeholder="e.g., Promotion / Apartment sale / 국민연금"
+               class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
+      </label>
+
+      <label class="block">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Amount ($)</span>
+        <input id="dlgAmount" type="text" placeholder="e.g., 1,500 or 250,000"
+               class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
+      </label>
+
+      <div class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+        Monthly change: sets the new monthly contribution from that age onward.<br/>
+        Lump sum: deposit at the start of that age year.<br/>
+        Pension payout: monthly withdrawal from balance starting that age (amount should be positive).
+      </div>
+    </div>
+
+    <div class="mt-5 flex gap-2 justify-end">
+      <button value="cancel" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">Cancel</button>
+      <button id="dlgSave" value="ok" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary">Add</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Add Preset Dialog -->
+<dialog id="presetDialog" class="rounded-xl p-0 w-[92vw] max-w-md bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl">
+  <form method="dialog" class="p-5">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-sm font-extrabold">Add Strategy Preset</h3>
+      <button value="cancel" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="space-y-3">
+      <label class="block">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Preset Name</span>
+        <input id="dlgPresetName" type="text" placeholder="e.g., My Aggressive Mix"
+               class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
+      </label>
+
+      <div class="grid grid-cols-2 gap-3">
+        <label class="block">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Annual Return (%)</span>
+          <input id="dlgPresetReturn" type="text" value="9.0"
+                 class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
+        </label>
+        <label class="block">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Dividend Yield (%)</span>
+          <input id="dlgPresetDiv" type="text" value="2.0"
+                 class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
+        </label>
+      </div>
+
+      <div class="text-[11px] text-slate-500 dark:text-slate-400">
+        Tip: You can model S&P500/Nasdaq/SCHD or any custom assumptions here.
+      </div>
+    </div>
+
+    <div class="mt-5 flex gap-2 justify-end">
+      <button value="cancel" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">Cancel</button>
+      <button id="dlgPresetSave" value="ok" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary">Add</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+/** =============================
+ *  Persistence (localStorage)
+ *  ============================= */
+const STORAGE_KEY = "retire_sim_v1";
+
+function safeJsonParse(s) {
+  try { return JSON.parse(s); } catch { return null; }
+}
+
+function loadSavedState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  const data = safeJsonParse(raw);
+  return data && typeof data === "object" ? data : null;
+}
+
+function saveStateDebounced() {
+  clearTimeout(saveStateDebounced._t);
+  saveStateDebounced._t = setTimeout(() => {
+    const snapshot = buildSnapshot();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+  }, 150);
+}
+
+function resetSavedState() {
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+/** -----------------------------
+ *  Utilities
+ *  ----------------------------- */
+const $ = (id) => document.getElementById(id);
+
+function parseMoney(input) {
+  if (typeof input === "number") return input;
+  const s = String(input || "").replace(/[^0-9.-]/g, "");
+  const n = Number(s);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function fmtMoney(n) {
+  const num = Number(n);
+  if (!Number.isFinite(num)) return "$0";
+  return "$" + Math.round(num).toLocaleString();
+}
+
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
+}
+
+function parsePct(s) {
+  const v = Number(parseFloat(String(s || "").replace(",", ".")));
+  return Number.isFinite(v) ? v : 0;
+}
+
+function uid() {
+  return (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + "_" + Math.random().toString(16).slice(2);
+}
+
+/** =============================
+ *  State
+ *  ============================= */
+const defaultPresets = [
+  { id: "sp500", name: "S&P 500 (Standard)", annualReturnPct: 10.0, dividendPct: 1.5, builtin: true },
+  { id: "nasdaq100", name: "Nasdaq 100 (Tech Focus)", annualReturnPct: 14.2, dividendPct: 0.8, builtin: true },
+  { id: "schd", name: "SCHD (Dividend Growth)", annualReturnPct: 8.5, dividendPct: 3.4, builtin: true },
+];
+
+const state = {
+  startYear: new Date().getFullYear(),
+  maxAge: 100,
+
+  // selected preset id
+  presetId: "sp500",
+  presets: [...defaultPresets],
+
+  // inputs/options
+  inputs: {
+    ageNow: 30,
+    ageRetire: 65,
+    initialInvestment: 50000,
+    monthlyContribution: 2000,
+    autoZeroAfterRetire: true,
+    filterEnabled: false,
+    filterAgeFrom: 30,
+    filterAgeTo: 100
+  },
+
+  // events: monthly change, lump, pension
+  events: [
+    { id: uid(), age: 45, type: "monthly", amount: 3500, label: "Promotion" },
+    { id: uid(), age: 55, type: "lump", amount: 250000, label: "Apartment Sale" },
+    { id: uid(), age: 65, type: "pension", amount: 1800, label: "국민연금" },
+  ],
+
+  results: null,
+  chart: null
+};
+
+/** =============================
+ *  Snapshot / Restore
+ *  ============================= */
+function buildSnapshot() {
+  return {
+    version: 1,
+    presetId: state.presetId,
+    presets: state.presets.map(p => ({
+      id: p.id,
+      name: p.name,
+      annualReturnPct: p.annualReturnPct,
+      dividendPct: p.dividendPct,
+      builtin: !!p.builtin
+    })),
+    inputs: { ...state.inputs },
+    events: state.events.map(e => ({ ...e })),
+    savedAt: new Date().toISOString()
+  };
+}
+
+function applySnapshot(snap) {
+  if (!snap) return;
+
+  // Presets: keep builtins, merge user presets
+  const builtins = [...defaultPresets];
+  const userPresets = Array.isArray(snap.presets)
+    ? snap.presets.filter(p => p && !p.builtin && p.id && p.name)
+    : [];
+
+  // Avoid id collisions
+  const used = new Set(builtins.map(p => p.id));
+  const mergedUsers = userPresets.map(p => {
+    let id = String(p.id);
+    if (used.has(id)) id = "u_" + id;
+    used.add(id);
+    return { id, name: String(p.name), annualReturnPct: Number(p.annualReturnPct) || 0, dividendPct: Number(p.dividendPct) || 0, builtin: false };
+  });
+
+  state.presets = [...builtins, ...mergedUsers];
+
+  // inputs
+  if (snap.inputs && typeof snap.inputs === "object") {
+    const i = snap.inputs;
+    state.inputs.ageNow = clamp(Number(i.ageNow ?? state.inputs.ageNow), 0, 120);
+    state.inputs.ageRetire = clamp(Number(i.ageRetire ?? state.inputs.ageRetire), 0, 120);
+    state.inputs.initialInvestment = Number(i.initialInvestment ?? state.inputs.initialInvestment) || 0;
+    state.inputs.monthlyContribution = Number(i.monthlyContribution ?? state.inputs.monthlyContribution) || 0;
+    state.inputs.autoZeroAfterRetire = !!i.autoZeroAfterRetire;
+    state.inputs.filterEnabled = !!i.filterEnabled;
+    state.inputs.filterAgeFrom = clamp(Number(i.filterAgeFrom ?? state.inputs.filterAgeFrom), 0, 120);
+    state.inputs.filterAgeTo = clamp(Number(i.filterAgeTo ?? state.inputs.filterAgeTo), 0, 120);
+  }
+
+  // events
+  if (Array.isArray(snap.events)) {
+    state.events = snap.events
+      .filter(e => e && typeof e === "object" && e.type && e.age != null)
+      .map(e => ({
+        id: String(e.id || uid()),
+        age: clamp(Number(e.age), 0, 120),
+        type: String(e.type),
+        amount: Number(e.amount) || 0,
+        label: String(e.label || "Event")
+      }));
+  }
+
+  // presetId
+  if (snap.presetId && state.presets.some(p => p.id === snap.presetId)) {
+    state.presetId = snap.presetId;
+  } else {
+    state.presetId = "sp500";
+  }
+}
+
+/** =============================
+ *  UI binding helpers
+ *  ============================= */
+function syncStateToUi() {
+  $("ageNow").value = state.inputs.ageNow;
+  $("ageRetire").value = state.inputs.ageRetire;
+  $("initialInvestment").value = state.inputs.initialInvestment.toLocaleString();
+  $("monthlyContribution").value = state.inputs.monthlyContribution.toLocaleString();
+  $("autoZeroAfterRetire").checked = state.inputs.autoZeroAfterRetire;
+
+  $("filterEnabled").checked = state.inputs.filterEnabled;
+  $("filterAgeFrom").value = state.inputs.filterAgeFrom;
+  $("filterAgeTo").value = state.inputs.filterAgeTo;
+
+  renderPresetSelect();
+  renderEventList();
+}
+
+function syncUiToStateFromInputs() {
+  state.inputs.ageNow = clamp(Number($("ageNow").value || 0), 0, 120);
+  state.inputs.ageRetire = clamp(Number($("ageRetire").value || 0), 0, 120);
+  state.inputs.initialInvestment = parseMoney($("initialInvestment").value);
+  state.inputs.monthlyContribution = parseMoney($("monthlyContribution").value);
+  state.inputs.autoZeroAfterRetire = $("autoZeroAfterRetire").checked;
+
+  state.inputs.filterEnabled = $("filterEnabled").checked;
+  state.inputs.filterAgeFrom = clamp(Number($("filterAgeFrom").value || 0), 0, 120);
+  state.inputs.filterAgeTo = clamp(Number($("filterAgeTo").value || 0), 0, 120);
+}
+
+function getSelectedPreset() {
+  return state.presets.find(p => p.id === state.presetId) || state.presets[0];
+}
+
+/** =============================
+ *  Presets UI
+ *  ============================= */
+function renderPresetSelect() {
+  const sel = $("presetSelect");
+  sel.innerHTML = "";
+  for (const p of state.presets) {
+    const opt = document.createElement("option");
+    opt.value = p.id;
+    opt.textContent = p.builtin ? `${p.name}` : `${p.name} (Custom)`;
+    if (p.id === state.presetId) opt.selected = true;
+    sel.appendChild(opt);
+  }
+
+  const cur = getSelectedPreset();
+  $("presetReturn").textContent = `${cur.annualReturnPct.toFixed(1)}%`;
+  $("presetDiv").textContent = `${cur.dividendPct.toFixed(1)}%`;
+
+  // disable delete for builtins
+  $("btnDeletePreset").disabled = !!cur.builtin;
+}
+
+function initPresetEvents() {
+  $("presetSelect").addEventListener("change", () => {
+    state.presetId = $("presetSelect").value;
+    renderPresetSelect();
+    recalcAndRender();
+    saveStateDebounced();
+  });
+
+  const dlg = $("presetDialog");
+
+  $("btnAddPreset").addEventListener("click", () => {
+    $("dlgPresetName").value = "";
+    $("dlgPresetReturn").value = "9.0";
+    $("dlgPresetDiv").value = "2.0";
+    dlg.showModal();
+  });
+
+  $("dlgPresetSave").addEventListener("click", () => {
+    const name = ($("dlgPresetName").value || "").trim();
+    const r = parsePct($("dlgPresetReturn").value);
+    const d = parsePct($("dlgPresetDiv").value);
+
+    if (!name) return; // keep simple
+    const id = "u_" + uid().slice(0, 8);
+
+    state.presets.push({ id, name, annualReturnPct: r, dividendPct: d, builtin: false });
+    state.presetId = id;
+
+    renderPresetSelect();
+    recalcAndRender();
+    saveStateDebounced();
+  });
+
+  $("btnDeletePreset").addEventListener("click", () => {
+    const cur = getSelectedPreset();
+    if (cur.builtin) return;
+
+    state.presets = state.presets.filter(p => p.id !== cur.id);
+    state.presetId = "sp500";
+    renderPresetSelect();
+    recalcAndRender();
+    saveStateDebounced();
+  });
+
+  $("btnResetAll").addEventListener("click", () => {
+    resetSavedState();
+    // hard reload to re-init with defaults
+    location.reload();
+  });
+
+  // backdrop close
+  dlg.addEventListener("click", (e) => {
+    const rect = dlg.getBoundingClientRect();
+    const inDialog = (
+      e.clientX >= rect.left && e.clientX <= rect.right &&
+      e.clientY >= rect.top && e.clientY <= rect.bottom
+    );
+    if (!inDialog) dlg.close();
+  });
+}
+
+/** =============================
+ *  Events UI
+ *  ============================= */
+function renderEventList() {
+  const wrap = $("eventList");
+  wrap.innerHTML = "";
+
+  const sorted = [...state.events].sort((a,b) => a.age - b.age);
+  if (sorted.length === 0) {
+    wrap.innerHTML = `<div class="text-[11px] text-slate-500 dark:text-slate-400">No events yet. Click “Add Point”.</div>`;
+    return;
+  }
+
+  for (const ev of sorted) {
+    let border = "border-slate-300 dark:border-slate-600";
+    let subtitle = "";
+    let pill = "";
+
+    if (ev.type === "monthly") {
+      border = "border-primary";
+      subtitle = `Monthly contribution becomes ${fmtMoney(ev.amount)}`;
+      pill = `<span class="px-2 py-0.5 bg-primary text-white text-[10px] font-bold rounded-full uppercase inline-flex items-center gap-1">
+                <span class="material-symbols-outlined text-[10px]">trending_up</span> MONTHLY
+              </span>`;
+    } else if (ev.type === "lump") {
+      subtitle = `Lump sum deposit ${ev.amount >= 0 ? "+" : ""}${fmtMoney(ev.amount)}`;
+      pill = `<span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-200 text-[10px] font-bold rounded-full uppercase inline-flex items-center gap-1">
+                <span class="material-symbols-outlined text-[10px]">savings</span> LUMP
+              </span>`;
+    } else if (ev.type === "pension") {
+      border = "border-emerald-400";
+      subtitle = `Pension payout starts: ${fmtMoney(ev.amount)}/month (withdrawal)`;
+      pill = `<span class="px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full uppercase inline-flex items-center gap-1">
+                <span class="material-symbols-outlined text-[10px]">paid</span> PENSION
+              </span>`;
+    } else {
+      subtitle = `${ev.type}: ${fmtMoney(ev.amount)}`;
+      pill = `<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 text-[10px] font-bold rounded-full uppercase">EVENT</span>`;
+    }
+
+    const node = document.createElement("div");
+    node.className = `p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border-l-4 ${border} relative`;
+    node.innerHTML = `
+      <div class="flex justify-between items-start gap-2">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <p class="text-xs font-bold text-slate-900 dark:text-slate-100">Age ${ev.age}: ${ev.label || "Event"}</p>
+            ${pill}
+          </div>
+          <p class="text-[11px] text-slate-500 mt-0.5">${subtitle}</p>
+        </div>
+        <button class="text-slate-400 hover:text-red-500 transition-colors shrink-0" data-del="${ev.id}" title="Delete">
+          <span class="material-symbols-outlined text-sm">delete</span>
+        </button>
+      </div>
+    `;
+    wrap.appendChild(node);
+  }
+
+  wrap.querySelectorAll("[data-del]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-del");
+      state.events = state.events.filter(e => e.id !== id);
+      renderEventList();
+      recalcAndRender();
+      saveStateDebounced();
+    });
+  });
+}
+
+function initEventDialog() {
+  const dlg = $("eventDialog");
+
+  $("btnAddEvent").addEventListener("click", () => {
+    const ageNow = state.inputs.ageNow;
+    $("dlgAge").value = clamp(ageNow + 5, 0, 120);
+    $("dlgType").value = "monthly";
+    $("dlgLabel").value = "";
+    $("dlgAmount").value = "";
+    dlg.showModal();
+  });
+
+  $("dlgSave").addEventListener("click", () => {
+    const age = clamp(Number($("dlgAge").value || 0), 0, 120);
+    const type = $("dlgType").value;
+    const label = ($("dlgLabel").value || "").trim() || (
+      type === "monthly" ? "Monthly Change" :
+      type === "lump" ? "Lump Sum" : "Pension"
+    );
+    const amount = parseMoney($("dlgAmount").value);
+
+    // For pension, treat amount as positive withdrawal; if user enters negative, make it positive.
+    const normalizedAmount = (type === "pension") ? Math.abs(amount) : amount;
+
+    state.events.push({ id: uid(), age, type, label, amount: normalizedAmount });
+    renderEventList();
+    recalcAndRender();
+    saveStateDebounced();
+  });
+
+  dlg.addEventListener("click", (e) => {
+    const rect = dlg.getBoundingClientRect();
+    const inDialog = (
+      e.clientX >= rect.left && e.clientX <= rect.right &&
+      e.clientY >= rect.top && e.clientY <= rect.bottom
+    );
+    if (!inDialog) dlg.close();
+  });
+}
+
+/** =============================
+ *  Simulation rules
+ *  ============================= */
+function baseMonthlyContributionForAge(baseMonthly, age, retireAge, autoZero) {
+  if (autoZero && age >= retireAge) return 0;
+  return baseMonthly;
+}
+
+function getActiveMonthlyContribution(baseMonthly, age) {
+  // latest monthly event <= age overrides base (then retirement auto-zero can still override)
+  const list = state.events
+    .filter(e => e.type === "monthly" && e.age <= age)
+    .sort((a,b) => b.age - a.age);
+  return list.length ? list[0].amount : baseMonthly;
+}
+
+function getLumpSumAtAge(age) {
+  return state.events.filter(e => e.type === "lump" && e.age === age).reduce((sum, e) => sum + e.amount, 0);
+}
+
+function getPensionMonthlyAtAge(age) {
+  // pensions active from their start age onward, sum all
+  return state.events.filter(e => e.type === "pension" && e.age <= age).reduce((sum, e) => sum + Math.abs(e.amount), 0);
+}
+
+function getEventLabelsAtAge(age) {
+  return state.events.filter(e => e.age === age).map(e => e.label || "Event");
+}
+
+/**
+ * Monthly flow:
+ * 1) contribution at start of month
+ * 2) apply growth + dividend on current balance
+ * 3) pension payout (withdrawal) end of month
+ *
+ * If balance goes below 0 due to payouts, clamp to 0.
+ */
+function simulate() {
+  // make sure state.inputs is current
+  syncUiToStateFromInputs();
+
+  const ageNow = state.inputs.ageNow;
+  const retireAge = state.inputs.ageRetire;
+  const initial = state.inputs.initialInvestment;
+  const baseMonthly = state.inputs.monthlyContribution;
+  const autoZero = state.inputs.autoZeroAfterRetire;
+
+  const preset = getSelectedPreset();
+  const annualR = (preset.annualReturnPct || 0) / 100;
+  const annualD = (preset.dividendPct || 0) / 100;
+
+  const startYear = state.startYear;
+  const endAge = state.maxAge;
+
+  const years = [];
+  let balance = initial;
+
+  for (let age = ageNow; age <= endAge; age++) {
+    const year = startYear + (age - ageNow);
+
+    // Determine monthly contribution for this age
+    const baseByRetire = baseMonthlyContributionForAge(baseMonthly, age, retireAge, autoZero);
+    let monthly = getActiveMonthlyContribution(baseByRetire, age);
+
+    // retirement auto-zero overrides events too (user asked: "은퇴 이후 납입 0 자동 전환 옵션")
+    if (autoZero && age >= retireAge) monthly = 0;
+
+    // Pension monthly payout
+    const pensionMonthly = getPensionMonthlyAtAge(age);
+
+    // Lump sum at year start
+    const lump = getLumpSumAtAge(age);
+    balance += lump;
+
+    let yContr = 0;
+    let yReturn = 0;
+    let yDiv = 0;
+    let yPensionOut = 0;
+
+    const months = [];
+    for (let m = 1; m <= 12; m++) {
+      // 1) contribution
+      balance += monthly;
+      yContr += monthly;
+
+      // 2) growth + dividend
+      const r = balance * (annualR / 12);
+      const d = balance * (annualD / 12);
+      balance += r + d;
+      yReturn += r;
+      yDiv += d;
+
+      // 3) pension payout
+      const out = pensionMonthly;
+      if (out > 0) {
+        balance -= out;
+        yPensionOut += out;
+        if (balance < 0) balance = 0;
+      }
+
+      months.push({
+        month: m,
+        contr: monthly,
+        ret: r,
+        div: d,
+        pensionOut: out,
+        endBalance: balance
+      });
+    }
+
+    years.push({
+      year,
+      age,
+      annualContribution: yContr,
+      returnEarned: yReturn,
+      dividends: yDiv,
+      pensionOut: yPensionOut,
+      endBalance: balance,
+      eventLabels: getEventLabelsAtAge(age),
+      lumpApplied: lump,
+      monthlyApplied: monthly,
+      pensionMonthlyApplied: pensionMonthly,
+      isRetirementYear: (age === retireAge)
+    });
+
+    // stop early if balance is 0 and no future contributions and pensions only withdraw (optional)
+    // keep going for table stability; user can see flat zeros
+  }
+
+  return { ageNow, retireAge, initial, baseMonthly, autoZero, annualR, annualD, preset, startYear, endAge, years };
+}
+
+/** =============================
+ *  Render table + monthly details
+ *  ============================= */
+function buildAnnualRow(y, idx) {
+  const labels = (y.eventLabels && y.eventLabels.length) ? y.eventLabels.join(", ") : "Baseline";
+  const badge = (y.eventLabels && y.eventLabels.length)
+    ? `<span class="px-2 py-0.5 bg-primary text-white text-[10px] font-bold rounded-full uppercase inline-flex items-center gap-1">
+         <span class="material-symbols-outlined text-[10px]">bolt</span> ${labels}
+       </span>`
+    : `<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 text-[10px] font-bold rounded-full uppercase">Baseline</span>`;
+
+  const highlight = y.isRetirementYear
+    ? "bg-emerald-50/60 dark:bg-emerald-900/10"
+    : ((y.eventLabels && y.eventLabels.length) ? "bg-blue-50/40 dark:bg-blue-900/10" : "");
+
+  return `
+    <tr class="annual-row ${highlight} hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group cursor-pointer" data-idx="${idx}">
+      <td class="px-6 py-4 font-bold text-slate-900 dark:text-slate-100">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined row-chevron text-slate-400 text-base">chevron_right</span>
+          <div class="flex flex-col">
+            <span>${y.year}</span>
+            <span class="text-[10px] text-slate-400">Age ${y.age}${y.isRetirementYear ? " • Retire" : ""}</span>
+          </div>
+        </div>
+      </td>
+      <td class="px-6 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.annualContribution)}</td>
+      <td class="px-6 py-4 font-bold text-primary">+${fmtMoney(y.returnEarned)}</td>
+      <td class="px-6 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.dividends)}</td>
+      <td class="px-6 py-4 font-medium text-emerald-600 dark:text-emerald-300">-${fmtMoney(y.pensionOut)}</td>
+      <td class="px-6 py-4 font-black">${fmtMoney(y.endBalance)}</td>
+      <td class="px-6 py-4">${badge}</td>
+    </tr>
+
+    <tr class="monthly-row hidden" data-months-for="${idx}">
+      <td colspan="7" class="px-6 pb-5">
+        <div class="mt-1 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-950">
+          <div class="px-4 py-3 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
+            <div class="text-[11px] text-slate-600 dark:text-slate-300 font-bold uppercase tracking-wider">
+              Monthly Breakdown • Age ${y.age} (${y.year})
+            </div>
+            <div class="text-[11px] text-slate-500 dark:text-slate-400">
+              Monthly Contr: <span class="font-semibold">${fmtMoney(y.monthlyApplied)}</span>
+              ${y.lumpApplied !== 0 ? ` • Lump: <span class="font-semibold">${fmtMoney(y.lumpApplied)}</span>` : ``}
+              ${y.pensionMonthlyApplied > 0 ? ` • Pension: <span class="font-semibold">-${fmtMoney(y.pensionMonthlyApplied)}/mo</span>` : ``}
+            </div>
+          </div>
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-[12px]">
+              <thead class="bg-white dark:bg-slate-950">
+                <tr class="text-slate-500 font-bold uppercase text-[11px] tracking-wider">
+                  <th class="px-4 py-3">Month</th>
+                  <th class="px-4 py-3">Contr.</th>
+                  <th class="px-4 py-3">Return</th>
+                  <th class="px-4 py-3">Dividend</th>
+                  <th class="px-4 py-3">Pension Out</th>
+                  <th class="px-4 py-3">End Balance</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                ${y._monthsHtml || ""}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </td>
+    </tr>
+  `;
+}
+
+function passesFilter(y) {
+  if (!state.inputs.filterEnabled) return true;
+  const from = Math.min(state.inputs.filterAgeFrom, state.inputs.filterAgeTo);
+  const to = Math.max(state.inputs.filterAgeFrom, state.inputs.filterAgeTo);
+  return y.age >= from && y.age <= to;
+}
+
+function renderAnnualTable(results) {
+  const tbody = $("annualTbody");
+  tbody.innerHTML = "";
+
+  // Build months html first
+  for (let i = 0; i < results.years.length; i++) {
+    const y = results.years[i];
+    const months = results._monthsByIdx[i] || [];
+    y._monthsHtml = months.map(m => `
+      <tr>
+        <td class="px-4 py-2 font-bold text-slate-900 dark:text-slate-100">${m.month}</td>
+        <td class="px-4 py-2 text-slate-600 dark:text-slate-400">${fmtMoney(m.contr)}</td>
+        <td class="px-4 py-2 font-semibold text-primary">+${fmtMoney(m.ret)}</td>
+        <td class="px-4 py-2 text-slate-600 dark:text-slate-400">${fmtMoney(m.div)}</td>
+        <td class="px-4 py-2 text-emerald-600 dark:text-emerald-300">-${fmtMoney(m.pensionOut)}</td>
+        <td class="px-4 py-2 font-extrabold">${fmtMoney(m.endBalance)}</td>
+      </tr>
+    `).join("");
+  }
+
+  // Filtered render
+  const filtered = results.years
+    .map((y, idx) => ({ y, idx }))
+    .filter(({ y }) => passesFilter(y));
+
+  const html = filtered.map(({ y, idx }) => buildAnnualRow(y, idx)).join("");
+  tbody.insertAdjacentHTML("beforeend", html);
+
+  // Toggle
+  tbody.querySelectorAll(".annual-row").forEach(row => {
+    row.addEventListener("click", () => {
+      const idx = row.getAttribute("data-idx");
+      const detail = tbody.querySelector(`.monthly-row[data-months-for="${idx}"]`);
+      const open = detail && !detail.classList.contains("hidden");
+      if (!detail) return;
+      if (open) {
+        detail.classList.add("hidden");
+        row.classList.remove("row-open");
+      } else {
+        detail.classList.remove("hidden");
+        row.classList.add("row-open");
+      }
+    });
+  });
+}
+
+/** =============================
+ *  Chart
+ *  ============================= */
+function renderChart(results) {
+  const labels = results.years.map(y => `${y.year}`);
+  const data = results.years.map(y => Math.round(y.endBalance));
+
+  const ctx = $("balanceChart").getContext("2d");
+  if (state.chart) state.chart.destroy();
+
+  state.chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "End Balance",
+        data,
+        tension: 0.25,
+        pointRadius: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: (c) => fmtMoney(c.parsed.y) }
+        }
+      },
+      scales: {
+        y: {
+          ticks: {
+            callback: (v) => {
+              const n = Number(v);
+              if (!Number.isFinite(n)) return v;
+              if (n >= 1_000_000_000) return (n/1_000_000_000).toFixed(1) + "B";
+              if (n >= 1_000_000) return (n/1_000_000).toFixed(1) + "M";
+              if (n >= 1_000) return (n/1_000).toFixed(1) + "K";
+              return String(n);
+            }
+          }
+        },
+        x: { ticks: { maxTicksLimit: 10 } }
+      }
+    }
+  });
+}
+
+/** =============================
+ *  Observation
+ *  ============================= */
+function updateObservation(results) {
+  const retireRow = results.years.find(y => y.age === results.retireAge);
+  const last = results.years[results.years.length - 1];
+
+  const preset = results.preset;
+  const pensionAtRetire = retireRow ? retireRow.pensionMonthlyApplied : 0;
+
+  let msg = `Preset: ${preset.name} • Return ${preset.annualReturnPct.toFixed(1)}% • Dividend ${preset.dividendPct.toFixed(1)}%. `;
+  if (retireRow) {
+    msg += `At Age ${results.retireAge} (${retireRow.year}), balance is ${fmtMoney(retireRow.endBalance)}. `;
+    if (results.autoZero) msg += `Contributions auto-stop from retirement. `;
+    if (pensionAtRetire > 0) msg += `Pension active: -${fmtMoney(pensionAtRetire)}/month. `;
+  }
+  msg += `By Age ${results.endAge} (${last.year}), balance could be ${fmtMoney(last.endBalance)}.`;
+  $("observation").textContent = msg;
+}
+
+/** =============================
+ *  CSV Export
+ *  ============================= */
+function exportCsv(results) {
+  const header = ["Year","Age","AnnualContribution","ReturnEarned","Dividends","PensionOut","EndBalance","Events"].join(",");
+  const lines = results.years.map(y => {
+    const events = (y.eventLabels && y.eventLabels.length) ? y.eventLabels.join(" | ") : "Baseline";
+    return [
+      y.year,
+      y.age,
+      Math.round(y.annualContribution),
+      Math.round(y.returnEarned),
+      Math.round(y.dividends),
+      Math.round(y.pensionOut),
+      Math.round(y.endBalance),
+      `"${events.replace(/"/g,'""')}"`
+    ].join(",");
+  });
+
+  const csv = [header, ...lines].join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "retirement_projection.csv";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/** =============================
+ *  Recalc + Render
+ *  ============================= */
+function recalcAndRender() {
+  const results = simulate();
+
+  // months detail re-sim (same rules)
+  const ageNow = results.ageNow;
+  const endAge = results.endAge;
+  const retireAge = results.retireAge;
+  const baseMonthly = results.baseMonthly;
+  const autoZero = results.autoZero;
+
+  let balance = results.initial;
+  const monthsByIdx = [];
+
+  for (let age = ageNow; age <= endAge; age++) {
+    const idx = age - ageNow;
+
+    const baseByRetire = baseMonthlyContributionForAge(baseMonthly, age, retireAge, autoZero);
+    let monthly = getActiveMonthlyContribution(baseByRetire, age);
+    if (autoZero && age >= retireAge) monthly = 0;
+
+    const pensionMonthly = getPensionMonthlyAtAge(age);
+    const lump = getLumpSumAtAge(age);
+    balance += lump;
+
+    const months = [];
+    for (let m = 1; m <= 12; m++) {
+      balance += monthly;
+
+      const r = balance * (results.annualR / 12);
+      const d = balance * (results.annualD / 12);
+      balance += r + d;
+
+      const out = pensionMonthly;
+      if (out > 0) {
+        balance -= out;
+        if (balance < 0) balance = 0;
+      }
+
+      months.push({ month: m, contr: monthly, ret: r, div: d, pensionOut: out, endBalance: balance });
+    }
+    monthsByIdx[idx] = months;
+  }
+
+  results._monthsByIdx = monthsByIdx;
+  state.results = results;
+
+  // Labels
+  $("rangeLabel").textContent =
+    `Start Year ${results.startYear} • Age ${results.ageNow} → ${results.endAge} • Retire @ ${results.retireAge} • Preset: ${results.preset.name}`;
+
+  renderPresetSelect();
+  renderAnnualTable(results);
+  updateObservation(results);
+
+  if (!$("chartPanel").classList.contains("hidden")) {
+    renderChart(results);
+  }
+}
+
+/** =============================
+ *  Inputs init
+ *  ============================= */
+function initInputs() {
+  const moneyIds = ["initialInvestment", "monthlyContribution"];
+  moneyIds.forEach(id => {
+    $(id).addEventListener("input", () => {
+      recalcAndRender();
+      saveStateDebounced();
+    });
+    $(id).addEventListener("blur", () => {
+      const v = parseMoney($(id).value);
+      $(id).value = v.toLocaleString();
+      syncUiToStateFromInputs();
+      saveStateDebounced();
+    });
+  });
+
+  ["ageNow","ageRetire","autoZeroAfterRetire","filterEnabled","filterAgeFrom","filterAgeTo"].forEach(id => {
+    $(id).addEventListener("input", () => {
+      recalcAndRender();
+      saveStateDebounced();
+    });
+    $(id).addEventListener("change", () => {
+      recalcAndRender();
+      saveStateDebounced();
+    });
+  });
+
+  $("btnToggleChart").addEventListener("click", () => {
+    $("chartPanel").classList.toggle("hidden");
+    if (!$("chartPanel").classList.contains("hidden")) {
+      renderChart(state.results || simulate());
+    }
+  });
+
+  $("btnExportCsv").addEventListener("click", () => {
+    if (!state.results) recalcAndRender();
+    exportCsv(state.results);
+  });
+
+  $("btnPrint").addEventListener("click", () => window.print());
+}
+
+/** =============================
+ *  Boot
+ *  ============================= */
+(function boot() {
+  // restore
+  const saved = loadSavedState();
+  if (saved) applySnapshot(saved);
+
+  // sync UI from state
+  syncStateToUi();
+
+  // init handlers
+  initPresetEvents();
+  initEventDialog();
+  initInputs();
+
+  // initial calc
+  recalcAndRender();
+
+  // save once after boot (ensures new keys exist)
+  saveStateDebounced();
+})();
+</script>
+</body>
+</html>
