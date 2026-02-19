@@ -11,8 +11,8 @@
 
   <!-- Chart -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="public/presets.js"></script>
-  <script src="public/events.js"></script>
+  <script src="presets.js"></script>
+  <script src="events.js"></script>
 
   <script id="tailwind-config">
     tailwind.config = {
@@ -451,10 +451,22 @@ function parseMoney(input) {
   return Number.isFinite(n) ? n : 0;
 }
 
-function fmtMoney(n) {
-  const num = Number(n);
-  if (!Number.isFinite(num)) return "0원";
-  return Math.round(num).toLocaleString() + "원";
+function fmtMoney(n, compact = false) {
+    const num = Number(n);
+    if (!Number.isFinite(num)) return "0원";
+
+    if (compact) {
+        if (Math.abs(num) >= 1000000000000) {
+            return `${parseFloat((num / 1000000000000).toFixed(2))}조`;
+        } else if (Math.abs(num) >= 100000000) {
+            return `${parseFloat((num / 100000000).toFixed(1))}억`;
+        } else if (Math.abs(num) >= 10000000) {
+            return `${parseFloat((num / 10000000).toFixed(1))}천`;
+        } else if (Math.abs(num) >= 10000) {
+            return `${parseFloat((num / 10000).toFixed(2))}만`;
+        }
+    }
+    return `${Math.round(num).toLocaleString()}원`;
 }
 
 function clamp(n, min, max) {
@@ -1006,11 +1018,11 @@ function buildAnnualRow(y, idx) {
           </div>
         </div>
       </td>
-      <td class="px-6 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.annualContribution)}</td>
-      <td class="px-6 py-4 font-bold text-primary">+${fmtMoney(y.returnEarned)}</td>
-      <td class="px-6 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.dividends)}</td>
-      <td class="px-6 py-4 font-medium text-emerald-600 dark:text-emerald-300">-${fmtMoney(y.pensionOut)}</td>
-      <td class="px-6 py-4 font-black">${fmtMoney(y.endBalance)}</td>
+      <td class="px-6 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.annualContribution, true)}</td>
+      <td class="px-6 py-4 font-bold text-primary">+${fmtMoney(y.returnEarned, true)}</td>
+      <td class="px-6 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.dividends, true)}</td>
+      <td class="px-6 py-4 font-medium text-emerald-600 dark:text-emerald-300">-${fmtMoney(y.pensionOut, true)}</td>
+      <td class="px-6 py-4 font-black">${fmtMoney(y.endBalance, true)}</td>
       <td class="px-6 py-4">${badge}</td>
     </tr>
 
@@ -1072,7 +1084,7 @@ function renderAnnualTable(results) {
         <td class="px-4 py-2 font-semibold text-primary">+${fmtMoney(m.ret)}</td>
         <td class="px-4 py-2 text-slate-600 dark:text-slate-400">${fmtMoney(m.div)}</td>
         <td class="px-4 py-2 text-emerald-600 dark:text-emerald-300">-${fmtMoney(m.pensionOut)}</td>
-        <td class="px-4 py-2 font-extrabold">${fmtMoney(m.endBalance)}</td>
+        <td class="px-4 py-2 font-extrabold">${fmtMoney(m.endBalance, true)}</td>
       </tr>
     `).join("");
   }
@@ -1130,7 +1142,7 @@ function renderChart(results) {
       plugins: {
         legend: { display: false },
         tooltip: {
-          callbacks: { label: (c) => fmtMoney(c.parsed.y) }
+          callbacks: { label: (c) => fmtMoney(c.parsed.y, true) }
         }
       },
       scales: {
@@ -1138,11 +1150,12 @@ function renderChart(results) {
           ticks: {
             callback: (v) => {
               const n = Number(v);
-              if (!Number.isFinite(n)) return v;
-              if (n >= 1_000_000_000) return (n/1_000_000_000).toFixed(1) + "십억";
-              if (n >= 1_000_000) return (n/1_000_000).toFixed(1) + "백만";
-              if (n >= 1_000) return (n/1_000).toFixed(1) + "천";
-              return String(n);
+              if (!Number.isFinite(n) || n === 0) return "0";
+              if (Math.abs(n) >= 1000000000000) return `${parseFloat((n / 1000000000000).toFixed(1))}조`;
+              if (Math.abs(n) >= 100000000) return `${parseFloat((n / 100000000).toFixed(1))}억`;
+              if (Math.abs(n) >= 10000000) return `${parseFloat((n / 10000000).toFixed(1))}천`;
+              if (Math.abs(n) >= 10000) return `${parseFloat((n / 10000).toFixed(1))}만`;
+              return n.toLocaleString();
             }
           }
         },
@@ -1164,11 +1177,11 @@ function updateObservation(results) {
 
   let msg = `프리셋: ${preset.name} • 수익률 ${preset.annualReturnPct.toFixed(1)}% • 배당 ${preset.dividendPct.toFixed(1)}%. `;
   if (retireRow) {
-    msg += `${results.retireAge}세 (${retireRow.year})에 잔액은 ${fmtMoney(retireRow.endBalance)} 입니다. `;
+    msg += `${results.retireAge}세 (${retireRow.year})에 잔액은 ${fmtMoney(retireRow.endBalance, true)} 입니다. `;
     if (results.autoZero) msg += `은퇴 후 납입은 자동으로 중지됩니다. `;
     if (pensionAtRetire > 0) msg += `연금 활성: -${fmtMoney(pensionAtRetire)}/월. `;
   }
-  msg += `${results.endAge}세 (${last.year})까지 잔액은 ${fmtMoney(last.endBalance)}가 될 수 있습니다.`;
+  msg += `${results.endAge}세 (${last.year})까지 잔액은 ${fmtMoney(last.endBalance, true)}가 될 수 있습니다.`;
   $("observation").textContent = msg;
 }
 
