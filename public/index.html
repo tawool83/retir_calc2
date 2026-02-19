@@ -11,6 +11,8 @@
 
   <!-- Chart -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="public/presets.js"></script>
+  <script src="public/events.js"></script>
 
   <script id="tailwind-config">
     tailwind.config = {
@@ -471,12 +473,6 @@ function uid() {
 /** =============================
  *  State
  *  ============================= */
-const defaultPresets = [
-  { id: "sp500", name: "S&P 500 (표준)", annualReturnPct: 10.0, dividendPct: 1.5, builtin: true },
-  { id: "nasdaq100", name: "나스닥 100 (기술주 중심)", annualReturnPct: 14.2, dividendPct: 0.8, builtin: true },
-  { id: "schd", name: "SCHD (배당 성장)", annualReturnPct: 8.5, dividendPct: 3.4, builtin: true },
-];
-
 const state = {
   startYear: new Date().getFullYear(),
   maxAge: 100,
@@ -498,11 +494,7 @@ const state = {
   },
 
   // events: monthly change, lump, pension
-  events: [
-    { id: uid(), age: 45, type: "monthly", amount: 3500000, label: "승진" },
-    { id: uid(), age: 55, type: "lump", amount: 250000000, label: "아파트 매매" },
-    { id: uid(), age: 65, type: "pension", amount: 1800000, label: "국민연금" },
-  ],
+  events: [],
 
   results: null,
   chart: null
@@ -529,7 +521,11 @@ function buildSnapshot() {
 }
 
 function applySnapshot(snap) {
-  if (!snap) return;
+  if (!snap) {
+    // If no saved state, load default events
+    state.events = defaultEvents.map(e => ({ ...e, id: uid() }));
+    return;
+  }
 
   // Presets: keep builtins, merge user presets
   const builtins = [...defaultPresets];
@@ -562,7 +558,7 @@ function applySnapshot(snap) {
   }
 
   // events
-  if (Array.isArray(snap.events)) {
+  if (Array.isArray(snap.events) && snap.events.length > 0) {
     state.events = snap.events
       .filter(e => e && typeof e === "object" && e.type && e.age != null)
       .map(e => ({
@@ -572,6 +568,9 @@ function applySnapshot(snap) {
         amount: Number(e.amount) || 0,
         label: String(e.label || "이벤트")
       }));
+  } else {
+    // If saved events are empty, load defaults
+    state.events = defaultEvents.map(e => ({ ...e, id: uid() }));
   }
 
   // presetId
@@ -1317,7 +1316,7 @@ function initInputs() {
 (function boot() {
   // restore
   const saved = loadSavedState();
-  if (saved) applySnapshot(saved);
+  applySnapshot(saved);
 
   // sync UI from state
   syncStateToUi();
