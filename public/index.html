@@ -149,12 +149,12 @@
 
           <div class="grid grid-cols-2 gap-3">
             <div class="bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2">
-              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">연간 수익률</p>
-              <p id="presetReturn" class="text-sm font-extrabold text-primary">-</p>
+              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">연간 수익률 (%)</p>
+              <input id="presetReturn" type="text" class="text-sm font-extrabold text-primary w-full bg-transparent border-0 p-0 focus:ring-0 disabled:cursor-not-allowed disabled:opacity-70 dark:text-primary" disabled>
             </div>
             <div class="bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2">
-              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">배당 수익률</p>
-              <p id="presetDiv" class="text-sm font-extrabold text-slate-700 dark:text-slate-300">-</p>
+              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">배당 수익률 (%)</p>
+              <input id="presetDiv" type="text" class="text-sm font-extrabold text-slate-700 dark:text-slate-300 w-full bg-transparent border-0 p-0 focus:ring-0 disabled:cursor-not-allowed disabled:opacity-70" disabled>
             </div>
           </div>
 
@@ -223,8 +223,8 @@
           </div>
           <label class="inline-flex items-center cursor-pointer">
             <input id="filterEnabled" type="checkbox" class="sr-only peer">
-            <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 dark:peer-focus:ring-primary/30 rounded-full peer dark:bg-slate-600 peer-checked:bg-primary relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
-          </label>
+              <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 dark:peer-focus:ring-primary/30 rounded-full peer dark:bg-slate-600 peer-checked:bg-primary relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
+            </label>
         </div>
 
         <p class="mt-3 text-[11px] text-slate-500 dark:text-slate-400">
@@ -460,7 +460,7 @@ function clamp(n, min, max) {
 }
 
 function parsePct(s) {
-  const v = Number(parseFloat(String(s || "").replace(",", ".")));
+  const v = Number(parseFloat(String(s || "").replace(/[^0-9.%]/g, "")));
   return Number.isFinite(v) ? v : 0;
 }
 
@@ -631,10 +631,16 @@ function renderPresetSelect() {
   }
 
   const cur = getSelectedPreset();
-  $("presetReturn").textContent = `${cur.annualReturnPct.toFixed(1)}%`;
-  $("presetDiv").textContent = `${cur.dividendPct.toFixed(1)}%`;
+  const returnInput = $("presetReturn");
+  const divInput = $("presetDiv");
 
-  // disable delete for builtins
+  returnInput.value = `${cur.annualReturnPct.toFixed(1)}%`;
+  divInput.value = `${cur.dividendPct.toFixed(1)}%`;
+
+  // Enable/disable editing for custom presets
+  returnInput.disabled = !!cur.builtin;
+  divInput.disabled = !!cur.builtin;
+
   $("btnDeletePreset").disabled = !!cur.builtin;
 }
 
@@ -683,21 +689,58 @@ function initPresetEvents() {
   });
 
   $("btnResetAll").addEventListener("click", () => {
-    resetSavedState();
-    // hard reload to re-init with defaults
-    location.reload();
+    if (confirm("저장된 모든 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) {
+      resetSavedState();
+      location.reload();
+    }
   });
 
   // backdrop close
   dlg.addEventListener("click", (e) => {
     const rect = dlg.getBoundingClientRect();
-    const inDialog = (
-      e.clientX >= rect.left && e.clientX <= rect.right &&
-      e.clientY >= rect.top && e.clientY <= rect.bottom
-    );
+    const inDialog = (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom);
     if (!inDialog) dlg.close();
   });
+
+  // --- Editable Preset Fields ---
+  const returnInput = $("presetReturn");
+  const divInput = $("presetDiv");
+
+  const handleUpdate = () => {
+    const cur = getSelectedPreset();
+    if (cur.builtin) return;
+
+    const newReturn = parsePct(returnInput.value);
+    const newDiv = parsePct(divInput.value);
+
+    cur.annualReturnPct = newReturn;
+    cur.dividendPct = newDiv;
+
+    returnInput.value = `${cur.annualReturnPct.toFixed(1)}%`;
+    divInput.value = `${cur.dividendPct.toFixed(1)}%`;
+
+    recalcAndRender();
+    saveStateDebounced();
+  };
+
+  returnInput.addEventListener("focus", () => {
+    const cur = getSelectedPreset();
+    if (cur.builtin) return;
+    returnInput.value = cur.annualReturnPct.toFixed(1);
+  });
+  divInput.addEventListener("focus", () => {
+    const cur = getSelectedPreset();
+    if (cur.builtin) return;
+    divInput.value = cur.dividendPct.toFixed(1);
+  });
+
+  returnInput.addEventListener("blur", handleUpdate);
+  divInput.addEventListener("blur", handleUpdate);
+
+  returnInput.addEventListener("keydown", e => { if (e.key === 'Enter') returnInput.blur(); });
+  divInput.addEventListener("keydown", e => { if (e.key === 'Enter') divInput.blur(); });
 }
+
 
 /** =============================
  *  Events UI
@@ -801,10 +844,7 @@ function initEventDialog() {
 
   dlg.addEventListener("click", (e) => {
     const rect = dlg.getBoundingClientRect();
-    const inDialog = (
-      e.clientX >= rect.left && e.clientX <= rect.right &&
-      e.clientY >= rect.top && e.clientY <= rect.bottom
-    );
+    const inDialog = (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom);
     if (!inDialog) dlg.close();
   });
 }
