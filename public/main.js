@@ -194,6 +194,8 @@ function renderPresetList() {
 
 function initPresetManagement() {
     const dlg = $('presetDialog');
+    let downTarget = null;
+
     $('btnAddPreset').addEventListener('click', () => {
         renderPresetList();
         $('newPresetForm').reset();
@@ -216,8 +218,11 @@ function initPresetManagement() {
         e.target.reset();
     });
 
+    dlg.addEventListener("mousedown", e => { downTarget = e.target; });
     dlg.addEventListener("click", (e) => {
-      if (e.target === dlg) dlg.close();
+      if (e.target === dlg && downTarget === dlg) {
+        dlg.close();
+      }
     });
 }
 
@@ -299,6 +304,7 @@ function initEventDialog() {
   const fieldsPortfolio = $('dlgFieldsPortfolio');
   const fieldsMonetary = $('dlgFieldsMonetary');
   const infoEl = $('dlgInfo');
+  let downTarget = null;
 
   const updateDialogFields = () => {
     const type = typeSelect.value;
@@ -352,8 +358,11 @@ function initEventDialog() {
     saveStateDebounced();
   });
 
+  dlg.addEventListener("mousedown", e => { downTarget = e.target; });
   dlg.addEventListener("click", (e) => {
-    if (e.target === dlg) dlg.close();
+    if (e.target === dlg && downTarget === dlg) {
+      dlg.close();
+    }
   });
 }
 
