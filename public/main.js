@@ -71,6 +71,7 @@ const state = {
   startYear: new Date().getFullYear(),
   maxAge: 100,
   dividendTaxRate: 0.154,
+  isEventListExpanded: false,
 
   presets: [...defaultPresets],
 
@@ -99,6 +100,7 @@ function buildSnapshot() {
     presets: state.presets.map(p => ({ ...p })),
     inputs: { ...state.inputs },
     events: state.events.map(e => ({ ...e })),
+    isEventListExpanded: state.isEventListExpanded,
     savedAt: new Date().toISOString()
   };
 }
@@ -120,6 +122,9 @@ function applySnapshot(snap) {
   if (snap.inputs && typeof snap.inputs === 'object') {
      Object.assign(state.inputs, snap.inputs);
   }
+  
+  state.isEventListExpanded = snap.isEventListExpanded || false;
+
    // Migration for removing autoZeroAfterRetire
   if (state.inputs.autoZeroAfterRetire) {
     delete state.inputs.autoZeroAfterRetire;
@@ -241,113 +246,157 @@ function initPresetManagement() {
 /** =============================
  *  Events UI
  *  ============================= */
-function renderEventList() {
-  const wrap = $("eventList");
-  wrap.innerHTML = "";
+function createEventCard(ev) {
+    let border, subtitle, pill;
 
-  const { ageNow, ageRetire } = state.inputs;
-  const endAge = state.maxAge;
-
-  const eventsByAge = {};
-  state.events.forEach(ev => {
-      if (!eventsByAge[ev.age]) eventsByAge[ev.age] = [];
-      eventsByAge[ev.age].push(ev);
-  });
-
-  let html = '<div class="flex gap-4">';
-  // Timeline bar
-  html += '<div class="relative flex-shrink-0 w-8 flex flex-col items-center">';
-  html += `<div class="absolute top-0 h-full w-0.5 bg-slate-200 dark:bg-slate-700"></div>`;
-
-  const agePoints = new Set([ageNow, ageRetire, ...state.events.map(e => e.age)]);
-  const sortedAges = [...agePoints].sort((a,b) => a - b);
-
-  sortedAges.forEach(age => {
-      const isEventAge = eventsByAge[age];
-      const isRetireAge = age === ageRetire;
-      const isNowAge = age === ageNow;
-      const percentage = (age - ageNow) / (endAge - ageNow) * 100;
-      
-      let dotClass = 'w-2 h-2 bg-slate-300 dark:bg-slate-600 rounded-full';
-      if (isEventAge || isRetireAge || isNowAge) {
-          dotClass = 'w-3 h-3 bg-primary rounded-full ring-4 ring-background-light dark:ring-background-dark';
-      }
-
-      html += `<div class="absolute" style="top: ${clamp(percentage,0,100)}%; transform: translateY(-50%);">
-                  <div class="${dotClass} relative">
-                    ${(isEventAge || isRetireAge || isNowAge) ? 
-                      `<span class="absolute -top-2 left-full ml-2 text-[10px] font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">${age}세</span>` : ''}
-                  </div>
-               </div>`;
-  });
-
-  html += '</div>';
-
-  // Event cards
-  html += '<div class="flex-grow space-y-3 min-w-0">';
-  const sortedEvents = [...state.events].sort((a,b) => a.age - b.age);
-
-   if (sortedEvents.length === 0) {
-    html += `<div class="text-[11px] text-slate-500 dark:text-slate-400">이벤트가 없습니다. “이벤트 추가”를 클릭하세요.</div>`;
-  } else {
-    for (const ev of sortedEvents) {
-      let border, subtitle, pill;
-
-      switch (ev.type) {
-          case 'portfolio':
-              const preset = state.presets.find(p => p.id === ev.presetId);
-              border = "border-purple-500";
-              subtitle = `전략: ${preset ? preset.name : '알 수 없음'}, 비중: ${ev.weight}`;
-              pill = `<span class="px-2 py-0.5 bg-purple-500 text-white text-[10px] font-bold rounded-full uppercase">포트폴리오</span>`;
-              break;
-          case 'monthly':
-              border = "border-primary";
-              subtitle = `월 납입액 ${fmtMoney(ev.amount)}으로 변경`;
-              pill = `<span class="px-2 py-0.5 bg-primary text-white text-[10px] font-bold rounded-full uppercase">월납입</span>`;
-              break;
-          case 'lump':
-              subtitle = `일시불 입금 ${ev.amount >= 0 ? "+" : ""}${fmtMoney(ev.amount)}`;
-              pill = `<span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-200 text-[10px] font-bold rounded-full uppercase">일시불</span>`;
-              break;
-          case 'withdrawal':
-              border = "border-emerald-400";
-              subtitle = `현금 인출 시작: 매월 ${fmtMoney(ev.amount)} (인출)`;
-              pill = `<span class="px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full uppercase">현금 인출</span>`;
-              break;
-          default: 
-              subtitle = "알 수 없는 이벤트";
-              pill = "";
-      }
-
-      html += `
-        <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border-l-4 ${border} relative">
-          <div class="flex justify-between items-start gap-2">
-            <div class="min-w-0">
-              <div class="flex items-center gap-2 flex-wrap">
-                ${pill}
-              </div>
-              <p class="text-[11px] text-slate-500 mt-1">${subtitle}</p>
-            </div>
-            <button class="text-slate-400 hover:text-red-500 transition-colors shrink-0" data-del="${ev.id}" title="삭제">
-              <span class="material-symbols-outlined text-sm">delete</span>
-            </button>
-          </div>
-        </div>
-      `;
+    switch (ev.type) {
+        case 'portfolio':
+            const preset = state.presets.find(p => p.id === ev.presetId);
+            border = "border-purple-500";
+            subtitle = `전략: ${preset ? preset.name : '알 수 없음'}, 비중: ${ev.weight}`;
+            pill = `<span class="px-2 py-0.5 bg-purple-500 text-white text-[10px] font-bold rounded-full uppercase">포트폴리오</span>`;
+            break;
+        case 'monthly':
+            border = "border-primary";
+            subtitle = `월 납입액 ${fmtMoney(ev.amount)}으로 변경`;
+            pill = `<span class="px-2 py-0.5 bg-primary text-white text-[10px] font-bold rounded-full uppercase">월납입</span>`;
+            break;
+        case 'lump':
+            subtitle = `일시불 입금 ${ev.amount >= 0 ? "+" : ""}${fmtMoney(ev.amount)}`;
+            pill = `<span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-200 text-[10px] font-bold rounded-full uppercase">일시불</span>`;
+            break;
+        case 'withdrawal':
+            border = "border-emerald-400";
+            subtitle = `현금 인출 시작: 매월 ${fmtMoney(ev.amount)} (인출)`;
+            pill = `<span class="px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full uppercase">현금 인출</span>`;
+            break;
+        default: 
+            subtitle = "알 수 없는 이벤트";
+            pill = "";
+            border = "border-slate-300";
     }
-  }
-  html += '</div></div>';
-  wrap.innerHTML = html;
 
-  wrap.querySelectorAll("[data-del]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const id = btn.getAttribute("data-del");
-      state.events = state.events.filter(e => e.id !== id);
-      renderEventList();
+    const node = document.createElement("div");
+    node.className = `p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border-l-4 ${border} relative`;
+    node.innerHTML = `
+      <div class="flex justify-between items-start gap-2">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            ${pill}
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">${subtitle}</p>
+        </div>
+        <button class="text-slate-400 hover:text-red-500 transition-colors shrink-0" data-del="${ev.id}" title="삭제">
+          <span class="material-symbols-outlined text-sm">delete</span>
+        </button>
+      </div>
+    `;
+
+    node.querySelector("[data-del]").addEventListener("click", () => {
+      state.events = state.events.filter(e => e.id !== ev.id);
       recalcAndRender();
       saveStateDebounced();
     });
-  });
+
+    return node;
+}
+
+function renderEventList() {
+    const wrap = $("eventList");
+    wrap.innerHTML = "";
+
+    if (typeof state.isEventListExpanded === 'undefined') {
+        state.isEventListExpanded = false;
+    }
+
+    const sortedEvents = [...state.events].sort((a,b) => a.age - b.age);
+    if (sortedEvents.length === 0) {
+        wrap.innerHTML = `<div class="text-[11px] text-slate-500 dark:text-slate-400">이벤트가 없습니다. “이벤트 추가”를 클릭하세요.</div>`;
+        return;
+    }
+
+    const eventGroups = [];
+    const eventsByAge = {};
+    sortedEvents.forEach(ev => {
+        if (!eventsByAge[ev.age]) {
+            const newGroup = { age: ev.age, events: [] };
+            eventsByAge[ev.age] = newGroup;
+            eventGroups.push(newGroup);
+        }
+        eventsByAge[ev.age].events.push(ev);
+    });
+
+    const showAll = state.isEventListExpanded || eventGroups.length <= 5;
+    const groupsToShow = showAll ? eventGroups : eventGroups.slice(0, 5);
+
+    const container = document.createElement('div');
+    container.className = 'relative';
+    
+    const line = document.createElement('div');
+    line.className = 'absolute left-[15px] top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-700';
+    container.appendChild(line);
+
+    const rowsContainer = document.createElement('div');
+    rowsContainer.className = 'relative z-10';
+    container.appendChild(rowsContainer);
+
+    groupsToShow.forEach(group => {
+        const row = document.createElement('div');
+        row.className = 'flex items-start gap-4 pt-4 first:pt-0';
+
+        const timelinePart = document.createElement('div');
+        timelinePart.className = 'w-8 flex-shrink-0 flex justify-center pt-3';
+        
+        const dotWrapper = document.createElement('div');
+        dotWrapper.className = 'w-3 h-3 bg-primary rounded-full ring-4 ring-white dark:ring-slate-900 relative';
+        
+        const ageLabel = document.createElement('span');
+        ageLabel.className = 'absolute -top-1.5 right-full mr-2 text-[10px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap';
+        ageLabel.textContent = `${group.age}세`;
+        
+        dotWrapper.appendChild(ageLabel);
+        timelinePart.appendChild(dotWrapper);
+        row.appendChild(timelinePart);
+
+        const cardsPart = document.createElement('div');
+        cardsPart.className = 'flex-grow space-y-3 min-w-0';
+        group.events.forEach(ev => {
+            cardsPart.appendChild(createEventCard(ev));
+        });
+        row.appendChild(cardsPart);
+        rowsContainer.appendChild(row);
+    });
+    
+    wrap.appendChild(container);
+
+    if (eventGroups.length > 5) {
+        const btnContainer = document.createElement('div');
+        btnContainer.className = 'flex items-start gap-4 pt-3';
+        
+        const spacer = document.createElement('div');
+        spacer.className = 'w-8 flex-shrink-0';
+        btnContainer.appendChild(spacer);
+        
+        const btnWrapper = document.createElement('div');
+        btnWrapper.className = 'flex-grow';
+        
+        const btn = document.createElement('button');
+        btn.id = 'btnToggleEventList';
+        btn.className = 'text-primary hover:text-secondary text-xs font-bold uppercase tracking-wider flex items-center gap-1';
+        btn.innerHTML = state.isEventListExpanded 
+            ? '<span class="material-symbols-outlined text-sm">unfold_less</span> 간략히 보기'
+            : `<span class="material-symbols-outlined text-sm">unfold_more</span> 전체 보기 (+${eventGroups.length - 5}개)`;
+
+        btn.addEventListener('click', () => {
+            state.isEventListExpanded = !state.isEventListExpanded;
+            renderEventList();
+            saveStateDebounced();
+        });
+
+        btnWrapper.appendChild(btn);
+        btnContainer.appendChild(btnWrapper);
+        wrap.appendChild(btnContainer);
+    }
 }
 
 function initEventDialog() {
@@ -405,7 +454,6 @@ function initEventDialog() {
     }
 
     state.events.push(newEvent);
-    renderEventList();
     recalcAndRender();
     saveStateDebounced();
   });
@@ -763,7 +811,7 @@ function recalcAndRender() {
 
   renderAnnualTable(results);
   updateObservation(results);
-  renderEventList(); // This now renders the timeline as well
+  renderEventList();
   updateFilterButton();
 
   if (!$("chartPanel").classList.contains("hidden")) {
@@ -778,6 +826,7 @@ function initInputs() {
   const inputsToWatch = ["ageNow", "ageRetire", "initialInvestment", "monthlyContribution"];
   inputsToWatch.forEach(id => {
       const el = $(id);
+      if (!el) return;
       el.addEventListener("input", () => { recalcAndRender(); saveStateDebounced(); });
       if(el.type !== 'text') el.addEventListener("change", () => { recalcAndRender(); saveStateDebounced(); });
       el.addEventListener("blur", () => {
@@ -805,6 +854,7 @@ function initInputs() {
     const filterInputs = ["filterEnabled", "filterAgeFrom", "filterAgeTo"];
     filterInputs.forEach(id => {
         const el = $(id);
+        if (!el) return;
         el.addEventListener("input", () => { recalcAndRender(); saveStateDebounced(); });
         if(el.type !== 'text') el.addEventListener("change", () => { recalcAndRender(); saveStateDebounced(); });
         el.addEventListener("blur", () => { 
