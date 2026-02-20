@@ -1,4 +1,4 @@
-'''/** =============================
+/** =============================
  *  Persistence (localStorage)
  *  ============================= */
 const STORAGE_KEY = "retire_sim_v2_dynamic_portfolio";
@@ -519,16 +519,12 @@ function initEventDialog() {
 
   dlg.addEventListener("mousedown", e => { downTarget = e.target; });
   dlg.addEventListener("click", (e) => {
-    // Only close if the click was directly on the backdrop
     if (e.target === dlg && downTarget === dlg) {
-      state.editingEventId = null; // Also reset editing state on close
       dlg.close();
     }
   });
   
-  // Also handle closing via the form's cancel button
-  const form = dlg.querySelector('form');
-  form.addEventListener('close', () => {
+  dlg.addEventListener('close', () => {
       state.editingEventId = null;
   });
 }
@@ -953,4 +949,3 @@ function initInputs() {
   initInputs();
   recalcAndRender();
 })();
-''
