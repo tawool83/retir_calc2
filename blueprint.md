@@ -11,9 +11,9 @@ This is a retirement simulator that allows users to project their savings over t
 *   **Dynamic Portfolio:** Users can define custom investment portfolios with different return and dividend rates, and the simulation will adjust accordingly.
 *   **Event-Based Scenarios:** Users can create events at different ages to simulate real-life scenarios, such as a promotion or a large purchase.
 *   **Tooltip:** When hovering over a row in the table, a tooltip appears, showing a detailed breakdown of the portfolio for that year, including the value, return, and dividend for each asset.
-*   **Chart:** The application includes a chart that visualizes the user's savings over time.
+*   **Chart:** The application includes a chart that visualizes the user's savings over time, with labels showing both the year and the user's age.
 *   **Responsive Design:** The application is fully responsive and works on both desktop and mobile devices.
 
 ## Current Plan
 
-I will now update the `blueprint.md` file to reflect the latest changes, which include adding a tooltip feature to the table. The tooltip will display a detailed breakdown of the portfolio for the year when a user hovers over a row.
+I will now update the `blueprint.md` file to reflect the latest changes, which include adding the user's age to the chart's x-axis labels.

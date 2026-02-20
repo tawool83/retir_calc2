@@ -533,7 +533,7 @@ function renderAnnualTable(results) {
 
 function renderChart(results) {
   const filteredYears = results.years.filter(passesFilter);
-  const labels = filteredYears.map(y => `${y.year}`);
+  const labels = filteredYears.map(y => [String(y.year), `${y.age}세`]);
   const datasets = {};
   
   // This is a simplified view for the chart. We calculate total principal and total returns.
