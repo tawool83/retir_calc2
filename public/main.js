@@ -494,12 +494,23 @@ function simulate() {
  *  Render table + Chart
  *  ============================= */
 function buildAnnualRow(y) {
-  const portfolioDesc = y.portfolio.map(p => {
-      const name = p.preset.name;
-      const displayName = name.length > 7 ? name.substring(0, 7) + '...' : name;
-      return `${displayName}:${(p.percentage*100).toFixed(0)}%`;
-    }).join(' ');
-  const badge = `<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 text-xs font-semibold rounded-full" title="${y.portfolio.map(p => p.preset.name).join(', ')}">${portfolioDesc || '정의되지 않음'}</span>`;
+  const fullPortfolioTitle = y.portfolio.map(p => `${p.preset.name}: ${(p.percentage*100).toFixed(0)}%`).join(', ');
+
+  let portfolioDisplayHtml;
+  if (y.portfolio.length === 0) {
+      portfolioDisplayHtml = '<span class="text-xs text-slate-400">정의되지 않음</span>';
+  } else {
+      const itemsToDisplay = y.portfolio.slice(0, 2);
+      let htmlItems = itemsToDisplay.map(p => {
+          return `<div class="whitespace-nowrap">(${p.preset.name}: ${(p.percentage*100).toFixed(0)}%)</div>`;
+      });
+
+      if (y.portfolio.length > 2) {
+          htmlItems[1] = htmlItems[1].replace('</div>', '&nbsp;...</div>');
+      }
+
+      portfolioDisplayHtml = htmlItems.join('');
+  }
 
   const highlight = y.age === state.inputs.ageRetire ? "bg-emerald-50/60 dark:bg-emerald-900/10" : "";
 
@@ -516,7 +527,7 @@ function buildAnnualRow(y) {
       <td class="px-6 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.dividends, true)}</td>
       <td class="px-6 py-4 font-medium text-emerald-600 dark:text-emerald-300">-${fmtMoney(y.pensionOut, true)}</td>
       <td class="px-6 py-4 font-black">${fmtMoney(y.endBalance, true)}</td>
-      <td class="px-6 py-4">${badge}</td>
+      <td class="px-6 py-4 text-xs text-slate-500" title="${fullPortfolioTitle}">${portfolioDisplayHtml}</td>
     </tr>
   `;
 }
