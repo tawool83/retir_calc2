@@ -883,16 +883,15 @@ function initTooltips() {
       tooltip.innerHTML = html;
       tooltip.classList.remove('hidden');
       
-      const rect = e.currentTarget.getBoundingClientRect();
       const tooltipRect = tooltip.getBoundingClientRect();
       let left = e.pageX + 10;
       let top = e.pageY + 10;
 
-      if (left + tooltipRect.width > window.innerWidth) {
-        left = window.innerWidth - tooltipRect.width - 10;
+      if (left + tooltipRect.width > (window.scrollX + window.innerWidth)) {
+        left = e.pageX - tooltipRect.width - 10;
       }
-      if (top + tooltipRect.height > window.innerHeight) {
-        top = window.innerHeight - tooltipRect.height - 10;
+      if (top + tooltipRect.height > (window.scrollY + window.innerHeight)) {
+        top = e.pageY - tooltipRect.height - 10;
       }
 
       tooltip.style.left = `${left}px`;
