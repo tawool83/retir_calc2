@@ -778,7 +778,17 @@ function renderChart(results) {
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { position: 'top' } },
-      scales: { x: { stacked: true }, y: { stacked: true } }
+      scales: {
+        x: { stacked: true },
+        y: {
+          stacked: true,
+          ticks: {
+            callback: function(value, index, values) {
+              return fmtMoney(value, true);
+            }
+          }
+        }
+      }
     }
   });
 }
