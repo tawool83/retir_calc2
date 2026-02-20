@@ -70,6 +70,7 @@ function uid() {
 const state = {
   startYear: new Date().getFullYear(),
   maxAge: 100,
+  dividendTaxRate: 0.154,
 
   presets: [...defaultPresets],
 
@@ -447,12 +448,14 @@ function simulate() {
       
       portfolioState.forEach(p => {
           const r = p.balance * (p.preset.annualReturnPct / 100 / 12);
-          const d = p.balance * (p.preset.dividendPct / 100 / 12);
-          p.balance += r + d;
+          const d_pretax = p.balance * (p.preset.dividendPct / 100 / 12);
+          const d_posttax = d_pretax * (1 - state.dividendTaxRate);
+          
+          p.balance += r + d_posttax;
           p.yearReturn += r;
-          p.yearDividend += d;
+          p.yearDividend += d_posttax;
           yReturn += r;
-          yDiv += d;
+          yDiv += d_posttax;
       });
 
       if (pensionMonthly > 0) {
@@ -611,7 +614,7 @@ function initTooltips() {
                 <div class="text-slate-100 font-bold">${fmtMoney(p.balance)}</div>
                 <div class="text-slate-400">평가 수익</div>
                 <div class="text-green-400">+${fmtMoney(p.return)}</div>
-                <div class="text-slate-400">배당금</div>
+                <div class="text-slate-400">세후 배당금</div>
                 <div class="text-blue-400">+${fmtMoney(p.dividend)}</div>
             </div>
           `).join('');
@@ -641,6 +644,33 @@ function initTooltips() {
     row.addEventListener('mouseleave', () => {
       tooltip.classList.add('hidden');
     });
+  });
+
+  // Header tooltips
+  const headerTooltips = {
+      'th-contribute': '연간 총 납입액입니다.',
+      'th-return': '연간 발생한 총 투자 수익금입니다. (배당 제외)',
+      'th-dividend': '연간 발생한 총 배당금입니다. (세후 15.4% 적용)',
+      'th-pension': '연간 인출한 총 연금액입니다.',
+      'th-balance': '해당 연도 말 기준 총 잔액입니다.',
+      'th-portfolio': '해당 연도에 적용된 포트폴리오 구성입니다.'
+  };
+
+  Object.entries(headerTooltips).forEach(([id, text]) => {
+      const th = $(id);
+      if (!th) return;
+      const icon = th.querySelector('.help-icon');
+      const tooltip = th.querySelector('.header-tooltip');
+      
+      if (icon && tooltip) {
+        tooltip.textContent = text;
+        icon.addEventListener('mouseenter', () => {
+            tooltip.classList.remove('hidden');
+        });
+        icon.addEventListener('mouseleave', () => {
+            tooltip.classList.add('hidden');
+        });
+      }
   });
 }
 

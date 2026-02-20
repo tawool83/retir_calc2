@@ -45,6 +45,8 @@
     .row-chevron { transition: transform .15s ease; }
     .row-open .row-chevron { transform: rotate(90deg); }
     dialog::backdrop { background: rgba(0,0,0,.35); }
+    .header-tooltip { visibility: hidden; opacity: 0; transition: opacity .2s ease, visibility .2s ease; }
+    .help-icon:hover + .header-tooltip, .header-tooltip:hover { visibility: visible; opacity: 1; }
   </style>
 </head>
 
@@ -220,12 +222,48 @@
             <thead class="sticky top-0 bg-slate-50 dark:bg-slate-800 z-10 shadow-sm">
               <tr class="text-slate-500 font-bold uppercase text-[11px] tracking-wider">
                 <th class="px-6 py-4">연도 / 나이</th>
-                <th class="px-6 py-4">연간 납입액</th>
-                <th class="px-6 py-4">평가 수익</th>
-                <th class="px-6 py-4">배당금</th>
-                <th class="px-6 py-4">연금 인출</th>
-                <th class="px-6 py-4">기말 잔액</th>
-                <th class="px-6 py-4">포트폴리오</th>
+                <th id="th-contribute" class="px-6 py-4 relative group">
+                  <div class="flex items-center gap-1 cursor-help">
+                    <span>연간 납입액</span>
+                    <span class="material-symbols-outlined text-xs help-icon">help</span>
+                  </div>
+                  <div class="header-tooltip hidden group-hover:block absolute z-20 -left-4 mt-2 w-64 p-3 bg-slate-900 text-white rounded-lg shadow-xl normal-case font-medium leading-relaxed text-xs"></div>
+                </th>
+                <th id="th-return" class="px-6 py-4 relative group">
+                  <div class="flex items-center gap-1 cursor-help">
+                    <span>평가 수익</span>
+                    <span class="material-symbols-outlined text-xs help-icon">help</span>
+                  </div>
+                  <div class="header-tooltip hidden group-hover:block absolute z-20 -left-4 mt-2 w-72 p-3 bg-slate-900 text-white rounded-lg shadow-xl normal-case font-medium leading-relaxed text-xs"></div>
+                </th>
+                <th id="th-dividend" class="px-6 py-4 relative group">
+                  <div class="flex items-center gap-1 cursor-help">
+                    <span>배당금 (세후)</span>
+                    <span class="material-symbols-outlined text-xs help-icon">help</span>
+                  </div>
+                  <div class="header-tooltip hidden group-hover:block absolute z-20 -left-4 mt-2 w-72 p-3 bg-slate-900 text-white rounded-lg shadow-xl normal-case font-medium leading-relaxed text-xs"></div>
+                </th>
+                <th id="th-pension" class="px-6 py-4 relative group">
+                  <div class="flex items-center gap-1 cursor-help">
+                    <span>연금 인출</span>
+                    <span class="material-symbols-outlined text-xs help-icon">help</span>
+                  </div>
+                  <div class="header-tooltip hidden group-hover:block absolute z-20 -left-4 mt-2 w-64 p-3 bg-slate-900 text-white rounded-lg shadow-xl normal-case font-medium leading-relaxed text-xs"></div>
+                </th>
+                <th id="th-balance" class="px-6 py-4 relative group">
+                  <div class="flex items-center gap-1 cursor-help">
+                    <span>기말 잔액</span>
+                    <span class="material-symbols-outlined text-xs help-icon">help</span>
+                  </div>
+                  <div class="header-tooltip hidden group-hover:block absolute z-20 -left-4 mt-2 w-80 p-3 bg-slate-900 text-white rounded-lg shadow-xl normal-case font-medium leading-relaxed text-xs"></div>
+                </th>
+                <th id="th-portfolio" class="px-6 py-4 relative group">
+                  <div class="flex items-center gap-1 cursor-help">
+                    <span>포트폴리오</span>
+                    <span class="material-symbols-outlined text-xs help-icon">help</span>
+                  </div>
+                  <div class="header-tooltip hidden group-hover:block absolute z-20 right-0 mt-2 w-60 p-3 bg-slate-900 text-white rounded-lg shadow-xl normal-case font-medium leading-relaxed text-xs"></div>
+                </th>
               </tr>
             </thead>
             <tbody id="annualTbody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
