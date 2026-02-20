@@ -49,6 +49,7 @@
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen font-display">
+<div id="test-results" class="max-w-[1440px] mx-auto px-3 lg:px-5 py-3 mb-4 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-sm"></div>
 <main class="max-w-[1440px] mx-auto px-3 lg:px-5 py-5">
 
   <!-- Header -->
@@ -380,5 +381,12 @@
 <script src="presets.js"></script>
 <script src="events.js"></script>
 <script src="main.js"></script>
+<script src="test-runner.js"></script>
+<script src="tests.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', (event) => {
+    runTests();
+  });
+</script>
 </body>
 </html>

@@ -112,32 +112,26 @@ function applySnapshot(snap) {
     return;
   }
 
-  // Presets
   const builtins = [...defaultPresets];
   const userPresets = Array.isArray(snap.presets)
     ? snap.presets.filter(p => p && !p.builtin && p.id && p.name)
     : [];
   state.presets = [...builtins, ...userPresets];
 
-  // Inputs
   if (snap.inputs && typeof snap.inputs === 'object') {
      Object.assign(state.inputs, snap.inputs);
   }
   
-  // Force these to 0 as they are no longer UI-configurable
   state.inputs.initialInvestment = 0;
   state.inputs.monthlyContribution = 0;
   
   state.isEventListExpanded = snap.isEventListExpanded || false;
 
-   // Migration for removing autoZeroAfterRetire
   if (state.inputs.autoZeroAfterRetire) {
     delete state.inputs.autoZeroAfterRetire;
   }
 
-
-  // Events
-  if (Array.isArray(snap.events) && snap.events.length > 0) {
+  if (Array.isArray(snap.events)) {
     state.events = snap.events
       .filter(e => e && e.type && e.age != null)
       .map(e => ({ ...e, id: e.id || uid() }));
@@ -449,7 +443,6 @@ function openEventDialog(eventId = null) {
         presetSelect.innerHTML = state.presets.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
     }
 
-    // Update field visibility and show dialog
     const typeSelect = $("dlgType");
     const fieldsPortfolio = $('dlgFieldsPortfolio');
     const fieldsMonetary = $('dlgFieldsMonetary');
@@ -564,24 +557,31 @@ function getPortfolioSignature(portfolio) {
 
 function simulate() {
   syncUiToStateFromInputs();
-  const { ageNow, ageRetire, initialInvestment, monthlyContribution } = state.inputs;
+  const { ageNow, ageRetire, initialInvestment } = state.inputs;
   const endAge = state.maxAge;
   const startYear = state.startYear;
 
   const years = [];
+  let portfolioState = [];
+  let uninvestedCash = initialInvestment;
+
+  let initialPortfolioConfig = getActivePortfolio(ageNow);
+  if (initialPortfolioConfig.length > 0 && uninvestedCash > 0) {
+      portfolioState = initialPortfolioConfig.map(p => ({ ...p, balance: uninvestedCash * p.percentage }));
+      uninvestedCash = 0;
+  }
   
-  let firstPortfolio = getActivePortfolio(ageNow);
-  let portfolioState = firstPortfolio.map(p => ({ ...p, balance: initialInvestment * p.percentage }));
-  let lastPortfolioSignature = getPortfolioSignature(firstPortfolio);
+  let lastPortfolioSignature = getPortfolioSignature(initialPortfolioConfig);
 
   for (let age = ageNow; age <= endAge; age++) {
     const year = startYear + (age - ageNow);
     let currentPortfolioConfig = getActivePortfolio(age);
     const currentPortfolioSignature = getPortfolioSignature(currentPortfolioConfig);
 
-    if (currentPortfolioSignature !== lastPortfolioSignature) {
-        const totalBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+    if (currentPortfolioSignature !== lastPortfolioSignature && currentPortfolioSignature !== '') {
+        const totalBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0) + uninvestedCash;
         portfolioState = currentPortfolioConfig.map(p => ({ ...p, balance: totalBalance * p.percentage }));
+        uninvestedCash = 0;
         lastPortfolioSignature = currentPortfolioSignature;
     }
 
@@ -592,25 +592,33 @@ function simulate() {
 
     const activeMonthly = state.events
         .filter(e => e.type === "monthly" && e.age <= age)
-        .sort((a,b) => b.age - a.age)[0]?.amount ?? monthlyContribution;
+        .sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
     const lumpSum = state.events.filter(e => e.type === 'lump' && e.age === age).reduce((sum, e) => sum + e.amount, 0);
     const withdrawalMonthly = state.events.filter(e => e.type === 'withdrawal' && e.age <= age).reduce((sum, e) => sum + e.amount, 0);
 
     if (lumpSum !== 0) {
-         const totalBalanceBeforeLump = portfolioState.reduce((sum, p) => sum + p.balance, 0);
-         if (totalBalanceBeforeLump > 0) { 
-            portfolioState.forEach(p => p.balance += lumpSum * (p.balance / totalBalanceBeforeLump));
-         } else if (portfolioState.length > 0) {
-            portfolioState.forEach(p => p.balance += lumpSum * p.percentage);
-         }
+        if (portfolioState.length > 0) {
+            const totalInvested = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+            if (totalInvested > 0) { 
+                portfolioState.forEach(p => p.balance += lumpSum * (p.balance / totalInvested));
+            } else {
+                portfolioState.forEach(p => p.balance += lumpSum * p.percentage);
+            }
+        } else {
+            uninvestedCash += lumpSum;
+        }
     }
 
     let yContr = 0, yReturn = 0, yDiv = 0, yWithdrawal = 0;
 
     for (let m = 1; m <= 12; m++) {
-      if(activeMonthly > 0) {
-          portfolioState.forEach(p => p.balance += activeMonthly * p.percentage);
+      if (activeMonthly > 0) {
           yContr += activeMonthly;
+          if (portfolioState.length > 0) {
+              portfolioState.forEach(p => p.balance += activeMonthly * p.percentage);
+          } else {
+              uninvestedCash += activeMonthly;
+          }
       }
       
       portfolioState.forEach(p => {
@@ -626,39 +634,56 @@ function simulate() {
       });
 
       if (withdrawalMonthly > 0) {
-          const totalBalanceBeforeWithdrawal = portfolioState.reduce((sum, p) => sum + p.balance, 0);
-          if (totalBalanceBeforeWithdrawal > withdrawalMonthly) {
-              const fraction = withdrawalMonthly / totalBalanceBeforeWithdrawal;
-              portfolioState.forEach(p => { p.balance -= p.balance * fraction; });
+          let totalDrawable = portfolioState.reduce((sum, p) => sum + p.balance, 0) + uninvestedCash;
+          if (totalDrawable > withdrawalMonthly) {
               yWithdrawal += withdrawalMonthly;
-          } else { // Liquidate all
-              yWithdrawal += totalBalanceBeforeWithdrawal;
+              let drawnFromCash = Math.min(uninvestedCash, withdrawalMonthly);
+              uninvestedCash -= drawnFromCash;
+              let remainingToDraw = withdrawalMonthly - drawnFromCash;
+              
+              if (remainingToDraw > 0) {
+                  const totalInvested = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+                  if (totalInvested > 0) {
+                      const fraction = remainingToDraw / totalInvested;
+                      portfolioState.forEach(p => { p.balance -= p.balance * fraction; });
+                  }
+              }
+          } else {
+              yWithdrawal += totalDrawable;
+              uninvestedCash = 0;
               portfolioState.forEach(p => { p.balance = 0; });
           }
       }
     }
 
-    const endBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+    const endBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0) + uninvestedCash;
+
+    let detailedPortfolioResult = portfolioState.map(p => ({ 
+        name: p.preset.name, 
+        balance: p.balance,
+        return: p.yearReturn,
+        dividend: p.yearDividend
+    }));
+
+    if (uninvestedCash > 0) {
+        detailedPortfolioResult.push({ name: '미투자 현금', balance: uninvestedCash, return: 0, dividend: 0 });
+    }
 
     years.push({
       year, age, 
-      annualContribution: yContr, 
+      annualContribution: yContr + (age === ageNow ? lumpSum : 0),
       returnEarned: yReturn, 
       dividends: yDiv, 
       withdrawalOut: yWithdrawal,
       endBalance,
       portfolio: currentPortfolioConfig,
-      detailedPortfolio: portfolioState.map(p => ({ 
-        name: p.preset.name, 
-        balance: p.balance,
-        return: p.yearReturn,
-        dividend: p.yearDividend
-      }))
+      detailedPortfolio: detailedPortfolioResult
     });
   }
 
   return { years, startYear, ageNow, endAge, ageRetire };
 }
+
 
 /** =============================
  *  Render table + Chart
@@ -722,7 +747,6 @@ function renderChart(results) {
   const labels = filteredYears.map(y => [`${String(y.year)}`, `${y.age}세`]);
   const datasets = {};
   
-  // This is a simplified view for the chart. We calculate total principal and total returns.
   let cumulativePrincipal = state.inputs.initialInvestment;
   const principalData = [];
   const returnData = [];
@@ -774,17 +798,21 @@ function initTooltips() {
       
       let html = `<div class="font-bold mb-2 text-base">${year}년 포트폴리오</div>`;
       if (yearData.detailedPortfolio.length > 0) {
-          html += yearData.detailedPortfolio.map(p => `
+          html += yearData.detailedPortfolio.map(p => {
+            const isCash = p.name === '미투자 현금';
+            return `
             <div class="grid grid-cols-[1fr,auto] items-center gap-x-4 gap-y-1 text-xs mb-2 pb-2 border-b border-slate-700 last:border-b-0 last:pb-0 last:mb-0">
                 <div class="font-bold col-span-2">${p.name}</div>
                 <div class="text-slate-400">기말 잔액</div>
                 <div class="text-slate-100 font-bold">${fmtMoney(p.balance)}</div>
+                ${!isCash ? `
                 <div class="text-slate-400">평가 수익</div>
                 <div class="text-green-400">+${fmtMoney(p.return)}</div>
                 <div class="text-slate-400">세후 배당금</div>
                 <div class="text-blue-400">+${fmtMoney(p.dividend)}</div>
+                ` : ''}
             </div>
-          `).join('');
+          `}).join('');
       } else {
           html += `<div class="text-slate-400">데이터 없음</div>`;
       }
@@ -813,7 +841,6 @@ function initTooltips() {
     });
   });
 
-  // Header tooltips
   const headerTooltips = {
       'th-contribute': '연간 총 납입액입니다.<br>계산식: <b>월 납입액 x 12</b>',
       'th-return': '연간 발생한 총 투자 수익금입니다. (배당 제외)<br>계산식: <b>(기말 잔액 - 연간 납입액 - 배당금)</b>',
@@ -874,6 +901,7 @@ function recalcAndRender() {
   if (!$("chartPanel").classList.contains("hidden")) {
     renderChart(results);
   }
+  runTests();
 }
 
 /** =============================
@@ -892,7 +920,6 @@ function initInputs() {
       });
   });
 
-    // Filter logic
     const filterPanel = $('filterPanel');
     const btnToggleFilter = $('btnToggleFilter');
     btnToggleFilter.addEventListener('click', (e) => {
