@@ -416,6 +416,11 @@ function simulate() {
         lastPortfolioSignature = currentPortfolioSignature;
     }
 
+    portfolioState.forEach(p => {
+        p.yearReturn = 0;
+        p.yearDividend = 0;
+    });
+
     const baseMonthly = autoZeroAfterRetire && age >= ageRetire ? 0 : monthlyContribution;
     const activeMonthly = state.events
         .filter(e => e.type === "monthly" && e.age <= age)
@@ -444,6 +449,8 @@ function simulate() {
           const r = p.balance * (p.preset.annualReturnPct / 100 / 12);
           const d = p.balance * (p.preset.dividendPct / 100 / 12);
           p.balance += r + d;
+          p.yearReturn += r;
+          p.yearDividend += d;
           yReturn += r;
           yDiv += d;
       });
@@ -471,7 +478,12 @@ function simulate() {
       pensionOut: yPension,
       endBalance,
       portfolio: currentPortfolioConfig,
-      detailedPortfolio: portfolioState.map(p => ({ name: p.preset.name, balance: p.balance }))
+      detailedPortfolio: portfolioState.map(p => ({ 
+        name: p.preset.name, 
+        balance: p.balance,
+        return: p.yearReturn,
+        dividend: p.yearDividend
+      }))
     });
   }
 
@@ -577,9 +589,14 @@ function initTooltips() {
       let html = `<div class="font-bold mb-2 text-base">${year}년 포트폴리오</div>`;
       if (yearData.detailedPortfolio.length > 0) {
           html += yearData.detailedPortfolio.map(p => `
-            <div class="flex justify-between items-center gap-4">
-              <span class="font-semibold">${p.name}</span>
-              <span class="text-slate-300">${fmtMoney(p.balance)}</span>
+            <div class="grid grid-cols-[1fr,auto] items-center gap-x-4 gap-y-1 text-xs mb-2 pb-2 border-b border-slate-700 last:border-b-0 last:pb-0 last:mb-0">
+                <div class="font-bold col-span-2">${p.name}</div>
+                <div class="text-slate-400">기말 잔액</div>
+                <div class="text-slate-100 font-bold">${fmtMoney(p.balance)}</div>
+                <div class="text-slate-400">평가 수익</div>
+                <div class="text-green-400">+${fmtMoney(p.return)}</div>
+                <div class="text-slate-400">배당금</div>
+                <div class="text-blue-400">+${fmtMoney(p.dividend)}</div>
             </div>
           `).join('');
       } else {
@@ -590,8 +607,19 @@ function initTooltips() {
       tooltip.classList.remove('hidden');
       
       const rect = e.currentTarget.getBoundingClientRect();
-      tooltip.style.top = `${e.clientY - tooltip.offsetHeight - 10}px`;
-      tooltip.style.left = `${e.clientX}px`;
+      const tooltipRect = tooltip.getBoundingClientRect();
+      let left = e.clientX + 10;
+      let top = e.clientY + 10;
+
+      if (left + tooltipRect.width > window.innerWidth) {
+        left = window.innerWidth - tooltipRect.width - 10;
+      }
+      if (top + tooltipRect.height > window.innerHeight) {
+        top = window.innerHeight - tooltipRect.height - 10;
+      }
+
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${top}px`;
 
     });
     row.addEventListener('mouseleave', () => {
