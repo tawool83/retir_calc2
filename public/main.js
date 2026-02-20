@@ -567,7 +567,7 @@ function simulate() {
 
   let initialPortfolioConfig = getActivePortfolio(ageNow);
   if (initialPortfolioConfig.length > 0 && uninvestedCash > 0) {
-      portfolioState = initialPortfolioConfig.map(p => ({ ...p, balance: uninvestedCash * p.percentage }));
+      portfolioState = initialPortfolioConfig.map(p => ({ ...p, balance: uninvestedCash * p.percentage, yearReturn: 0, yearDividend: 0 }));
       uninvestedCash = 0;
   }
   
@@ -580,7 +580,7 @@ function simulate() {
 
     if (currentPortfolioSignature !== lastPortfolioSignature && currentPortfolioSignature !== '') {
         const totalBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0) + uninvestedCash;
-        portfolioState = currentPortfolioConfig.map(p => ({ ...p, balance: totalBalance * p.percentage }));
+        portfolioState = currentPortfolioConfig.map(p => ({ ...p, balance: totalBalance * p.percentage, yearReturn: 0, yearDividend: 0 }));
         uninvestedCash = 0;
         lastPortfolioSignature = currentPortfolioSignature;
     }
@@ -590,35 +590,29 @@ function simulate() {
         p.yearDividend = 0;
     });
 
-    const activeMonthly = state.events
-        .filter(e => e.type === "monthly" && e.age <= age)
-        .sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
+    const activeMonthly = state.events.filter(e => e.type === "monthly" && e.age <= age).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
     const lumpSum = state.events.filter(e => e.type === 'lump' && e.age === age).reduce((sum, e) => sum + e.amount, 0);
     const withdrawalMonthly = state.events.filter(e => e.type === 'withdrawal' && e.age <= age).reduce((sum, e) => sum + e.amount, 0);
 
-    if (lumpSum !== 0) {
-        if (portfolioState.length > 0) {
-            const totalInvested = portfolioState.reduce((sum, p) => sum + p.balance, 0);
-            if (totalInvested > 0) { 
-                portfolioState.forEach(p => p.balance += lumpSum * (p.balance / totalInvested));
-            } else {
-                portfolioState.forEach(p => p.balance += lumpSum * p.percentage);
-            }
-        } else {
-            uninvestedCash += lumpSum;
-        }
-    }
+    uninvestedCash += lumpSum;
 
     let yContr = 0, yReturn = 0, yDiv = 0, yWithdrawal = 0;
 
     for (let m = 1; m <= 12; m++) {
-      if (activeMonthly > 0) {
-          yContr += activeMonthly;
-          if (portfolioState.length > 0) {
-              portfolioState.forEach(p => p.balance += activeMonthly * p.percentage);
-          } else {
-              uninvestedCash += activeMonthly;
+      yContr += activeMonthly;
+      uninvestedCash += activeMonthly;
+      
+      if (uninvestedCash > 0 && currentPortfolioConfig.length > 0) {
+          if (portfolioState.length === 0) {
+               portfolioState = currentPortfolioConfig.map(p => ({ ...p, balance: 0, yearReturn: 0, yearDividend: 0 }));
           }
+          const totalInvested = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+          if (totalInvested > 0) {
+              portfolioState.forEach(p => { p.balance += uninvestedCash * (p.balance / totalInvested); });
+          } else {
+              portfolioState.forEach(p => { p.balance += uninvestedCash * p.percentage; });
+          }
+          uninvestedCash = 0;
       }
       
       portfolioState.forEach(p => {
@@ -671,10 +665,10 @@ function simulate() {
 
     years.push({
       year, age, 
-      annualContribution: yContr + (age === ageNow ? lumpSum : 0),
+      annualContribution: yContr + (lumpSum > 0 ? lumpSum : 0),
       returnEarned: yReturn, 
       dividends: yDiv, 
-      withdrawalOut: yWithdrawal,
+      withdrawalOut: yWithdrawal + (lumpSum < 0 ? -lumpSum : 0),
       endBalance,
       portfolio: currentPortfolioConfig,
       detailedPortfolio: detailedPortfolioResult
@@ -693,7 +687,11 @@ function buildAnnualRow(y) {
 
     let portfolioDisplayHtml;
     if (y.portfolio.length === 0) {
-        portfolioDisplayHtml = `<span class="text-xs text-slate-400">정의되지 않음</span>`;
+        if (y.endBalance > 0) {
+            portfolioDisplayHtml = `<span class="text-xs text-amber-500">미투자 현금</span>`;
+        } else {
+            portfolioDisplayHtml = `<span class="text-xs text-slate-400">정의되지 않음</span>`;
+        }
     } else {
         const itemsToDisplay = y.portfolio.slice(0, 2);
         let htmlItems = itemsToDisplay.map(p => {
