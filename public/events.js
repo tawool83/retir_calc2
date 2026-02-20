@@ -19,12 +19,5 @@ const defaultEvents = [
     type: "portfolio",
     presetId: "sp500",
     weight: 5
-  },
-  {
-    id: "evt4",
-    age: 65,
-    type: "cash-out",
-    amount: 2500000,
-    label: "현금 인출 시작"
-  }
+  } 
 ];

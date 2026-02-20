@@ -100,18 +100,6 @@
                      type="number" min="0" max="120" value="65"/>
             </div>
           </div>
-
-          <div class="grid grid-cols-2 gap-4">
-            <div class="space-y-1.5">
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">초기 투자액 (₩)</label>
-              <input id="initialInvestment" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2.5 px-4 focus:ring-primary focus:border-primary text-sm font-semibold"
-                     type="text" value="50,000"/>
-            </div>
-            <div class="space-y-1.5">
-              <label for="monthlyContribution" class="text-xs font-bold text-slate-500 uppercase tracking-wider">월 납입액 (₩)</label>
-              <input id="monthlyContribution" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2.5 px-4 focus:ring-primary focus:border-primary text-sm font-semibold" type="text" value="2,000"/>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -308,9 +296,9 @@
           <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">종류</span>
           <select id="dlgType" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold">
             <option value="portfolio">포트폴리오 변경</option>
-            <option value="monthly">월 납입액 변경</option>
-            <option value="lump">일시불 입금</option>
-            <option value="withdrawal">현금 인출 (월)</option>
+            <option value="monthly">월 정기 납입액 변경</option>
+            <option value="lump">일시 입/출금</option>
+            <option value="withdrawal">현금 정기(월별) 출금</option>
           </select>
         </label>
       </div>
@@ -330,7 +318,7 @@
       <div id="dlgFieldsMonetary" class="hidden space-y-3 pt-2">
          <label class="block">
           <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">라벨</span>
-          <input id="dlgLabel" type="text" placeholder="예: 생활비, 여행 자금"
+          <input id="dlgLabel" type="text" placeholder="예: 초기 투자금"
                  class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
         </label>
         <label class="block">

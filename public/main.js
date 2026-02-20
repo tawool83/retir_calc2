@@ -416,7 +416,7 @@ function initEventDialog() {
     switch (type) {
         case 'portfolio': infoText = '해당 나이부터 포트폴리오 구성을 변경합니다. 같은 나이에 여러 개의 프리셋을 추가하여 비중을 조절할 수 있습니다.'; break;
         case 'monthly': infoText = '해당 나이부터 월 납입액을 새로 설정합니다.'; break;
-        case 'lump': infoText = '해당 나이 시작 시점에 일시불로 입금 또는 출금됩니다.'; break;
+        case 'lump': infoText = '해당 나이에 일시불로 입금 또는 출금합니다.'; break;
         case 'withdrawal': infoText = '해당 나이부터 매월 잔액에서 고정 금액을 인출합니다.'; break;
     }
     infoEl.textContent = infoText;
