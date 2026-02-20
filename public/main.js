@@ -272,7 +272,13 @@ function renderEventList() {
       if (isEventAge || isRetireAge || isNowAge) {
           dotClass = 'w-3 h-3 bg-primary rounded-full ring-4 ring-background-light dark:ring-background-dark';
       }
-      html += `<div class="absolute" style="top: ${clamp(percentage,0,100)}%"><div class="${dotClass}"></div></div>`;
+
+      html += `<div class="absolute" style="top: ${clamp(percentage,0,100)}%; transform: translateY(-50%);">
+                  <div class="${dotClass} relative">
+                    ${(isEventAge || isRetireAge || isNowAge) ? 
+                      `<span class="absolute -top-2 left-full ml-2 text-[10px] font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">${age}세</span>` : ''}
+                  </div>
+               </div>`;
   });
 
   html += '</div>';
@@ -318,10 +324,9 @@ function renderEventList() {
           <div class="flex justify-between items-start gap-2">
             <div class="min-w-0">
               <div class="flex items-center gap-2 flex-wrap">
-                <p class="text-xs font-bold text-slate-900 dark:text-slate-100">${ev.age}세</p>
                 ${pill}
               </div>
-              <p class="text-[11px] text-slate-500 mt-0.5">${subtitle}</p>
+              <p class="text-[11px] text-slate-500 mt-1">${subtitle}</p>
             </div>
             <button class="text-slate-400 hover:text-red-500 transition-colors shrink-0" data-del="${ev.id}" title="삭제">
               <span class="material-symbols-outlined text-sm">delete</span>
