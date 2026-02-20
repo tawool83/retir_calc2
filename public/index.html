@@ -142,7 +142,7 @@
         <div class="mt-4 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
           지원 항목: <span class="font-semibold">포트폴리오 변경</span>,
           <span class="font-semibold">월 납입액 변경</span>, <span class="font-semibold">일시불</span>,
-          <span class="font-semibold">연금(월 지급)</span>.
+          <span class="font-semibold">현금 인출(월)</span>.
         </div>
          <button id="btnAddPreset" class="mt-4 w-full flex items-center justify-center gap-1 text-xs font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition-colors border border-primary/50 rounded-lg py-2">
             <span class="material-symbols-outlined text-sm">add_circle</span> 투자 프리셋 관리
@@ -239,9 +239,9 @@
                   </div>
                   <div class="header-tooltip hidden absolute z-20 -left-4 mt-2 w-72 p-3 bg-slate-900 text-white rounded-lg shadow-xl normal-case font-medium leading-relaxed text-xs"></div>
                 </th>
-                <th id="th-pension" class="px-6 py-4 relative">
+                <th id="th-withdrawal" class="px-6 py-4 relative">
                   <div class="flex items-center gap-1 cursor-help">
-                    <span>연금 인출</span>
+                    <span>현금 인출</span>
                     <span class="material-symbols-outlined text-xs help-icon">help</span>
                   </div>
                   <div class="header-tooltip hidden absolute z-20 -left-4 mt-2 w-64 p-3 bg-slate-900 text-white rounded-lg shadow-xl normal-case font-medium leading-relaxed text-xs"></div>
@@ -320,7 +320,7 @@
             <option value="portfolio">포트폴리오 변경</option>
             <option value="monthly">월 납입액 변경</option>
             <option value="lump">일시불 입금</option>
-            <option value="pension">연금 수령 (월)</option>
+            <option value="withdrawal">현금 인출 (월)</option>
           </select>
         </label>
       </div>
@@ -340,7 +340,7 @@
       <div id="dlgFieldsMonetary" class="hidden space-y-3 pt-2">
          <label class="block">
           <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">라벨</span>
-          <input id="dlgLabel" type="text" placeholder="예: 승진, 아파트 매매"
+          <input id="dlgLabel" type="text" placeholder="예: 생활비, 여행 자금"
                  class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
         </label>
         <label class="block">

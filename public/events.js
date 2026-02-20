@@ -23,8 +23,8 @@ const defaultEvents = [
   {
     id: "evt4",
     age: 65,
-    type: "pension",
+    type: "cash-out",
     amount: 2500000,
-    label: "연금 수령 시작"
+    label: "현금 인출 시작"
   }
 ];

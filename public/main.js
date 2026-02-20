@@ -251,10 +251,10 @@ function renderEventList() {
             subtitle = `일시불 입금 ${ev.amount >= 0 ? "+" : ""}${fmtMoney(ev.amount)}`;
             pill = `<span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-200 text-[10px] font-bold rounded-full uppercase">일시불</span>`;
             break;
-        case 'pension':
+        case 'withdrawal':
             border = "border-emerald-400";
-            subtitle = `연금 수령 시작: 매월 ${fmtMoney(ev.amount)} (인출)`;
-            pill = `<span class="px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full uppercase">연금</span>`;
+            subtitle = `현금 인출 시작: 매월 ${fmtMoney(ev.amount)} (인출)`;
+            pill = `<span class="px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full uppercase">현금 인출</span>`;
             break;
         default: 
             subtitle = "알 수 없는 이벤트";
@@ -308,7 +308,7 @@ function initEventDialog() {
         case 'portfolio': infoText = '해당 나이부터 포트폴리오 구성을 변경합니다. 같은 나이에 여러 개의 프리셋을 추가하여 비중을 조절할 수 있습니다.'; break;
         case 'monthly': infoText = '해당 나이부터 월 납입액을 새로 설정합니다.'; break;
         case 'lump': infoText = '해당 나이 시작 시점에 일시불로 입금 또는 출금됩니다.'; break;
-        case 'pension': infoText = '해당 나이부터 매월 잔액에서 고정 금액을 인출합니다.'; break;
+        case 'withdrawal': infoText = '해당 나이부터 매월 잔액에서 고정 금액을 인출합니다.'; break;
     }
     infoEl.textContent = infoText;
   };
@@ -427,7 +427,7 @@ function simulate() {
         .filter(e => e.type === "monthly" && e.age <= age)
         .sort((a,b) => b.age - a.age)[0]?.amount ?? baseMonthly;
     const lumpSum = state.events.filter(e => e.type === 'lump' && e.age === age).reduce((sum, e) => sum + e.amount, 0);
-    const pensionMonthly = state.events.filter(e => e.type === 'pension' && e.age <= age).reduce((sum, e) => sum + e.amount, 0);
+    const withdrawalMonthly = state.events.filter(e => e.type === 'withdrawal' && e.age <= age).reduce((sum, e) => sum + e.amount, 0);
 
     if (lumpSum !== 0) {
          const totalBalanceBeforeLump = portfolioState.reduce((sum, p) => sum + p.balance, 0);
@@ -438,7 +438,7 @@ function simulate() {
          }
     }
 
-    let yContr = 0, yReturn = 0, yDiv = 0, yPension = 0;
+    let yContr = 0, yReturn = 0, yDiv = 0, yWithdrawal = 0;
 
     for (let m = 1; m <= 12; m++) {
       if(activeMonthly > 0) {
@@ -458,14 +458,14 @@ function simulate() {
           yDiv += d_posttax;
       });
 
-      if (pensionMonthly > 0) {
-          const totalBalanceBeforePension = portfolioState.reduce((sum, p) => sum + p.balance, 0);
-          if (totalBalanceBeforePension > pensionMonthly) {
-              const fraction = pensionMonthly / totalBalanceBeforePension;
+      if (withdrawalMonthly > 0) {
+          const totalBalanceBeforeWithdrawal = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+          if (totalBalanceBeforeWithdrawal > withdrawalMonthly) {
+              const fraction = withdrawalMonthly / totalBalanceBeforeWithdrawal;
               portfolioState.forEach(p => { p.balance -= p.balance * fraction; });
-              yPension += pensionMonthly;
+              yWithdrawal += withdrawalMonthly;
           } else { // Liquidate all
-              yPension += totalBalanceBeforePension;
+              yWithdrawal += totalBalanceBeforeWithdrawal;
               portfolioState.forEach(p => { p.balance = 0; });
           }
       }
@@ -478,7 +478,7 @@ function simulate() {
       annualContribution: yContr, 
       returnEarned: yReturn, 
       dividends: yDiv, 
-      pensionOut: yPension,
+      withdrawalOut: yWithdrawal,
       endBalance,
       portfolio: currentPortfolioConfig,
       detailedPortfolio: portfolioState.map(p => ({ 
@@ -529,7 +529,7 @@ function buildAnnualRow(y) {
       <td class="px-6 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.annualContribution, true)}</td>
       <td class="px-6 py-4 font-bold text-primary">+${fmtMoney(y.returnEarned, true)}</td>
       <td class="px-6 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.dividends, true)}</td>
-      <td class="px-6 py-4 font-medium text-emerald-600 dark:text-emerald-300">-${fmtMoney(y.pensionOut, true)}</td>
+      <td class="px-6 py-4 font-medium text-emerald-600 dark:text-emerald-300">-${fmtMoney(y.withdrawalOut, true)}</td>
       <td class="px-6 py-4 font-black">${fmtMoney(y.endBalance, true)}</td>
       <td class="px-6 py-4" title="${fullPortfolioTitle}">${portfolioDisplayHtml}</td>
     </tr>
@@ -651,8 +651,8 @@ function initTooltips() {
       'th-contribute': '연간 총 납입액입니다.<br>계산식: <b>월 납입액 x 12</b>',
       'th-return': '연간 발생한 총 투자 수익금입니다. (배당 제외)<br>계산식: <b>(기말 잔액 - 연간 납입액 - 배당금)</b>',
       'th-dividend': '연간 발생한 총 배당금입니다. (세후 15.4% 적용)<br>계산식: <b>(배당 수익률 * (1 - 0.154))</b>',
-      'th-pension': '연간 인출한 총 연금액입니다.<br>계산식: <b>월 연금 수령액 x 12</b>',
-      'th-balance': '해당 연도 말 기준 총 잔액입니다.<br>계산식: <b>기초 잔액 + 연간 납입액 + 평가 수익 + 배당금 - 연금 인출</b>',
+      'th-withdrawal': '연간 인출한 총 현금액입니다.<br>계산식: <b>월 현금 인출액 x 12</b>',
+      'th-balance': '해당 연도 말 기준 총 잔액입니다.<br>계산식: <b>기초 잔액 + 연간 납입액 + 평가 수익 + 배당금 - 현금 인출</b>',
       'th-portfolio': '해당 연도에 적용된 포트폴리오 구성입니다. 마우스를 올리면 전체 구성을 확인할 수 있습니다.'
   };
 
