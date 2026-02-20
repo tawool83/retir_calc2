@@ -16,4 +16,4 @@ This is a retirement simulator that allows users to project their savings over t
 
 ## Current Plan
 
-I will now update the `blueprint.md` file to reflect the latest changes, which include updating the portfolio display format in the table.
+I will now update the `blueprint.md` file to reflect the latest changes, which include updating the portfolio display format in the table to use labels with background colors instead of parentheses.

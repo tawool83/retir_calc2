@@ -494,27 +494,28 @@ function simulate() {
  *  Render table + Chart
  *  ============================= */
 function buildAnnualRow(y) {
-  const fullPortfolioTitle = y.portfolio.map(p => `${p.preset.name}: ${(p.percentage*100).toFixed(0)}%`).join(', ');
+    const fullPortfolioTitle = y.portfolio.map(p => `${p.preset.name}: ${(p.percentage*100).toFixed(0)}%`).join(', ');
 
-  let portfolioDisplayHtml;
-  if (y.portfolio.length === 0) {
-      portfolioDisplayHtml = '<span class="text-xs text-slate-400">정의되지 않음</span>';
-  } else {
-      const itemsToDisplay = y.portfolio.slice(0, 2);
-      let htmlItems = itemsToDisplay.map(p => {
-          return `<div class="whitespace-nowrap">(${p.preset.name}: ${(p.percentage*100).toFixed(0)}%)</div>`;
-      });
+    let portfolioDisplayHtml;
+    if (y.portfolio.length === 0) {
+        portfolioDisplayHtml = `<span class="text-xs text-slate-400">정의되지 않음</span>`;
+    } else {
+        const itemsToDisplay = y.portfolio.slice(0, 2);
+        let htmlItems = itemsToDisplay.map(p => {
+            const content = `${p.preset.name}: ${(p.percentage * 100).toFixed(0)}%`;
+            return `<div class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md text-xs font-semibold text-slate-700 dark:text-slate-300">${content}</div>`;
+        });
 
-      if (y.portfolio.length > 2) {
-          htmlItems[1] = htmlItems[1].replace('</div>', '&nbsp;...</div>');
-      }
+        if (y.portfolio.length > 2) {
+            htmlItems[1] = `<div class="flex items-center gap-1.5">${htmlItems[1]} <span class="font-bold">...</span></div>`;
+        }
+        
+        portfolioDisplayHtml = `<div class="flex flex-col items-start gap-1">${htmlItems.join('')}</div>`;
+    }
 
-      portfolioDisplayHtml = htmlItems.join('');
-  }
+    const highlight = y.age === state.inputs.ageRetire ? "bg-emerald-50/60 dark:bg-emerald-900/10" : "";
 
-  const highlight = y.age === state.inputs.ageRetire ? "bg-emerald-50/60 dark:bg-emerald-900/10" : "";
-
-  return `
+    return `
     <tr class="annual-row ${highlight} hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group" data-year="${y.year}">
       <td class="px-6 py-4 font-bold text-slate-900 dark:text-slate-100">
         <div class="flex flex-col">
@@ -527,7 +528,7 @@ function buildAnnualRow(y) {
       <td class="px-6 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.dividends, true)}</td>
       <td class="px-6 py-4 font-medium text-emerald-600 dark:text-emerald-300">-${fmtMoney(y.pensionOut, true)}</td>
       <td class="px-6 py-4 font-black">${fmtMoney(y.endBalance, true)}</td>
-      <td class="px-6 py-4 text-xs text-slate-500" title="${fullPortfolioTitle}">${portfolioDisplayHtml}</td>
+      <td class="px-6 py-4" title="${fullPortfolioTitle}">${portfolioDisplayHtml}</td>
     </tr>
   `;
 }
