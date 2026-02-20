@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>은퇴 시뮬레이터 (영구 데이터 + 연금 + 필터 + 프리셋)</title>
+  <title>은퇴 시뮬레이터 (동적 포트폴리오)</title>
 
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -59,7 +59,7 @@
       <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
         은퇴 <span class="text-primary">시뮬레이터</span>
       </h1>
-      <p class="text-slate-500 text-sm mt-1">영구 입력 • 연금 현금 흐름 • 범위 필터 • 사용자 지정 프리셋</p>
+      <p class="text-slate-500 text-sm mt-1">동적 포트폴리오 • 이벤트 기반 • 영구 저장</p>
     </div>
     <div class="flex items-center gap-4">
       <div class="text-right hidden sm:block">
@@ -82,7 +82,7 @@
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-lg font-bold flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">tune</span>
-            구성
+            기본 설정
           </h2>
           <button id="btnResetAll" class="px-3 py-2 rounded-lg text-xs font-bold bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-200 hover:bg-red-100 dark:hover:bg-red-900/30">
             저장된 데이터 초기화
@@ -126,54 +126,6 @@
               <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 dark:peer-focus:ring-primary/30 rounded-full peer dark:bg-slate-600 peer-checked:bg-primary relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
             </label>
           </div>
-
-          <div class="pt-1 flex items-start gap-2">
-            <span class="material-symbols-outlined text-primary text-base mt-0.5">info</span>
-            <p class="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
-              월별 타이밍: 월초 납입 → 수익 및 배당 적용 → 연금 지급(해당 시). 배당금은 재투자됩니다. 연금 지급으로 잔액이 감소합니다.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Presets -->
-      <div class="bg-white dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-bold flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">analytics</span>
-            전략 프리셋
-          </h2>
-          <button id="btnAddPreset" class="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition-colors">
-            <span class="material-symbols-outlined text-sm">add_circle</span> 프리셋 추가
-          </button>
-        </div>
-
-        <div class="space-y-3">
-          <label class="block">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">프리셋 선택</span>
-            <select id="presetSelect" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"></select>
-          </label>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div class="bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2">
-              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">연간 수익률 (%)</p>
-              <input id="presetReturn" type="text" class="text-sm font-extrabold text-primary w-full bg-transparent border-0 p-0 focus:ring-0 disabled:cursor-not-allowed disabled:opacity-70 dark:text-primary" disabled>
-            </div>
-            <div class="bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2">
-              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">배당 수익률 (%)</p>
-              <input id="presetDiv" type="text" class="text-sm font-extrabold text-slate-700 dark:text-slate-300 w-full bg-transparent border-0 p-0 focus:ring-0 disabled:cursor-not-allowed disabled:opacity-70" disabled>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-start gap-2">
-            <button id="btnDeletePreset" class="px-3 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed">
-              선택된 프리셋 삭제
-            </button>
-          </div>
-
-          <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-            프리셋은 브라우저에 로컬로 저장됩니다. 사용자 지정 수익/배당 가정을 추가할 수 있습니다.
-          </p>
         </div>
       </div>
 
@@ -192,10 +144,13 @@
         <div id="eventList" class="space-y-3"></div>
 
         <div class="mt-4 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-          지원 항목:
+          지원 항목: <span class="font-semibold">포트폴리오 변경</span>,
           <span class="font-semibold">월 납입액 변경</span>, <span class="font-semibold">일시불</span>,
           <span class="font-semibold">연금(월 지급)</span>.
         </div>
+         <button id="btnAddPreset" class="mt-4 w-full flex items-center justify-center gap-1 text-xs font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition-colors border border-primary/50 rounded-lg py-2">
+            <span class="material-symbols-outlined text-sm">add_circle</span> 투자 프리셋 관리
+          </button>
       </div>
 
       <!-- Filter -->
@@ -230,10 +185,6 @@
               <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 dark:peer-focus:ring-primary/30 rounded-full peer dark:bg-slate-600 peer-checked:bg-primary relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
             </label>
         </div>
-
-        <p class="mt-3 text-[11px] text-slate-500 dark:text-slate-400">
-          예시: 55 ~ 65세는 은퇴 전후 10년만 표시합니다.
-        </p>
       </div>
 
     </aside>
@@ -252,9 +203,6 @@
             <button id="btnToggleChart" class="size-10 flex items-center justify-center bg-primary text-white rounded-lg shadow-lg shadow-primary/20 hover:bg-secondary transition-all hover:scale-105 active:scale-95 group" title="차트 보기">
               <span class="material-symbols-outlined">bar_chart</span>
             </button>
-            <div class="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-            <button id="btnExportCsv" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">CSV 내보내기</button>
-            <button id="btnPrint" class="px-4 py-2 bg-slate-900 dark:bg-slate-700 text-white rounded text-xs font-bold hover:bg-black dark:hover:bg-slate-600 transition-colors">보고서 인쇄</button>
           </div>
         </div>
 
@@ -279,7 +227,7 @@
                 <th class="px-6 py-4">배당금</th>
                 <th class="px-6 py-4">연금 인출</th>
                 <th class="px-6 py-4">기말 잔액</th>
-                <th class="px-6 py-4">이벤트</th>
+                <th class="px-6 py-4">포트폴리오</th>
               </tr>
             </thead>
             <tbody id="annualTbody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
@@ -310,11 +258,6 @@
       <span class="material-symbols-outlined text-primary text-sm">verified_user</span>
       <p>© 2024 은퇴계획 Pro. 데이터는 브라우저에 저장됩니다. 본 시뮬레이션은 투자 자문이 아닙니다.</p>
     </div>
-    <div class="flex items-center gap-8">
-      <a class="hover:text-primary transition-colors" href="#">개인정보보호</a>
-      <a class="hover:text-primary transition-colors" href="#">시스템 상태</a>
-      <a class="hover:text-primary transition-colors" href="#">고객 지원</a>
-    </div>
   </div>
 </footer>
 
@@ -338,6 +281,7 @@
         <label class="block">
           <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">종류</span>
           <select id="dlgType" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold">
+            <option value="portfolio">포트폴리오 변경</option>
             <option value="monthly">월 납입액 변경</option>
             <option value="lump">일시불 입금</option>
             <option value="pension">연금 수령 (월)</option>
@@ -345,46 +289,60 @@
         </label>
       </div>
 
-      <label class="block">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">라벨</span>
-        <input id="dlgLabel" type="text" placeholder="예: 승진, 아파트 매매, 국민연금"
-               class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
-      </label>
-
-      <label class="block">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">금액 (₩)</span>
-        <input id="dlgAmount" type="text" placeholder="예: 1500000 또는 250000000"
-               class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
-      </label>
-
-      <div class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-        월 납입액 변경: 해당 연령부터 새로운 월 납입액을 설정합니다.<br/>
-        일시불: 해당 연령 시작 시점에 입금됩니다.<br/>
-        연금 수령: 해당 연령부터 잔액에서 매월 인출됩니다 (금액은 양수여야 합니다).
+      <div id="dlgFieldsPortfolio" class="space-y-3 pt-2">
+        <label class="block">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">투자 프리셋</span>
+          <select id="dlgPresetId" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"></select>
+        </label>
+         <label class="block">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">비중 (1-10)</span>
+          <input id="dlgWeight" type="number" min="1" max="10" value="10"
+                 class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
+        </label>
       </div>
+
+      <div id="dlgFieldsMonetary" class="hidden space-y-3 pt-2">
+         <label class="block">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">라벨</span>
+          <input id="dlgLabel" type="text" placeholder="예: 승진, 아파트 매매"
+                 class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
+        </label>
+        <label class="block">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">금액 (₩)</span>
+          <input id="dlgAmount" type="text" placeholder="예: 1500000"
+                 class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
+        </label>
+      </div>
+
+      <div id="dlgInfo" class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed pt-1"></div>
     </div>
 
     <div class="mt-5 flex gap-2 justify-end">
       <button value="cancel" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">취소</button>
-      <button id="dlgSave" value="ok" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary">추가</button>
+      <button id="dlgSave" value="ok" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary">이벤트 추가</button>
     </div>
   </form>
 </dialog>
 
 <!-- Add Preset Dialog -->
 <dialog id="presetDialog" class="rounded-xl p-0 w-[92vw] max-w-md bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl">
-  <form method="dialog" class="p-5">
-    <div class="flex items-center justify-between mb-3">
-      <h3 class="text-sm font-extrabold">전략 프리셋 추가</h3>
-      <button value="cancel" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
-        <span class="material-symbols-outlined">close</span>
-      </button>
+  <div class="p-5">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-sm font-extrabold">투자 프리셋 관리</h3>
+       <form method="dialog">
+        <button value="cancel" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </form>
     </div>
+    
+    <div id="presetList" class="space-y-2 mb-4"></div>
 
-    <div class="space-y-3">
+    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 pt-4 border-t border-slate-200 dark:border-slate-800">새 프리셋 추가</h4>
+    <form id="newPresetForm" class="space-y-3">
       <label class="block">
         <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">프리셋 이름</span>
-        <input id="dlgPresetName" type="text" placeholder="예: 공격적인 내 투자"
+        <input id="dlgPresetName" type="text" placeholder="예: 성장주 포트폴리오"
                class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
       </label>
 
@@ -400,24 +358,16 @@
                  class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
         </label>
       </div>
-
-      <div class="text-[11px] text-slate-500 dark:text-slate-400">
-        팁: S&P500/나스닥/SCHD 또는 사용자 지정 가정을 모델링할 수 있습니다.
-      </div>
-    </div>
-
-    <div class="mt-5 flex gap-2 justify-end">
-      <button value="cancel" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">취소</button>
-      <button id="dlgPresetSave" value="ok" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary">추가</button>
-    </div>
-  </form>
+      <button id="dlgPresetSave" type="submit" class="w-full px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary">새 프리셋 저장</button>
+    </form>
+  </div>
 </dialog>
 
 <script>
 /** =============================
  *  Persistence (localStorage)
  *  ============================= */
-const STORAGE_KEY = "retire_sim_v1";
+const STORAGE_KEY = "retire_sim_v2_dynamic_portfolio";
 
 function safeJsonParse(s) {
   try { return JSON.parse(s); } catch { return null; }
@@ -458,12 +408,10 @@ function fmtMoney(n, compact = false) {
     if (!Number.isFinite(num)) return "0원";
 
     if (compact) {
-        if (Math.abs(num) >= 1000000000000) {
-            return `${parseFloat((num / 1000000000000).toFixed(2))}조`;
-        } else if (Math.abs(num) >= 100000000) {
-            return `${parseFloat((num / 100000000).toFixed(1))}억`;
+        if (Math.abs(num) >= 100000000) {
+            return `${parseFloat((num / 100000000).toFixed(2))}억`;
         } else if (Math.abs(num) >= 10000) {
-            return `${parseFloat((num / 10000).toFixed(2))}만`;
+            return `${parseFloat((num / 10000).toFixed(0))}만`;
         }
     }
     return `${Math.round(num).toLocaleString()}원`;
@@ -489,11 +437,8 @@ const state = {
   startYear: new Date().getFullYear(),
   maxAge: 100,
 
-  // selected preset id
-  presetId: "sp500",
   presets: [...defaultPresets],
 
-  // inputs/options
   inputs: {
     ageNow: 30,
     ageRetire: 65,
@@ -505,9 +450,7 @@ const state = {
     filterAgeTo: 100
   },
 
-  // events: monthly change, lump, pension
   events: [],
-
   results: null,
   chart: null
 };
@@ -517,15 +460,8 @@ const state = {
  *  ============================= */
 function buildSnapshot() {
   return {
-    version: 1,
-    presetId: state.presetId,
-    presets: state.presets.map(p => ({
-      id: p.id,
-      name: p.name,
-      annualReturnPct: p.annualReturnPct,
-      dividendPct: p.dividendPct,
-      builtin: !!p.builtin
-    })),
+    version: 2,
+    presets: state.presets.map(p => ({ ...p })),
     inputs: { ...state.inputs },
     events: state.events.map(e => ({ ...e })),
     savedAt: new Date().toISOString()
@@ -533,63 +469,30 @@ function buildSnapshot() {
 }
 
 function applySnapshot(snap) {
-  if (!snap) {
-    // If no saved state, load default events
+  if (!snap || snap.version !== 2) {
     state.events = defaultEvents.map(e => ({ ...e, id: uid() }));
     return;
   }
 
-  // Presets: keep builtins, merge user presets
+  // Presets
   const builtins = [...defaultPresets];
   const userPresets = Array.isArray(snap.presets)
     ? snap.presets.filter(p => p && !p.builtin && p.id && p.name)
     : [];
+  state.presets = [...builtins, ...userPresets];
 
-  // Avoid id collisions
-  const used = new Set(builtins.map(p => p.id));
-  const mergedUsers = userPresets.map(p => {
-    let id = String(p.id);
-    if (used.has(id)) id = "u_" + id;
-    used.add(id);
-    return { id, name: String(p.name), annualReturnPct: Number(p.annualReturnPct) || 0, dividendPct: Number(p.dividendPct) || 0, builtin: false };
-  });
-
-  state.presets = [...builtins, ...mergedUsers];
-
-  // inputs
-  if (snap.inputs && typeof snap.inputs === "object") {
-    const i = snap.inputs;
-    state.inputs.ageNow = clamp(Number(i.ageNow ?? state.inputs.ageNow), 0, 120);
-    state.inputs.ageRetire = clamp(Number(i.ageRetire ?? state.inputs.ageRetire), 0, 120);
-    state.inputs.initialInvestment = Number(i.initialInvestment ?? state.inputs.initialInvestment) || 0;
-    state.inputs.monthlyContribution = Number(i.monthlyContribution ?? state.inputs.monthlyContribution) || 0;
-    state.inputs.autoZeroAfterRetire = !!i.autoZeroAfterRetire;
-    state.inputs.filterEnabled = !!i.filterEnabled;
-    state.inputs.filterAgeFrom = clamp(Number(i.filterAgeFrom ?? state.inputs.filterAgeFrom), 0, 120);
-    state.inputs.filterAgeTo = clamp(Number(i.filterAgeTo ?? state.inputs.filterAgeTo), 0, 120);
+  // Inputs
+  if (snap.inputs && typeof snap.inputs === 'object') {
+     Object.assign(state.inputs, snap.inputs);
   }
 
-  // events
+  // Events
   if (Array.isArray(snap.events) && snap.events.length > 0) {
     state.events = snap.events
-      .filter(e => e && typeof e === "object" && e.type && e.age != null)
-      .map(e => ({
-        id: String(e.id || uid()),
-        age: clamp(Number(e.age), 0, 120),
-        type: String(e.type),
-        amount: Number(e.amount) || 0,
-        label: String(e.label || "이벤트")
-      }));
+      .filter(e => e && e.type && e.age != null)
+      .map(e => ({ ...e, id: e.id || uid() }));
   } else {
-    // If saved events are empty, load defaults
     state.events = defaultEvents.map(e => ({ ...e, id: uid() }));
-  }
-
-  // presetId
-  if (snap.presetId && state.presets.some(p => p.id === snap.presetId)) {
-    state.presetId = snap.presetId;
-  } else {
-    state.presetId = "sp500";
   }
 }
 
@@ -607,7 +510,6 @@ function syncStateToUi() {
   $("filterAgeFrom").value = state.inputs.filterAgeFrom;
   $("filterAgeTo").value = state.inputs.filterAgeTo;
 
-  renderPresetSelect();
   renderEventList();
 }
 
@@ -623,135 +525,63 @@ function syncUiToStateFromInputs() {
   state.inputs.filterAgeTo = clamp(Number($("filterAgeTo").value || 0), 0, 120);
 }
 
-function getSelectedPreset() {
-  return state.presets.find(p => p.id === state.presetId) || state.presets[0];
-}
 
 /** =============================
- *  Presets UI
+ *  Presets Management
  *  ============================= */
-function renderPresetSelect() {
-  const sel = $("presetSelect");
-  sel.innerHTML = "";
-  for (const p of state.presets) {
-    const opt = document.createElement("option");
-    opt.value = p.id;
-    opt.textContent = p.builtin ? `${p.name}` : `${p.name} (사용자 설정)`;
-    if (p.id === state.presetId) opt.selected = true;
-    sel.appendChild(opt);
-  }
+function renderPresetList() {
+  const listEl = $("presetList");
+  listEl.innerHTML = "";
+  state.presets.forEach(p => {
+    const item = document.createElement("div");
+    item.className = "flex items-center justify-between gap-2 text-sm p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50";
+    item.innerHTML = `
+      <div class="font-bold">${p.name} ${p.builtin ? '(기본)' : ''}</div>
+      <div class="text-xs text-slate-500">수익 ${p.annualReturnPct}% / 배당 ${p.dividendPct}%</div>
+      ${!p.builtin ? `<button data-del-preset="${p.id}" class="text-red-500 hover:text-red-400"><span class="material-symbols-outlined text-sm">delete</span></button>` : ''}
+    `;
+    listEl.appendChild(item);
+  });
 
-  const cur = getSelectedPreset();
-  const returnInput = $("presetReturn");
-  const divInput = $("presetDiv");
-
-  returnInput.value = `${cur.annualReturnPct.toFixed(1)}%`;
-  divInput.value = `${cur.dividendPct.toFixed(1)}%`;
-
-  // Enable/disable editing for custom presets
-  returnInput.disabled = !!cur.builtin;
-  divInput.disabled = !!cur.builtin;
-
-  $("btnDeletePreset").disabled = !!cur.builtin;
+  listEl.querySelectorAll("[data-del-preset]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+          const id = e.currentTarget.getAttribute("data-del-preset");
+          state.presets = state.presets.filter(p => p.id !== id);
+          renderPresetList();
+          recalcAndRender();
+          saveStateDebounced();
+      });
+  });
 }
 
-function initPresetEvents() {
-  $("presetSelect").addEventListener("change", () => {
-    state.presetId = $("presetSelect").value;
-    renderPresetSelect();
-    recalcAndRender();
-    saveStateDebounced();
-  });
+function initPresetManagement() {
+    const dlg = $('presetDialog');
+    $('btnAddPreset').addEventListener('click', () => {
+        renderPresetList();
+        $('newPresetForm').reset();
+        dlg.showModal();
+    });
 
-  const dlg = $("presetDialog");
+    $('newPresetForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = ($("dlgPresetName").value || "").trim();
+        const r = parsePct($("dlgPresetReturn").value);
+        const d = parsePct($("dlgPresetDiv").value);
 
-  $("btnAddPreset").addEventListener("click", () => {
-    $("dlgPresetName").value = "";
-    $("dlgPresetReturn").value = "9.0";
-    $("dlgPresetDiv").value = "2.0";
-    dlg.showModal();
-  });
+        if (!name) return;
+        const id = "u_" + uid().slice(0, 8);
 
-  $("dlgPresetSave").addEventListener("click", () => {
-    const name = ($("dlgPresetName").value || "").trim();
-    const r = parsePct($("dlgPresetReturn").value);
-    const d = parsePct($("dlgPresetDiv").value);
+        state.presets.push({ id, name, annualReturnPct: r, dividendPct: d, builtin: false });
+        renderPresetList();
+        recalcAndRender();
+        saveStateDebounced();
+        e.target.reset();
+    });
 
-    if (!name) return; // keep simple
-    const id = "u_" + uid().slice(0, 8);
-
-    state.presets.push({ id, name, annualReturnPct: r, dividendPct: d, builtin: false });
-    state.presetId = id;
-
-    renderPresetSelect();
-    recalcAndRender();
-    saveStateDebounced();
-  });
-
-  $("btnDeletePreset").addEventListener("click", () => {
-    const cur = getSelectedPreset();
-    if (cur.builtin) return;
-
-    state.presets = state.presets.filter(p => p.id !== cur.id);
-    state.presetId = "sp500";
-    renderPresetSelect();
-    recalcAndRender();
-    saveStateDebounced();
-  });
-
-  $("btnResetAll").addEventListener("click", () => {
-    if (confirm("저장된 모든 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) {
-      resetSavedState();
-      location.reload();
-    }
-  });
-
-  // backdrop close
-  dlg.addEventListener("click", (e) => {
-    const rect = dlg.getBoundingClientRect();
-    const inDialog = (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom);
-    if (!inDialog) dlg.close();
-  });
-
-  // --- Editable Preset Fields ---
-  const returnInput = $("presetReturn");
-  const divInput = $("presetDiv");
-
-  const handleUpdate = () => {
-    const cur = getSelectedPreset();
-    if (cur.builtin) return;
-
-    const newReturn = parsePct(returnInput.value);
-    const newDiv = parsePct(divInput.value);
-
-    cur.annualReturnPct = newReturn;
-    cur.dividendPct = newDiv;
-
-    returnInput.value = `${cur.annualReturnPct.toFixed(1)}%`;
-    divInput.value = `${cur.dividendPct.toFixed(1)}%`;
-
-    recalcAndRender();
-    saveStateDebounced();
-  };
-
-  returnInput.addEventListener("focus", () => {
-    const cur = getSelectedPreset();
-    if (cur.builtin) return;
-    returnInput.value = cur.annualReturnPct.toFixed(1);
-  });
-  divInput.addEventListener("focus", () => {
-    const cur = getSelectedPreset();
-    if (cur.builtin) return;
-    divInput.value = cur.dividendPct.toFixed(1);
-  });
-
-  returnInput.addEventListener("blur", handleUpdate);
-  divInput.addEventListener("blur", handleUpdate);
-
-  returnInput.addEventListener("keydown", e => { if (e.key === 'Enter') returnInput.blur(); });
-  divInput.addEventListener("keydown", e => { if (e.key === 'Enter') divInput.blur(); });
+    dlg.addEventListener("click", (e) => {
+      if (e.target === dlg) dlg.close();
+    });
 }
-
 
 /** =============================
  *  Events UI
@@ -767,30 +597,32 @@ function renderEventList() {
   }
 
   for (const ev of sorted) {
-    let border = "border-slate-300 dark:border-slate-600";
-    let subtitle = "";
-    let pill = "";
+    let border, subtitle, pill;
 
-    if (ev.type === "monthly") {
-      border = "border-primary";
-      subtitle = `월 납입액 ${fmtMoney(ev.amount)}으로 변경`;
-      pill = `<span class="px-2 py-0.5 bg-primary text-white text-[10px] font-bold rounded-full uppercase inline-flex items-center gap-1">
-                <span class="material-symbols-outlined text-[10px]">trending_up</span> 월납입
-              </span>`;
-    } else if (ev.type === "lump") {
-      subtitle = `일시불 입금 ${ev.amount >= 0 ? "+" : ""}${fmtMoney(ev.amount)}`;
-      pill = `<span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-200 text-[10px] font-bold rounded-full uppercase inline-flex items-center gap-1">
-                <span class="material-symbols-outlined text-[10px]">savings</span> 일시불
-              </span>`;
-    } else if (ev.type === "pension") {
-      border = "border-emerald-400";
-      subtitle = `연금 수령 시작: 매월 ${fmtMoney(ev.amount)} (인출)`;
-      pill = `<span class="px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full uppercase inline-flex items-center gap-1">
-                <span class="material-symbols-outlined text-[10px]">paid</span> 연금
-              </span>`;
-    } else {
-      subtitle = `${ev.type}: ${fmtMoney(ev.amount)}`;
-      pill = `<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 text-[10px] font-bold rounded-full uppercase">이벤트</span>`;
+    switch (ev.type) {
+        case 'portfolio':
+            const preset = state.presets.find(p => p.id === ev.presetId);
+            border = "border-purple-500";
+            subtitle = `전략: ${preset ? preset.name : '알 수 없음'}, 비중: ${ev.weight}`;
+            pill = `<span class="px-2 py-0.5 bg-purple-500 text-white text-[10px] font-bold rounded-full uppercase">포트폴리오</span>`;
+            break;
+        case 'monthly':
+            border = "border-primary";
+            subtitle = `월 납입액 ${fmtMoney(ev.amount)}으로 변경`;
+            pill = `<span class="px-2 py-0.5 bg-primary text-white text-[10px] font-bold rounded-full uppercase">월납입</span>`;
+            break;
+        case 'lump':
+            subtitle = `일시불 입금 ${ev.amount >= 0 ? "+" : ""}${fmtMoney(ev.amount)}`;
+            pill = `<span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-200 text-[10px] font-bold rounded-full uppercase">일시불</span>`;
+            break;
+        case 'pension':
+            border = "border-emerald-400";
+            subtitle = `연금 수령 시작: 매월 ${fmtMoney(ev.amount)} (인출)`;
+            pill = `<span class="px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full uppercase">연금</span>`;
+            break;
+        default: 
+            subtitle = "알 수 없는 이벤트";
+            pill = "";
     }
 
     const node = document.createElement("div");
@@ -799,7 +631,7 @@ function renderEventList() {
       <div class="flex justify-between items-start gap-2">
         <div class="min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
-            <p class="text-xs font-bold text-slate-900 dark:text-slate-100">${ev.age}세: ${ev.label || "이벤트"}</p>
+            <p class="text-xs font-bold text-slate-900 dark:text-slate-100">${ev.age}세</p>
             ${pill}
           </div>
           <p class="text-[11px] text-slate-500 mt-0.5">${subtitle}</p>
@@ -825,197 +657,191 @@ function renderEventList() {
 
 function initEventDialog() {
   const dlg = $("eventDialog");
+  const typeSelect = $("dlgType");
+  const fieldsPortfolio = $('dlgFieldsPortfolio');
+  const fieldsMonetary = $('dlgFieldsMonetary');
+  const infoEl = $('dlgInfo');
+
+  const updateDialogFields = () => {
+    const type = typeSelect.value;
+    fieldsPortfolio.classList.toggle('hidden', type !== 'portfolio');
+    fieldsMonetary.classList.toggle('hidden', type === 'portfolio');
+
+    let infoText = '';
+    switch (type) {
+        case 'portfolio': infoText = '해당 나이부터 포트폴리오 구성을 변경합니다. 같은 나이에 여러 개의 프리셋을 추가하여 비중을 조절할 수 있습니다.'; break;
+        case 'monthly': infoText = '해당 나이부터 월 납입액을 새로 설정합니다.'; break;
+        case 'lump': infoText = '해당 나이 시작 시점에 일시불로 입금 또는 출금됩니다.'; break;
+        case 'pension': infoText = '해당 나이부터 매월 잔액에서 고정 금액을 인출합니다.'; break;
+    }
+    infoEl.textContent = infoText;
+  };
 
   $("btnAddEvent").addEventListener("click", () => {
     const ageNow = state.inputs.ageNow;
     $("dlgAge").value = clamp(ageNow + 5, 0, 120);
-    $("dlgType").value = "monthly";
+    typeSelect.value = "portfolio";
     $("dlgLabel").value = "";
     $("dlgAmount").value = "";
+    $('dlgWeight').value = 10;
+    
+    const presetSelect = $("dlgPresetId");
+    presetSelect.innerHTML = state.presets.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    
+    updateDialogFields();
     dlg.showModal();
   });
 
+  typeSelect.addEventListener('change', updateDialogFields);
+
   $("dlgSave").addEventListener("click", () => {
     const age = clamp(Number($("dlgAge").value || 0), 0, 120);
-    const type = $("dlgType").value;
-    const label = ($("dlgLabel").value || "").trim() || (
-      type === "monthly" ? "월 납입액 변경" :
-      type === "lump" ? "일시불" : "연금"
-    );
-    const amount = parseMoney($("dlgAmount").value);
+    const type = typeSelect.value;
+    const id = uid();
+    let newEvent = { id, age, type };
 
-    // For pension, treat amount as positive withdrawal; if user enters negative, make it positive.
-    const normalizedAmount = (type === "pension") ? Math.abs(amount) : amount;
+    if (type === 'portfolio') {
+        newEvent.presetId = $('dlgPresetId').value;
+        newEvent.weight = clamp(Number($('dlgWeight').value), 1, 10);
+    } else {
+        newEvent.amount = parseMoney($("dlgAmount").value);
+        newEvent.label = $('dlgLabel').value.trim();
+    }
 
-    state.events.push({ id: uid(), age, type, label, amount: normalizedAmount });
+    state.events.push(newEvent);
     renderEventList();
     recalcAndRender();
     saveStateDebounced();
   });
 
   dlg.addEventListener("click", (e) => {
-    const rect = dlg.getBoundingClientRect();
-    const inDialog = (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom);
-    if (!inDialog) dlg.close();
+    if (e.target === dlg) dlg.close();
   });
 }
 
 /** =============================
- *  Simulation rules
+ *  Simulation Core
  *  ============================= */
-function baseMonthlyContributionForAge(baseMonthly, age, retireAge, autoZero) {
-  if (autoZero && age >= retireAge) return 0;
-  return baseMonthly;
+function getActivePortfolio(age) {
+    const portfolioEvents = state.events
+        .filter(e => e.type === 'portfolio' && e.age <= age)
+        .sort((a,b) => b.age - a.age);
+
+    if (!portfolioEvents.length) return [];
+
+    const latestAge = portfolioEvents[0].age;
+    const activeEvents = portfolioEvents.filter(e => e.age === latestAge);
+    
+    const totalWeight = activeEvents.reduce((sum, e) => sum + e.weight, 0);
+    if (totalWeight === 0) return [];
+
+    return activeEvents.map(e => {
+        const preset = state.presets.find(p => p.id === e.presetId);
+        return {
+            preset: preset || { annualReturnPct: 0, dividendPct: 0, name: 'Unknown' },
+            weight: e.weight,
+            percentage: e.weight / totalWeight
+        };
+    });
 }
 
-function getActiveMonthlyContribution(baseMonthly, age) {
-  // latest monthly event <= age overrides base (then retirement auto-zero can still override)
-  const list = state.events
-    .filter(e => e.type === "monthly" && e.age <= age)
-    .sort((a,b) => b.age - a.age);
-  return list.length ? list[0].amount : baseMonthly;
-}
-
-function getLumpSumAtAge(age) {
-  return state.events.filter(e => e.type === "lump" && e.age === age).reduce((sum, e) => sum + e.amount, 0);
-}
-
-function getPensionMonthlyAtAge(age) {
-  // pensions active from their start age onward, sum all
-  return state.events.filter(e => e.type === "pension" && e.age <= age).reduce((sum, e) => sum + Math.abs(e.amount), 0);
-}
-
-function getEventLabelsAtAge(age) {
-  return state.events.filter(e => e.age === age).map(e => e.label || "이벤트");
-}
-
-/**
- * Monthly flow:
- * 1) contribution at start of month
- * 2) apply growth + dividend on current balance
- * 3) pension payout (withdrawal) end of month
- *
- * If balance goes below 0 due to payouts, clamp to 0.
- */
 function simulate() {
-  // make sure state.inputs is current
   syncUiToStateFromInputs();
-
-  const ageNow = state.inputs.ageNow;
-  const retireAge = state.inputs.ageRetire;
-  const initial = state.inputs.initialInvestment;
-  const baseMonthly = state.inputs.monthlyContribution;
-  const autoZero = state.inputs.autoZeroAfterRetire;
-
-  const preset = getSelectedPreset();
-  const annualR = (preset.annualReturnPct || 0) / 100;
-  const annualD = (preset.dividendPct || 0) / 100;
-
-  const startYear = state.startYear;
+  const { ageNow, ageRetire, initialInvestment, monthlyContribution, autoZeroAfterRetire } = state.inputs;
   const endAge = state.maxAge;
+  const startYear = state.startYear;
 
   const years = [];
-  let balance = initial;
+  let portfolioState = getActivePortfolio(ageNow).map(p => ({ ...p, balance: initialInvestment * p.percentage }));
 
   for (let age = ageNow; age <= endAge; age++) {
     const year = startYear + (age - ageNow);
+    let currentPortfolio = getActivePortfolio(age);
 
-    // Determine monthly contribution for this age
-    const baseByRetire = baseMonthlyContributionForAge(baseMonthly, age, retireAge, autoZero);
-    let monthly = getActiveMonthlyContribution(baseByRetire, age);
-
-    // retirement auto-zero overrides events too (user asked: "은퇴 이후 납입 0 자동 전환 옵션")
-    if (autoZero && age >= retireAge) monthly = 0;
-
-    // Pension monthly payout
-    const pensionMonthly = getPensionMonthlyAtAge(age);
-
-    // Lump sum at year start
-    const lump = getLumpSumAtAge(age);
-    balance += lump;
-
-    let yContr = 0;
-    let yReturn = 0;
-    let yDiv = 0;
-    let yPensionOut = 0;
-
-    const months = [];
-    for (let m = 1; m <= 12; m++) {
-      // 1) contribution
-      balance += monthly;
-      yContr += monthly;
-
-      // 2) growth + dividend
-      const r = balance * (annualR / 12);
-      const d = balance * (annualD / 12);
-      balance += r + d;
-      yReturn += r;
-      yDiv += d;
-
-      // 3) pension payout
-      const out = pensionMonthly;
-      if (out > 0) {
-        balance -= out;
-        yPensionOut += out;
-        if (balance < 0) balance = 0;
-      }
-
-      months.push({
-        month: m,
-        contr: monthly,
-        ret: r,
-        div: d,
-        pensionOut: out,
-        endBalance: balance
-      });
+    // Rebalance if portfolio changed this year
+    const portfolioChanged = JSON.stringify(currentPortfolio.map(p=>p.preset.id)) !== JSON.stringify(portfolioState.map(p=>p.preset.id));
+    if (portfolioChanged) {
+        const totalBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+        portfolioState = currentPortfolio.map(p => ({ ...p, balance: totalBalance * p.percentage }));
     }
 
-    years.push({
-      year,
-      age,
-      annualContribution: yContr,
-      returnEarned: yReturn,
-      dividends: yDiv,
-      pensionOut: yPensionOut,
-      endBalance: balance,
-      eventLabels: getEventLabelsAtAge(age),
-      lumpApplied: lump,
-      monthlyApplied: monthly,
-      pensionMonthlyApplied: pensionMonthly,
-      isRetirementYear: (age === retireAge)
-    });
+    // Contributions
+    const baseMonthly = autoZeroAfterRetire && age >= ageRetire ? 0 : monthlyContribution;
+    const activeMonthly = state.events
+        .filter(e => e.type === "monthly" && e.age <= age)
+        .sort((a,b) => b.age - a.age)[0]?.amount ?? baseMonthly;
+    const lumpSum = state.events.filter(e => e.type === 'lump' && e.age === age).reduce((sum, e) => sum + e.amount, 0);
 
-    // stop early if balance is 0 and no future contributions and pensions only withdraw (optional)
-    // keep going for table stability; user can see flat zeros
+    // Pension
+    const pensionMonthly = state.events.filter(e => e.type === 'pension' && e.age <= age).reduce((sum, e) => sum + e.amount, 0);
+
+    let yearStartBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+    if (lumpSum > 0) {
+         portfolioState.forEach(p => p.balance += lumpSum * p.percentage);
+    }
+
+    let yContr = 0, yReturn = 0, yDiv = 0, yPension = 0;
+
+    for (let m = 1; m <= 12; m++) {
+      // Monthly contribution
+      if(activeMonthly > 0) {
+          portfolioState.forEach(p => p.balance += activeMonthly * p.percentage);
+          yContr += activeMonthly;
+      }
+      
+      // Growth and dividend
+      portfolioState.forEach(p => {
+          const r = p.balance * (p.preset.annualReturnPct / 100 / 12);
+          const d = p.balance * (p.preset.dividendPct / 100 / 12);
+          p.balance += r + d;
+          yReturn += r;
+          yDiv += d;
+      });
+
+      // Pension
+      if (pensionMonthly > 0) {
+          const totalBalanceBeforePension = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+          if (totalBalanceBeforePension > pensionMonthly) {
+              portfolioState.forEach(p => {
+                  const withdrawal = p.balance / totalBalanceBeforePension * pensionMonthly;
+                  p.balance -= withdrawal;
+              });
+              yPension += pensionMonthly;
+          }
+      }
+    }
+
+    const endBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+
+    years.push({
+      year, age, 
+      annualContribution: yContr, 
+      returnEarned: yReturn, 
+      dividends: yDiv, 
+      pensionOut: yPension,
+      endBalance,
+      portfolio: currentPortfolio
+    });
   }
 
-  return { ageNow, retireAge, initial, baseMonthly, autoZero, annualR, annualD, preset, startYear, endAge, years };
+  return { years, startYear, ageNow, endAge, retireAge };
 }
 
 /** =============================
- *  Render table + monthly details
+ *  Render table + Chart
  *  ============================= */
-function buildAnnualRow(y, idx) {
-  const labels = (y.eventLabels && y.eventLabels.length) ? y.eventLabels.join(", ") : "기준";
-  const badge = (y.eventLabels && y.eventLabels.length)
-    ? `<span class="px-2 py-0.5 bg-primary text-white text-[10px] font-bold rounded-full uppercase inline-flex items-center gap-1">
-         <span class="material-symbols-outlined text-[10px]">bolt</span> ${labels}
-       </span>`
-    : `<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 text-[10px] font-bold rounded-full uppercase">기준</span>`;
+function buildAnnualRow(y) {
+  const portfolioDesc = y.portfolio.map(p => `${p.preset.name.substring(0,4)}:${(p.percentage*100).toFixed(0)}%`).join(' ');
+  const badge = `<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 text-xs font-semibold rounded-full">${portfolioDesc || '정의되지 않음'}</span>`;
 
-  const highlight = y.isRetirementYear
-    ? "bg-emerald-50/60 dark:bg-emerald-900/10"
-    : ((y.eventLabels && y.eventLabels.length) ? "bg-blue-50/40 dark:bg-blue-900/10" : "");
+  const highlight = y.age === state.inputs.ageRetire ? "bg-emerald-50/60 dark:bg-emerald-900/10" : "";
 
   return `
-    <tr class="annual-row ${highlight} hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group cursor-pointer" data-idx="${idx}">
+    <tr class="annual-row ${highlight} hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
       <td class="px-6 py-4 font-bold text-slate-900 dark:text-slate-100">
-        <div class="flex items-center gap-2">
-          <span class="material-symbols-outlined row-chevron text-slate-400 text-base">chevron_right</span>
-          <div class="flex flex-col">
-            <span>${y.year}</span>
-            <span class="text-[10px] text-slate-400">${y.age}세${y.isRetirementYear ? " • 은퇴" : ""}</span>
-          </div>
+        <div class="flex flex-col">
+          <span>${y.year}</span>
+          <span class="text-[10px] text-slate-400">${y.age}세${y.age === state.inputs.ageRetire ? " • 은퇴" : ""}</span>
         </div>
       </td>
       <td class="px-6 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.annualContribution, true)}</td>
@@ -1024,40 +850,6 @@ function buildAnnualRow(y, idx) {
       <td class="px-6 py-4 font-medium text-emerald-600 dark:text-emerald-300">-${fmtMoney(y.pensionOut, true)}</td>
       <td class="px-6 py-4 font-black">${fmtMoney(y.endBalance, true)}</td>
       <td class="px-6 py-4">${badge}</td>
-    </tr>
-
-    <tr class="monthly-row hidden" data-months-for="${idx}">
-      <td colspan="7" class="px-6 pb-5">
-        <div class="mt-1 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-950">
-          <div class="px-4 py-3 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
-            <div class="text-[11px] text-slate-600 dark:text-slate-300 font-bold uppercase tracking-wider">
-              월별 상세 • ${y.age}세 (${y.year})
-            </div>
-            <div class="text-[11px] text-slate-500 dark:text-slate-400">
-              월 납입액: <span class="font-semibold">${fmtMoney(y.monthlyApplied)}</span>
-              ${y.lumpApplied !== 0 ? ` • 일시불: <span class="font-semibold">${fmtMoney(y.lumpApplied)}</span>` : ``}
-              ${y.pensionMonthlyApplied > 0 ? ` • 연금: <span class="font-semibold">-${fmtMoney(y.pensionMonthlyApplied)}/월</span>` : ``}
-            </div>
-          </div>
-          <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-[12px]">
-              <thead class="bg-white dark:bg-slate-950">
-                <tr class="text-slate-500 font-bold uppercase text-[11px] tracking-wider">
-                  <th class="px-4 py-3">월</th>
-                  <th class="px-4 py-3">납입액</th>
-                  <th class="px-4 py-3">수익</th>
-                  <th class="px-4 py-3">배당</th>
-                  <th class="px-4 py-3">연금 인출</th>
-                  <th class="px-4 py-3">기말 잔액</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                ${y._monthsHtml || ""}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </td>
     </tr>
   `;
 }
@@ -1071,203 +863,69 @@ function passesFilter(y) {
 
 function renderAnnualTable(results) {
   const tbody = $("annualTbody");
-  tbody.innerHTML = "";
-
-  // Build months html first
-  for (let i = 0; i < results.years.length; i++) {
-    const y = results.years[i];
-    const months = results._monthsByIdx[i] || [];
-    y._monthsHtml = months.map(m => `
-      <tr>
-        <td class="px-4 py-2 font-bold text-slate-900 dark:text-slate-100">${m.month}</td>
-        <td class="px-4 py-2 text-slate-600 dark:text-slate-400">${fmtMoney(m.contr)}</td>
-        <td class="px-4 py-2 font-semibold text-primary">+${fmtMoney(m.ret)}</td>
-        <td class="px-4 py-2 text-slate-600 dark:text-slate-400">${fmtMoney(m.div)}</td>
-        <td class="px-4 py-2 text-emerald-600 dark:text-emerald-300">-${fmtMoney(m.pensionOut)}</td>
-        <td class="px-4 py-2 font-extrabold">${fmtMoney(m.endBalance, true)}</td>
-      </tr>
-    `).join("");
-  }
-
-  // Filtered render
-  const filtered = results.years
-    .map((y, idx) => ({ y, idx }))
-    .filter(({ y }) => passesFilter(y));
-
-  const html = filtered.map(({ y, idx }) => buildAnnualRow(y, idx)).join("");
-  tbody.insertAdjacentHTML("beforeend", html);
-
-  // Toggle
-  tbody.querySelectorAll(".annual-row").forEach(row => {
-    row.addEventListener("click", () => {
-      const idx = row.getAttribute("data-idx");
-      const detail = tbody.querySelector(`.monthly-row[data-months-for="${idx}"]`);
-      const open = detail && !detail.classList.contains("hidden");
-      if (!detail) return;
-      if (open) {
-        detail.classList.add("hidden");
-        row.classList.remove("row-open");
-      } else {
-        detail.classList.remove("hidden");
-        row.classList.add("row-open");
-      }
-    });
-  });
+  const filtered = results.years.filter(passesFilter);
+  tbody.innerHTML = filtered.map(buildAnnualRow).join("");
 }
 
-/** =============================
- *  Chart
- *  ============================= */
 function renderChart(results) {
-  // Data for the chart, will be filtered based on the table's filter
-  const labels = [];
+  const filteredYears = results.years.filter(passesFilter);
+  const labels = filteredYears.map(y => `${y.year}`);
+  const datasets = {};
+  
+  // This is a simplified view for the chart. We calculate total principal and total returns.
+  let cumulativePrincipal = state.inputs.initialInvestment;
   const principalData = [];
   const returnData = [];
   const endBalanceData = [];
 
-  let cumulativePrincipal = results.initial;
-  for (const year of results.years) {
-    // We always calculate the cumulative principal over all years
-    cumulativePrincipal += year.annualContribution + year.lumpApplied;
-
-    // But only add data to the chart if it passes the filter
-    if (passesFilter(year)) {
-      labels.push(`${year.year}`);
-
-      const principalComponent = Math.min(cumulativePrincipal, year.endBalance);
-      const returnComponent = Math.max(0, year.endBalance - cumulativePrincipal);
-
-      principalData.push(principalComponent);
-      returnData.push(returnComponent);
-      endBalanceData.push(year.endBalance);
-    }
-  }
+  results.years.forEach(year => {
+      cumulativePrincipal += year.annualContribution;
+      if(passesFilter(year)){
+          const principalComponent = Math.min(cumulativePrincipal, year.endBalance);
+          const returnComponent = Math.max(0, year.endBalance - cumulativePrincipal);
+          principalData.push(principalComponent);
+          returnData.push(returnComponent);
+          endBalanceData.push(year.endBalance);
+      }
+  });
 
   const ctx = $("balanceChart").getContext("2d");
   if (state.chart) state.chart.destroy();
-
-  // If no data after filtering, don't render the chart
-  if (labels.length === 0) {
-      return;
-  }
+  if (labels.length === 0) return;
 
   state.chart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels,
       datasets: [
-        {
-          label: '누적 투자원금',
-          data: principalData,
-          backgroundColor: '#2563eb',
-        },
-        {
-          label: '누적 투자수익',
-          data: returnData,
-          backgroundColor: '#84cc16',
-        }
+        { label: '누적 투자원금', data: principalData, backgroundColor: '#2563eb' },
+        { label: '누적 투자수익', data: returnData, backgroundColor: '#84cc16' }
       ]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'top',
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              let label = context.dataset.label || '';
-              if (label) {
-                label += ': ';
-              }
-              if (context.parsed.y !== null) {
-                label += fmtMoney(context.parsed.y, true);
-              }
-              return label;
-            },
-            footer: function(tooltipItems) {
-              const yearIndex = tooltipItems[0].dataIndex;
-              const totalBalance = endBalanceData[yearIndex];
-              return '기말잔액: ' + fmtMoney(totalBalance, true);
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          stacked: true,
-          ticks: { maxTicksLimit: 10 }
-        },
-        y: {
-          stacked: true,
-          ticks: {
-            callback: (v) => {
-              const n = Number(v);
-              if (!Number.isFinite(n) || n === 0) return "0";
-              if (Math.abs(n) >= 1000000000000) return `${parseFloat((n / 1000000000000).toFixed(1))}조`;
-              if (Math.abs(n) >= 100000000) return `${parseFloat((n / 100000000).toFixed(1))}억`;
-              if (Math.abs(n) >= 10000) return `${parseFloat((n / 10000).toFixed(1))}만`;
-              return n.toLocaleString();
-            }
-          }
-        }
-      }
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' } },
+      scales: { x: { stacked: true }, y: { stacked: true } }
     }
   });
 }
+
 
 /** =============================
  *  Observation
  *  ============================= */
 function updateObservation(results) {
-  const retireRow = results.years.find(y => y.age === results.retireAge);
+  const retireRow = results.years.find(y => y.age === state.inputs.ageRetire);
   const last = results.years[results.years.length - 1];
 
-  const preset = results.preset;
-  const pensionAtRetire = retireRow ? retireRow.pensionMonthlyApplied : 0;
-
-  let msg = `프리셋: ${preset.name} • 수익률 ${preset.annualReturnPct.toFixed(1)}% • 배당 ${preset.dividendPct.toFixed(1)}%. `;
+  let msg = ``;
   if (retireRow) {
-    msg += `${results.retireAge}세 (${retireRow.year})에 잔액은 ${fmtMoney(retireRow.endBalance, true)} 입니다. `;
-    if (results.autoZero) msg += `은퇴 후 납입은 자동으로 중지됩니다. `;
-    if (pensionAtRetire > 0) msg += `연금 활성: -${fmtMoney(pensionAtRetire, true)}/월. `;
+    msg += `${state.inputs.ageRetire}세 (${retireRow.year}) 은퇴 시점에 예상 잔액은 ${fmtMoney(retireRow.endBalance, true)} 입니다. `;
   }
-  msg += `${results.endAge}세 (${last.year})까지 잔액은 ${fmtMoney(last.endBalance, true)}가 될 수 있습니다.`;
-  $("observation").textContent = msg;
-}
-
-/** =============================
- *  CSV Export
- *  ============================= */
-function exportCsv(results) {
-  const header = ["연도","나이","연간납입액","평가수익","배당금","연금인출","기말잔액","이벤트"].join(",");
-  const lines = results.years.map(y => {
-    const events = (y.eventLabels && y.eventLabels.length) ? y.eventLabels.join(" | ") : "기준";
-    return [
-      y.year,
-      y.age,
-      Math.round(y.annualContribution),
-      Math.round(y.returnEarned),
-      Math.round(y.dividends),
-      Math.round(y.pensionOut),
-      Math.round(y.endBalance),
-      `"${events.replace(/"/g,'""')}"`
-    ].join(",");
-  });
-
-  const csv = [header, ...lines].join("\n");
-  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "retirement_projection.csv";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  if (last) {
+    msg += `${state.maxAge}세 (${last.year})에 예상 잔액은 ${fmtMoney(last.endBalance, true)}가 될 수 있습니다.`;
+  }
+  $("observation").textContent = msg || '시뮬레이션 결과가 없습니다.';
 }
 
 /** =============================
@@ -1275,55 +933,10 @@ function exportCsv(results) {
  *  ============================= */
 function recalcAndRender() {
   const results = simulate();
-
-  // months detail re-sim (same rules)
-  const ageNow = results.ageNow;
-  const endAge = results.endAge;
-  const retireAge = results.retireAge;
-  const baseMonthly = results.baseMonthly;
-  const autoZero = results.autoZero;
-
-  let balance = results.initial;
-  const monthsByIdx = [];
-
-  for (let age = ageNow; age <= endAge; age++) {
-    const idx = age - ageNow;
-
-    const baseByRetire = baseMonthlyContributionForAge(baseMonthly, age, retireAge, autoZero);
-    let monthly = getActiveMonthlyContribution(baseByRetire, age);
-    if (autoZero && age >= retireAge) monthly = 0;
-
-    const pensionMonthly = getPensionMonthlyAtAge(age);
-    const lump = getLumpSumAtAge(age);
-    balance += lump;
-
-    const months = [];
-    for (let m = 1; m <= 12; m++) {
-      balance += monthly;
-
-      const r = balance * (results.annualR / 12);
-      const d = balance * (results.annualD / 12);
-      balance += r + d;
-
-      const out = pensionMonthly;
-      if (out > 0) {
-        balance -= out;
-        if (balance < 0) balance = 0;
-      }
-
-      months.push({ month: m, contr: monthly, ret: r, div: d, pensionOut: out, endBalance: balance });
-    }
-    monthsByIdx[idx] = months;
-  }
-
-  results._monthsByIdx = monthsByIdx;
   state.results = results;
 
-  // Labels
-  $("rangeLabel").textContent =
-    `시작 연도 ${results.startYear} • ${results.ageNow}세 → ${results.endAge}세 • 은퇴 ${results.retireAge}세 • 프리셋: ${results.preset.name}`;
+  $("rangeLabel").textContent = `시작 연도 ${results.startYear} • ${results.ageNow}세 → ${results.endAge}세 • 은퇴 ${results.retireAge}세`;
 
-  renderPresetSelect();
   renderAnnualTable(results);
   updateObservation(results);
 
@@ -1336,29 +949,19 @@ function recalcAndRender() {
  *  Inputs init
  *  ============================= */
 function initInputs() {
-  const moneyIds = ["initialInvestment", "monthlyContribution"];
-  moneyIds.forEach(id => {
-    $(id).addEventListener("input", () => {
-      recalcAndRender();
-      saveStateDebounced();
-    });
-    $(id).addEventListener("blur", () => {
-      const v = parseMoney($(id).value);
-      $(id).value = v.toLocaleString();
-      syncUiToStateFromInputs();
-      saveStateDebounced();
-    });
-  });
-
-  ["ageNow","ageRetire","autoZeroAfterRetire","filterEnabled","filterAgeFrom","filterAgeTo"].forEach(id => {
-    $(id).addEventListener("input", () => {
-      recalcAndRender();
-      saveStateDebounced();
-    });
-    $(id).addEventListener("change", () => {
-      recalcAndRender();
-      saveStateDebounced();
-    });
+  const inputsToWatch = ["ageNow", "ageRetire", "initialInvestment", "monthlyContribution", "autoZeroAfterRetire", "filterEnabled", "filterAgeFrom", "filterAgeTo"];
+  inputsToWatch.forEach(id => {
+      const el = $(id);
+      el.addEventListener("input", () => { recalcAndRender(); saveStateDebounced(); });
+      if(el.type !== 'text') el.addEventListener("change", () => { recalcAndRender(); saveStateDebounced(); });
+      el.addEventListener("blur", () => {
+          if(id === 'initialInvestment' || id === 'monthlyContribution') {
+              const v = parseMoney($(id).value);
+              $(id).value = v.toLocaleString();
+          }
+          syncUiToStateFromInputs(); 
+          saveStateDebounced();
+      });
   });
 
   $("btnToggleChart").addEventListener("click", () => {
@@ -1367,35 +970,26 @@ function initInputs() {
       renderChart(state.results || simulate());
     }
   });
-
-  $("btnExportCsv").addEventListener("click", () => {
-    if (!state.results) recalcAndRender();
-    exportCsv(state.results);
+  
+  $("btnResetAll").addEventListener("click", () => {
+    if (confirm("저장된 모든 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) {
+      resetSavedState();
+      location.reload();
+    }
   });
-
-  $("btnPrint").addEventListener("click", () => window.print());
 }
 
 /** =============================
  *  Boot
  *  ============================= */
 (function boot() {
-  // restore
   const saved = loadSavedState();
   applySnapshot(saved);
-
-  // sync UI from state
   syncStateToUi();
-
-  // init handlers
-  initPresetEvents();
+  initPresetManagement();
   initEventDialog();
   initInputs();
-
-  // initial calc
   recalcAndRender();
-
-  // save once after boot (ensures new keys exist)
   saveStateDebounced();
 })();
 </script>

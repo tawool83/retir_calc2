@@ -1,6 +1,30 @@
 const defaultEvents = [
-  { age: 45, type: "monthly", amount: 3500000, label: "승진" },
-  { age: 55, type: "lump", amount: 250000000, label: "아파트 매매" },
-  { age: 65, type: "pension", amount: 1800000, label: "국민연금" },
+  {
+    id: "evt1",
+    age: 30,
+    type: "portfolio",
+    presetId: "sp500",
+    weight: 10
+  },
+  {
+    id: "evt2",
+    age: 55,
+    type: "portfolio",
+    presetId: "schd",
+    weight: 5
+  },
+  {
+    id: "evt3",
+    age: 55,
+    type: "portfolio",
+    presetId: "sp500",
+    weight: 5
+  },
+  {
+    id: "evt4",
+    age: 65,
+    type: "pension",
+    amount: 2500000,
+    label: "연금 수령 시작"
+  }
 ];
-console.log("events.js loaded successfully");
