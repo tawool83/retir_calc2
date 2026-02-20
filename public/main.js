@@ -150,6 +150,7 @@ function syncStateToUi() {
   $("filterAgeTo").value = state.inputs.filterAgeTo;
 
   renderEventList();
+  updateFilterButton();
 }
 
 function syncUiToStateFromInputs() {
@@ -161,6 +162,17 @@ function syncUiToStateFromInputs() {
   state.inputs.filterEnabled = $("filterEnabled").checked;
   state.inputs.filterAgeFrom = clamp(Number($("filterAgeFrom").value || 0), 0, 120);
   state.inputs.filterAgeTo = clamp(Number($("filterAgeTo").value || 0), 0, 120);
+}
+
+function updateFilterButton() {
+    const btn = $('btnToggleFilter');
+    if (state.inputs.filterEnabled) {
+        btn.classList.add("bg-primary", "text-white");
+        btn.classList.remove("bg-slate-100", "dark:bg-slate-800", "text-slate-500", "dark:text-slate-300");
+    } else {
+        btn.classList.remove("bg-primary", "text-white");
+        btn.classList.add("bg-slate-100", "dark:bg-slate-800", "text-slate-500", "dark:text-slate-300");
+    }
 }
 
 
@@ -747,6 +759,7 @@ function recalcAndRender() {
   renderAnnualTable(results);
   updateObservation(results);
   renderEventList(); // This now renders the timeline as well
+  updateFilterButton();
 
   if (!$("chartPanel").classList.contains("hidden")) {
     renderChart(results);
