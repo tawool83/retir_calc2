@@ -86,7 +86,8 @@ const state = {
 
   events: [],
   results: null,
-  chart: null
+  chart: null,
+  activeTooltip: null
 };
 
 /** =============================
@@ -469,7 +470,8 @@ function simulate() {
       dividends: yDiv, 
       pensionOut: yPension,
       endBalance,
-      portfolio: currentPortfolioConfig
+      portfolio: currentPortfolioConfig,
+      detailedPortfolio: portfolioState.map(p => ({ name: p.preset.name, balance: p.balance }))
     });
   }
 
@@ -486,7 +488,7 @@ function buildAnnualRow(y) {
   const highlight = y.age === state.inputs.ageRetire ? "bg-emerald-50/60 dark:bg-emerald-900/10" : "";
 
   return `
-    <tr class="annual-row ${highlight} hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
+    <tr class="annual-row ${highlight} hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group" data-year="${y.year}">
       <td class="px-6 py-4 font-bold text-slate-900 dark:text-slate-100">
         <div class="flex flex-col">
           <span>${y.year}</span>
@@ -514,6 +516,7 @@ function renderAnnualTable(results) {
   const tbody = $("annualTbody");
   const filtered = results.years.filter(passesFilter);
   tbody.innerHTML = filtered.map(buildAnnualRow).join("");
+  initTooltips();
 }
 
 function renderChart(results) {
@@ -556,6 +559,44 @@ function renderChart(results) {
       plugins: { legend: { position: 'top' } },
       scales: { x: { stacked: true }, y: { stacked: true } }
     }
+  });
+}
+
+
+/** =============================
+ *  Tooltip
+ *  ============================= */
+function initTooltips() {
+  const tooltip = $('portfolioTooltip');
+  document.querySelectorAll('.annual-row').forEach(row => {
+    row.addEventListener('mouseenter', (e) => {
+      const year = Number(e.currentTarget.dataset.year);
+      const yearData = state.results.years.find(y => y.year === year);
+      if (!yearData) return;
+      
+      let html = `<div class="font-bold mb-2 text-base">${year}년 포트폴리오</div>`;
+      if (yearData.detailedPortfolio.length > 0) {
+          html += yearData.detailedPortfolio.map(p => `
+            <div class="flex justify-between items-center gap-4">
+              <span class="font-semibold">${p.name}</span>
+              <span class="text-slate-300">${fmtMoney(p.balance)}</span>
+            </div>
+          `).join('');
+      } else {
+          html += `<div class="text-slate-400">데이터 없음</div>`;
+      }
+
+      tooltip.innerHTML = html;
+      tooltip.classList.remove('hidden');
+      
+      const rect = e.currentTarget.getBoundingClientRect();
+      tooltip.style.top = `${e.clientY - tooltip.offsetHeight - 10}px`;
+      tooltip.style.left = `${e.clientX}px`;
+
+    });
+    row.addEventListener('mouseleave', () => {
+      tooltip.classList.add('hidden');
+    });
   });
 }
 
@@ -639,5 +680,4 @@ function initInputs() {
   initEventDialog();
   initInputs();
   recalcAndRender();
-  saveStateDebounced();
 })();
