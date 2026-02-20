@@ -4,3 +4,4 @@ const defaultPresets = [
   { id: "nasdaq100", name: "나스닥 100 (기술주 중심)", annualReturnPct: 14.2, dividendPct: 0.8, builtin: true },
   { id: "schd", name: "SCHD (배당 성장)", annualReturnPct: 8.5, dividendPct: 3.4, builtin: true },
 ];
+console.log("presets.js loaded successfully");
