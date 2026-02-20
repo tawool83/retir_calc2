@@ -12,16 +12,20 @@ This application is a web-based retirement simulator that allows users to projec
     *   **Pension (Withdrawal):** Simulate the start of pension payments, which are withdrawn from the portfolio balance.
 *   **Interactive Chart & Table:** The application visualizes the projected growth of the user's portfolio through an interactive chart and a detailed annual table. The chart shows the composition of the portfolio over time, broken down into principal and returns.
 *   **Persistent State:** All user inputs, including presets and events, are automatically saved to the browser's local storage. This allows users to close the application and resume their simulation later.
-*   **Data Export:** Users can export their simulation results to a CSV file for further analysis.
 
-## **Current Implementation Plan**
+## **Bug Fixes and Improvements (Latest Update)**
+
+*   **Corrected Initial Portfolio Allocation:** Fixed a critical bug where the simulation would fail if no "Portfolio Change" event was explicitly set for the starting age. The system now automatically applies a default portfolio configuration in such cases, ensuring the simulation can always run. If no portfolio events are defined at all, it defaults to a 100% allocation in the first available preset.
+*   **Improved Rebalancing Logic:** Addressed an issue where the simulation would not correctly rebalance assets if only the weights of existing presets were changed at a certain age (e.g., changing from an 80/20 split to a 50/50 split). The rebalancing mechanism has been enhanced to detect changes in both the presets used and their respective weights, ensuring accurate portfolio adjustments over time.
+
+## **Implementation Details**
 
 ### **UI/UX**
 
 *   [x] The main UI is divided into a left-side control panel and a right-side results panel.
 *   [x] The control panel contains sections for basic configuration (age, retirement, initial investment), event management, and table filtering.
 *   [x] The results panel displays the annual projection table and an interactive chart.
-*   [x] A new modal dialog has been implemented for managing investment presets (create, delete).
+*   [x] A modal dialog has been implemented for managing investment presets (create, delete).
 *   [x] The event creation dialog has been updated to support the new "portfolio change" event, allowing users to select a preset and assign a weight to it.
 
 ### **State Management**
@@ -35,7 +39,4 @@ This application is a web-based retirement simulator that allows users to projec
 *   [x] The core simulation logic has been rewritten to support dynamic portfolio allocation.
 *   [x] The simulator now calculates the growth of each preset in the portfolio independently, based on its assigned weight.
 *   [x] The simulation takes into account all user-defined events, such as changes in monthly contributions, lump-sum investments, and pension withdrawals.
-
-### **Next Steps**
-
-*   The current implementation is complete. No further steps are planned at this time.
+*   [x] A `getPortfolioSignature` function has been added to create a unique identifier for a portfolio's composition, ensuring accurate detection of changes for rebalancing.
