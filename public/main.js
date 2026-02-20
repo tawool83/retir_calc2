@@ -1,4 +1,4 @@
-/** =============================
+'''/** =============================
  *  Persistence (localStorage)
  *  ============================= */
 const STORAGE_KEY = "retire_sim_v2_dynamic_portfolio";
@@ -88,7 +88,8 @@ const state = {
   events: [],
   results: null,
   chart: null,
-  activeTooltip: null
+  activeTooltip: null,
+  editingEventId: null,
 };
 
 /** =============================
@@ -286,9 +287,14 @@ function createEventCard(ev) {
           </div>
           <p class="text-[11px] text-slate-500 mt-1">${subtitle}</p>
         </div>
-        <button class="text-slate-400 hover:text-red-500 transition-colors shrink-0" data-del="${ev.id}" title="삭제">
-          <span class="material-symbols-outlined text-sm">delete</span>
-        </button>
+        <div class="flex items-center">
+            <button class="text-slate-400 hover:text-primary transition-colors shrink-0" data-edit="${ev.id}" title="수정">
+              <span class="material-symbols-outlined text-sm">edit</span>
+            </button>
+            <button class="text-slate-400 hover:text-red-500 transition-colors shrink-0" data-del="${ev.id}" title="삭제">
+              <span class="material-symbols-outlined text-sm">delete</span>
+            </button>
+         </div>
       </div>
     `;
 
@@ -296,6 +302,10 @@ function createEventCard(ev) {
       state.events = state.events.filter(e => e.id !== ev.id);
       recalcAndRender();
       saveStateDebounced();
+    });
+    
+    node.querySelector("[data-edit]").addEventListener("click", () => {
+        openEventDialog(ev.id);
     });
 
     return node;
@@ -399,6 +409,58 @@ function renderEventList() {
     }
 }
 
+function openEventDialog(eventId = null) {
+    const dlg = $("eventDialog");
+    const title = dlg.querySelector("h3");
+    const saveBtn = $("dlgSave");
+
+    state.editingEventId = eventId;
+
+    if (eventId) { // Edit mode
+        const eventToEdit = state.events.find(e => e.id === eventId);
+        if (!eventToEdit) {
+            console.error("Event not found:", eventId);
+            state.editingEventId = null;
+            return;
+        }
+        title.textContent = "시나리오 이벤트 수정";
+        saveBtn.textContent = "변경 내용 저장";
+
+        $("dlgAge").value = eventToEdit.age;
+        $("dlgType").value = eventToEdit.type;
+        $("dlgLabel").value = eventToEdit.label || "";
+        $("dlgAmount").value = (eventToEdit.amount || "").toLocaleString();
+        $('dlgWeight').value = eventToEdit.weight || 10;
+        
+        const presetSelect = $("dlgPresetId");
+        presetSelect.innerHTML = state.presets.map(p => `<option value="${p.id}" ${p.id === eventToEdit.presetId ? 'selected' : ''}>${p.name}</option>`).join('');
+
+    } else { // Add mode
+        title.textContent = "시나리오 이벤트 추가";
+        saveBtn.textContent = "이벤트 추가";
+        const ageNow = state.inputs.ageNow;
+        $("dlgAge").value = clamp(ageNow + 5, 0, 120);
+        $("dlgType").value = "portfolio";
+        $("dlgLabel").value = "";
+        $("dlgAmount").value = "";
+        $('dlgWeight').value = 10;
+        
+        const presetSelect = $("dlgPresetId");
+        presetSelect.innerHTML = state.presets.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    }
+
+    // Update field visibility and show dialog
+    const typeSelect = $("dlgType");
+    const fieldsPortfolio = $('dlgFieldsPortfolio');
+    const fieldsMonetary = $('dlgFieldsMonetary');
+    const type = typeSelect.value;
+    fieldsPortfolio.classList.toggle('hidden', type !== 'portfolio');
+    fieldsMonetary.classList.toggle('hidden', type === 'portfolio');
+
+    dlg.showModal();
+}
+
+
 function initEventDialog() {
   const dlg = $("eventDialog");
   const typeSelect = $("dlgType");
@@ -422,47 +484,52 @@ function initEventDialog() {
     infoEl.textContent = infoText;
   };
 
-  $("btnAddEvent").addEventListener("click", () => {
-    const ageNow = state.inputs.ageNow;
-    $("dlgAge").value = clamp(ageNow + 5, 0, 120);
-    typeSelect.value = "portfolio";
-    $("dlgLabel").value = "";
-    $("dlgAmount").value = "";
-    $('dlgWeight').value = 10;
-    
-    const presetSelect = $("dlgPresetId");
-    presetSelect.innerHTML = state.presets.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-    
-    updateDialogFields();
-    dlg.showModal();
-  });
+  $("btnAddEvent").addEventListener("click", () => openEventDialog());
 
   typeSelect.addEventListener('change', updateDialogFields);
 
   $("dlgSave").addEventListener("click", () => {
     const age = clamp(Number($("dlgAge").value || 0), 0, 120);
     const type = typeSelect.value;
-    const id = uid();
-    let newEvent = { id, age, type };
+    
+    let eventData = { age, type };
 
     if (type === 'portfolio') {
-        newEvent.presetId = $('dlgPresetId').value;
-        newEvent.weight = clamp(Number($('dlgWeight').value), 1, 10);
+        eventData.presetId = $('dlgPresetId').value;
+        eventData.weight = clamp(Number($('dlgWeight').value), 1, 10);
     } else {
-        newEvent.amount = parseMoney($("dlgAmount").value);
-        newEvent.label = $('dlgLabel').value.trim();
+        eventData.amount = parseMoney($("dlgAmount").value);
+        eventData.label = $('dlgLabel').value.trim();
     }
 
-    state.events.push(newEvent);
+    if (state.editingEventId) { // Update existing event
+        const index = state.events.findIndex(e => e.id === state.editingEventId);
+        if (index !== -1) {
+            state.events[index] = { ...state.events[index], ...eventData };
+        }
+    } else { // Add new event
+        eventData.id = uid();
+        state.events.push(eventData);
+    }
+    
+    state.editingEventId = null; // Reset editing state
     recalcAndRender();
     saveStateDebounced();
   });
 
   dlg.addEventListener("mousedown", e => { downTarget = e.target; });
   dlg.addEventListener("click", (e) => {
+    // Only close if the click was directly on the backdrop
     if (e.target === dlg && downTarget === dlg) {
+      state.editingEventId = null; // Also reset editing state on close
       dlg.close();
     }
+  });
+  
+  // Also handle closing via the form's cancel button
+  const form = dlg.querySelector('form');
+  form.addEventListener('close', () => {
+      state.editingEventId = null;
   });
 }
 
@@ -886,3 +953,4 @@ function initInputs() {
   initInputs();
   recalcAndRender();
 })();
+''
