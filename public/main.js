@@ -777,7 +777,30 @@ function renderChart(results) {
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'top' } },
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              let label = context.dataset.label || '';
+              if (label) {
+                label += ': ';
+              }
+              if (context.parsed.y !== null) {
+                label += fmtMoney(context.parsed.y, true);
+              }
+              return label;
+            },
+            footer: function(tooltipItems) {
+                let sum = 0;
+                tooltipItems.forEach(function(tooltipItem) {
+                    sum += tooltipItem.parsed.y;
+                });
+                return '총합: ' + fmtMoney(sum, true);
+            }
+          }
+        }
+      },
       scales: {
         x: { stacked: true },
         y: {
@@ -831,8 +854,8 @@ function initTooltips() {
       
       const rect = e.currentTarget.getBoundingClientRect();
       const tooltipRect = tooltip.getBoundingClientRect();
-      let left = e.clientX + 10;
-      let top = e.clientY + 10;
+      let left = e.pageX + 10;
+      let top = e.pageY + 10;
 
       if (left + tooltipRect.width > window.innerWidth) {
         left = window.innerWidth - tooltipRect.width - 10;
