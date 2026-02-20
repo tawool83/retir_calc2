@@ -648,26 +648,24 @@ function initTooltips() {
 
   // Header tooltips
   const headerTooltips = {
-      'th-contribute': '연간 총 납입액입니다.',
-      'th-return': '연간 발생한 총 투자 수익금입니다. (배당 제외)',
-      'th-dividend': '연간 발생한 총 배당금입니다. (세후 15.4% 적용)',
-      'th-pension': '연간 인출한 총 연금액입니다.',
-      'th-balance': '해당 연도 말 기준 총 잔액입니다.',
-      'th-portfolio': '해당 연도에 적용된 포트폴리오 구성입니다.'
+      'th-contribute': '연간 총 납입액입니다.<br>계산식: <b>월 납입액 x 12</b>',
+      'th-return': '연간 발생한 총 투자 수익금입니다. (배당 제외)<br>계산식: <b>(기말 잔액 - 연간 납입액 - 배당금)</b>',
+      'th-dividend': '연간 발생한 총 배당금입니다. (세후 15.4% 적용)<br>계산식: <b>(배당 수익률 * (1 - 0.154))</b>',
+      'th-pension': '연간 인출한 총 연금액입니다.<br>계산식: <b>월 연금 수령액 x 12</b>',
+      'th-balance': '해당 연도 말 기준 총 잔액입니다.<br>계산식: <b>기초 잔액 + 연간 납입액 + 평가 수익 + 배당금 - 연금 인출</b>',
+      'th-portfolio': '해당 연도에 적용된 포트폴리오 구성입니다. 마우스를 올리면 전체 구성을 확인할 수 있습니다.'
   };
 
   Object.entries(headerTooltips).forEach(([id, text]) => {
       const th = $(id);
       if (!th) return;
-      const icon = th.querySelector('.help-icon');
       const tooltip = th.querySelector('.header-tooltip');
-      
-      if (icon && tooltip) {
-        tooltip.textContent = text;
-        icon.addEventListener('mouseenter', () => {
+      if (tooltip) {
+        tooltip.innerHTML = text;
+        th.addEventListener('mouseenter', () => {
             tooltip.classList.remove('hidden');
         });
-        icon.addEventListener('mouseleave', () => {
+        th.addEventListener('mouseleave', () => {
             tooltip.classList.add('hidden');
         });
       }

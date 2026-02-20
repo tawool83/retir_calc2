@@ -16,4 +16,4 @@ This is a retirement simulator that allows users to project their savings over t
 
 ## Current Plan
 
-I will now update the `blueprint.md` file to reflect the latest changes, which include applying a 15.4% tax to dividends and adding tooltips to the table headers to explain what each column means.
+I will now update the `blueprint.md` file to reflect the latest changes, which include fixing the header tooltips, increasing the header font size, and ensuring that dividend calculations include a 15.4% tax.
