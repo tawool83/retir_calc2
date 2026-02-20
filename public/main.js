@@ -78,8 +78,8 @@ const state = {
   inputs: {
     ageNow: 30,
     ageRetire: 65,
-    initialInvestment: 50000000,
-    monthlyContribution: 2000000,
+    initialInvestment: 0,
+    monthlyContribution: 0,
     filterEnabled: false,
     filterAgeFrom: 30,
     filterAgeTo: 100
@@ -123,6 +123,10 @@ function applySnapshot(snap) {
      Object.assign(state.inputs, snap.inputs);
   }
   
+  // Force these to 0 as they are no longer UI-configurable
+  state.inputs.initialInvestment = 0;
+  state.inputs.monthlyContribution = 0;
+  
   state.isEventListExpanded = snap.isEventListExpanded || false;
 
    // Migration for removing autoZeroAfterRetire
@@ -147,8 +151,6 @@ function applySnapshot(snap) {
 function syncStateToUi() {
   $("ageNow").value = state.inputs.ageNow;
   $("ageRetire").value = state.inputs.ageRetire;
-  $("initialInvestment").value = state.inputs.initialInvestment.toLocaleString();
-  $("monthlyContribution").value = state.inputs.monthlyContribution.toLocaleString();
   
   $("filterEnabled").checked = state.inputs.filterEnabled;
   $("filterAgeFrom").value = state.inputs.filterAgeFrom;
@@ -161,8 +163,6 @@ function syncStateToUi() {
 function syncUiToStateFromInputs() {
   state.inputs.ageNow = clamp(Number($("ageNow").value || 0), 0, 120);
   state.inputs.ageRetire = clamp(Number($("ageRetire").value || 0), 0, 120);
-  state.inputs.initialInvestment = parseMoney($("initialInvestment").value);
-  state.inputs.monthlyContribution = parseMoney($("monthlyContribution").value);
 
   state.inputs.filterEnabled = $("filterEnabled").checked;
   state.inputs.filterAgeFrom = clamp(Number($("filterAgeFrom").value || 0), 0, 120);
@@ -823,17 +823,13 @@ function recalcAndRender() {
  *  Inputs init
  *  ============================= */
 function initInputs() {
-  const inputsToWatch = ["ageNow", "ageRetire", "initialInvestment", "monthlyContribution"];
+  const inputsToWatch = ["ageNow", "ageRetire"];
   inputsToWatch.forEach(id => {
       const el = $(id);
       if (!el) return;
       el.addEventListener("input", () => { recalcAndRender(); saveStateDebounced(); });
       if(el.type !== 'text') el.addEventListener("change", () => { recalcAndRender(); saveStateDebounced(); });
       el.addEventListener("blur", () => {
-          if(id === 'initialInvestment' || id === 'monthlyContribution') {
-              const v = parseMoney($(id).value);
-              $(id).value = v.toLocaleString();
-          }
           syncUiToStateFromInputs(); 
           saveStateDebounced();
       });
