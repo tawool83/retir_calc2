@@ -887,10 +887,14 @@ function initTooltips() {
       let left = e.pageX + 10;
       let top = e.pageY + 10;
 
-      if (left + tooltipRect.width > (window.scrollX + window.innerWidth)) {
+      // 현재 뷰포트의 경계를 확인합니다.
+      const viewportRight = window.scrollX + window.innerWidth;
+      const viewportBottom = window.scrollY + window.innerHeight;
+
+      if (left + tooltipRect.width > viewportRight) {
         left = e.pageX - tooltipRect.width - 10;
       }
-      if (top + tooltipRect.height > (window.scrollY + window.innerHeight)) {
+      if (top + tooltipRect.height > viewportBottom) {
         top = e.pageY - tooltipRect.height - 10;
       }
 
