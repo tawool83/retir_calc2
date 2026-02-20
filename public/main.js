@@ -233,59 +233,94 @@ function renderEventList() {
   const wrap = $("eventList");
   wrap.innerHTML = "";
 
-  const sorted = [...state.events].sort((a,b) => a.age - b.age);
-  if (sorted.length === 0) {
-    wrap.innerHTML = `<div class="text-[11px] text-slate-500 dark:text-slate-400">이벤트가 없습니다. “이벤트 추가”를 클릭하세요.</div>`;
-    return;
-  }
+  const { ageNow, ageRetire } = state.inputs;
+  const endAge = state.maxAge;
 
-  for (const ev of sorted) {
-    let border, subtitle, pill;
+  const eventsByAge = {};
+  state.events.forEach(ev => {
+      if (!eventsByAge[ev.age]) eventsByAge[ev.age] = [];
+      eventsByAge[ev.age].push(ev);
+  });
 
-    switch (ev.type) {
-        case 'portfolio':
-            const preset = state.presets.find(p => p.id === ev.presetId);
-            border = "border-purple-500";
-            subtitle = `전략: ${preset ? preset.name : '알 수 없음'}, 비중: ${ev.weight}`;
-            pill = `<span class="px-2 py-0.5 bg-purple-500 text-white text-[10px] font-bold rounded-full uppercase">포트폴리오</span>`;
-            break;
-        case 'monthly':
-            border = "border-primary";
-            subtitle = `월 납입액 ${fmtMoney(ev.amount)}으로 변경`;
-            pill = `<span class="px-2 py-0.5 bg-primary text-white text-[10px] font-bold rounded-full uppercase">월납입</span>`;
-            break;
-        case 'lump':
-            subtitle = `일시불 입금 ${ev.amount >= 0 ? "+" : ""}${fmtMoney(ev.amount)}`;
-            pill = `<span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-200 text-[10px] font-bold rounded-full uppercase">일시불</span>`;
-            break;
-        case 'withdrawal':
-            border = "border-emerald-400";
-            subtitle = `현금 인출 시작: 매월 ${fmtMoney(ev.amount)} (인출)`;
-            pill = `<span class="px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full uppercase">현금 인출</span>`;
-            break;
-        default: 
-            subtitle = "알 수 없는 이벤트";
-            pill = "";
-    }
+  let html = '<div class="flex gap-4">';
+  // Timeline bar
+  html += '<div class="relative flex-shrink-0 w-8 flex flex-col items-center">';
+  html += `<div class="absolute top-0 h-full w-0.5 bg-slate-200 dark:bg-slate-700"></div>`;
 
-    const node = document.createElement("div");
-    node.className = `p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border-l-4 ${border} relative`;
-    node.innerHTML = `
-      <div class="flex justify-between items-start gap-2">
-        <div class="min-w-0">
-          <div class="flex items-center gap-2 flex-wrap">
-            <p class="text-xs font-bold text-slate-900 dark:text-slate-100">${ev.age}세</p>
-            ${pill}
+  const agePoints = new Set([ageNow, ageRetire, ...state.events.map(e => e.age)]);
+  const sortedAges = [...agePoints].sort((a,b) => a - b);
+
+  sortedAges.forEach(age => {
+      const isEventAge = eventsByAge[age];
+      const isRetireAge = age === ageRetire;
+      const isNowAge = age === ageNow;
+      const percentage = (age - ageNow) / (endAge - ageNow) * 100;
+      
+      let dotClass = 'w-2 h-2 bg-slate-300 dark:bg-slate-600 rounded-full';
+      if (isEventAge || isRetireAge || isNowAge) {
+          dotClass = 'w-3 h-3 bg-primary rounded-full ring-4 ring-background-light dark:ring-background-dark';
+      }
+      html += `<div class="absolute" style="top: ${clamp(percentage,0,100)}%"><div class="${dotClass}"></div></div>`;
+  });
+
+  html += '</div>';
+
+  // Event cards
+  html += '<div class="flex-grow space-y-3 min-w-0">';
+  const sortedEvents = [...state.events].sort((a,b) => a.age - b.age);
+
+   if (sortedEvents.length === 0) {
+    html += `<div class="text-[11px] text-slate-500 dark:text-slate-400">이벤트가 없습니다. “이벤트 추가”를 클릭하세요.</div>`;
+  } else {
+    for (const ev of sortedEvents) {
+      let border, subtitle, pill;
+
+      switch (ev.type) {
+          case 'portfolio':
+              const preset = state.presets.find(p => p.id === ev.presetId);
+              border = "border-purple-500";
+              subtitle = `전략: ${preset ? preset.name : '알 수 없음'}, 비중: ${ev.weight}`;
+              pill = `<span class="px-2 py-0.5 bg-purple-500 text-white text-[10px] font-bold rounded-full uppercase">포트폴리오</span>`;
+              break;
+          case 'monthly':
+              border = "border-primary";
+              subtitle = `월 납입액 ${fmtMoney(ev.amount)}으로 변경`;
+              pill = `<span class="px-2 py-0.5 bg-primary text-white text-[10px] font-bold rounded-full uppercase">월납입</span>`;
+              break;
+          case 'lump':
+              subtitle = `일시불 입금 ${ev.amount >= 0 ? "+" : ""}${fmtMoney(ev.amount)}`;
+              pill = `<span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-200 text-[10px] font-bold rounded-full uppercase">일시불</span>`;
+              break;
+          case 'withdrawal':
+              border = "border-emerald-400";
+              subtitle = `현금 인출 시작: 매월 ${fmtMoney(ev.amount)} (인출)`;
+              pill = `<span class="px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full uppercase">현금 인출</span>`;
+              break;
+          default: 
+              subtitle = "알 수 없는 이벤트";
+              pill = "";
+      }
+
+      html += `
+        <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border-l-4 ${border} relative">
+          <div class="flex justify-between items-start gap-2">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <p class="text-xs font-bold text-slate-900 dark:text-slate-100">${ev.age}세</p>
+                ${pill}
+              </div>
+              <p class="text-[11px] text-slate-500 mt-0.5">${subtitle}</p>
+            </div>
+            <button class="text-slate-400 hover:text-red-500 transition-colors shrink-0" data-del="${ev.id}" title="삭제">
+              <span class="material-symbols-outlined text-sm">delete</span>
+            </button>
           </div>
-          <p class="text-[11px] text-slate-500 mt-0.5">${subtitle}</p>
         </div>
-        <button class="text-slate-400 hover:text-red-500 transition-colors shrink-0" data-del="${ev.id}" title="삭제">
-          <span class="material-symbols-outlined text-sm">delete</span>
-        </button>
-      </div>
-    `;
-    wrap.appendChild(node);
+      `;
+    }
   }
+  html += '</div></div>';
+  wrap.innerHTML = html;
 
   wrap.querySelectorAll("[data-del]").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -504,97 +539,6 @@ function simulate() {
 }
 
 /** =============================
- *  Timeline Rendering
- *  ============================= */
-function renderTimeline() {
-  const container = $("timelineContainer");
-  const { ageNow, ageRetire } = state.inputs;
-  const endAge = state.maxAge;
-  container.innerHTML = ''; // Clear previous timeline
-
-  // Create main timeline bar
-  const bar = document.createElement("div");
-  bar.className = "w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-full";
-  container.appendChild(bar);
-
-  // --- Markers ---
-  const allPoints = [
-    { age: ageNow, type: 'now', label: '현재', icon: 'radio_button_checked' },
-    { age: ageRetire, type: 'retire', label: '은퇴', icon: 'retirement' },
-    ...state.events.map(e => ({ 
-      age: e.age, 
-      type: e.type,
-      label: e.label || e.type,
-      data: e
-    }))
-  ].sort((a,b) => a.age - b.age);
-
-  const uniquePoints = [];
-  const seenAges = new Set();
-  for (const point of allPoints.reverse()) { // Prioritize events over default markers
-    if (!seenAges.has(point.age)) {
-      uniquePoints.push(point);
-      seenAges.add(point.age);
-    }
-  }
-  uniquePoints.reverse(); // Restore original order
-
-  uniquePoints.forEach(point => {
-    const percentage = (point.age - ageNow) / (endAge - ageNow) * 100;
-    const marker = document.createElement("div");
-    marker.className = "absolute -top-1.5 transform -translate-x-1/2";
-    marker.style.left = `${clamp(percentage, 0, 100)}%`;
-
-    let icon, color, title;
-    switch (point.type) {
-      case 'now':
-        icon = 'radio_button_checked'; color = 'text-primary'; title = `현재: ${point.age}세`;
-        break;
-      case 'retire':
-        icon = 'flag'; color = 'text-emerald-500'; title = `은퇴: ${point.age}세`;
-        break;
-      case 'portfolio':
-        const preset = state.presets.find(p => p.id === point.data.presetId);
-        icon = 'cases'; color = 'text-purple-500'; title = `${point.age}세: 포트폴리오 변경 (${preset ? preset.name : 'N/A'})`
-        break;
-      case 'monthly':
-        icon = 'paid'; color = 'text-blue-500'; title = `${point.age}세: 월 납입액 변경 (${fmtMoney(point.data.amount)})`;
-        break;
-      case 'lump':
-        icon = 'add_card'; color = 'text-slate-500'; title = `${point.age}세: 일시불 입금 (${fmtMoney(point.data.amount)})`;
-        break;
-      case 'withdrawal':
-        icon = 'credit_card'; color = 'text-red-500'; title = `${point.age}세: 현금 인출 (${fmtMoney(point.data.amount)}/월)`;
-        break;
-      default:
-        icon = 'help'; color = 'text-gray-400'; title = `알 수 없는 이벤트`;
-    }
-
-    marker.innerHTML = `
-      <span class="material-symbols-outlined ${color} text-3xl cursor-pointer" title="${title}"> 
-        ${icon}
-      </span>
-       <p class="absolute top-full left-1/2 -translate-x-1/2 text-[10px] font-bold mt-1.5 whitespace-nowrap">${point.age}세</p>
-    `;
-    container.appendChild(marker);
-
-    // Tooltip Logic
-    const tooltip = $('timelineTooltip');
-    const iconEl = marker.querySelector('span');
-    iconEl.addEventListener('mouseenter', (e) => {
-      tooltip.textContent = title;
-      tooltip.classList.remove('hidden');
-      const rect = e.target.getBoundingClientRect();
-      tooltip.style.left = `${rect.left + rect.width / 2 - tooltip.offsetWidth / 2}px`;
-      tooltip.style.top = `${rect.top - tooltip.offsetHeight - 8}px`;
-    });
-    iconEl.addEventListener('mouseleave', () => {
-      tooltip.classList.add('hidden');
-    });
-  });
-}
-
-/** =============================
  *  Render table + Chart
  *  ============================= */
 function buildAnnualRow(y) {
@@ -802,7 +746,7 @@ function recalcAndRender() {
 
   renderAnnualTable(results);
   updateObservation(results);
-  renderTimeline();
+  renderEventList(); // This now renders the timeline as well
 
   if (!$("chartPanel").classList.contains("hidden")) {
     renderChart(results);
