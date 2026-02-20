@@ -243,6 +243,7 @@ function initPresetManagement() {
  *  ============================= */
 function createEventCard(ev) {
     let border, subtitle, pill;
+    const labelPart = ev.label ? `<span class="font-bold text-slate-800 dark:text-slate-100">${ev.label}:</span>` : '';
 
     switch (ev.type) {
         case 'portfolio':
@@ -253,16 +254,16 @@ function createEventCard(ev) {
             break;
         case 'monthly':
             border = "border-primary";
-            subtitle = `월 납입액 ${fmtMoney(ev.amount)}으로 변경`;
+            subtitle = `${labelPart} 월 납입액 ${fmtMoney(ev.amount)}으로 변경`;
             pill = `<span class="px-2 py-0.5 bg-primary text-white text-[10px] font-bold rounded-full uppercase">월납입</span>`;
             break;
         case 'lump':
-            subtitle = `일시불 입금 ${ev.amount >= 0 ? "+" : ""}${fmtMoney(ev.amount)}`;
+            subtitle = `${labelPart} 일시불 입금 ${ev.amount >= 0 ? "+" : ""}${fmtMoney(ev.amount)}`;
             pill = `<span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-200 text-[10px] font-bold rounded-full uppercase">일시불</span>`;
             break;
         case 'withdrawal':
             border = "border-emerald-400";
-            subtitle = `현금 인출 시작: 매월 ${fmtMoney(ev.amount)} (인출)`;
+            subtitle = `${labelPart} 현금 인출 시작: 매월 ${fmtMoney(ev.amount)} (인출)`;
             pill = `<span class="px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full uppercase">현금 인출</span>`;
             break;
         default: 
