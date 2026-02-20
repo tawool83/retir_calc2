@@ -241,33 +241,45 @@ function initPresetManagement() {
 /** =============================
  *  Events UI
  *  ============================= */
-function createEventCard(ev) {
-    let border, subtitle, pill;
+function getEventSubtitle(ev) {
     const labelPart = ev.label ? `<span class="font-bold text-slate-800 dark:text-slate-100">${ev.label}:</span>` : '';
-
     switch (ev.type) {
         case 'portfolio':
             const preset = state.presets.find(p => p.id === ev.presetId);
+            return `전략: ${preset ? preset.name : '알 수 없음'}, 비중: ${ev.weight}`;
+        case 'monthly':
+            return `${labelPart} 월 납입액 ${fmtMoney(ev.amount)}으로 변경`;
+        case 'lump':
+            return `${labelPart} 일시불 ${ev.amount >= 0 ? "입금" : "출금"} ${fmtMoney(Math.abs(ev.amount))}`;
+        case 'withdrawal':
+            return `${labelPart} 현금 인출 시작: 매월 ${fmtMoney(ev.amount)} (인출)`;
+        default:
+            return "알 수 없는 이벤트";
+    }
+}
+
+function createEventCard(ev) {
+    let border, pill;
+    const subtitle = getEventSubtitle(ev);
+
+    switch (ev.type) {
+        case 'portfolio':
             border = "border-purple-500";
-            subtitle = `전략: ${preset ? preset.name : '알 수 없음'}, 비중: ${ev.weight}`;
             pill = `<span class="px-2 py-0.5 bg-purple-500 text-white text-[10px] font-bold rounded-full uppercase">포트폴리오</span>`;
             break;
         case 'monthly':
             border = "border-primary";
-            subtitle = `${labelPart} 월 납입액 ${fmtMoney(ev.amount)}으로 변경`;
             pill = `<span class="px-2 py-0.5 bg-primary text-white text-[10px] font-bold rounded-full uppercase">월납입</span>`;
             break;
         case 'lump':
-            subtitle = `${labelPart} 일시불 입금 ${ev.amount >= 0 ? "+" : ""}${fmtMoney(ev.amount)}`;
+            border = "border-slate-500";
             pill = `<span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-200 text-[10px] font-bold rounded-full uppercase">일시불</span>`;
             break;
         case 'withdrawal':
             border = "border-emerald-400";
-            subtitle = `${labelPart} 현금 인출 시작: 매월 ${fmtMoney(ev.amount)} (인출)`;
             pill = `<span class="px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full uppercase">현금 인출</span>`;
             break;
         default: 
-            subtitle = "알 수 없는 이벤트";
             pill = "";
             border = "border-slate-300";
     }
@@ -707,14 +719,24 @@ function buildAnnualRow(y) {
         portfolioDisplayHtml = `<div class="flex flex-col items-start gap-1">${htmlItems.join('')}</div>`;
     }
 
-    const highlight = y.age === state.inputs.ageRetire ? "bg-emerald-50/60 dark:bg-emerald-900/10" : "";
+    let highlight = '';
+    const hasEvents = state.events.some(e => e.age === y.age);
+    if (y.age === state.inputs.ageRetire) {
+        highlight = "bg-emerald-50/60 dark:bg-emerald-900/10";
+    } else if (hasEvents) {
+        highlight = "bg-blue-50/60 dark:bg-blue-900/20";
+    }
+    
+    let ageExtra = [];
+    if (y.age === state.inputs.ageRetire) ageExtra.push('은퇴');
+    if (hasEvents) ageExtra.push('이벤트');
 
     return `
     <tr class="annual-row ${highlight} hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group" data-year="${y.year}">
       <td class="px-6 py-4 font-bold text-slate-900 dark:text-slate-100">
         <div class="flex flex-col">
           <span>${y.year}</span>
-          <span class="text-[10px] text-slate-400">${y.age}세${y.age === state.inputs.ageRetire ? " • 은퇴" : ""}</span>
+          <span class="text-[10px] text-slate-400">${y.age}세${ageExtra.length > 0 ? ` • ${ageExtra.join(' • ')}` : ""}</span>
         </div>
       </td>
       <td class="px-6 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.annualContribution, true)}</td>
@@ -848,6 +870,15 @@ function initTooltips() {
       } else {
           html += `<div class="text-slate-400">데이터 없음</div>`;
       }
+
+      const eventsAtAge = state.events.filter(e => e.age === yearData.age);
+        if (eventsAtAge.length > 0) {
+            html += `<div class="font-bold mt-3 mb-2 text-base border-t border-slate-700 pt-2">이벤트</div>`;
+            html += eventsAtAge.map(ev => {
+                const subtitle = getEventSubtitle(ev);
+                return `<p class="text-xs text-slate-300 mb-1">${subtitle}</p>`;
+            }).join('');
+        }
 
       tooltip.innerHTML = html;
       tooltip.classList.remove('hidden');
