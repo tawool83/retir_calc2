@@ -494,8 +494,12 @@ function simulate() {
  *  Render table + Chart
  *  ============================= */
 function buildAnnualRow(y) {
-  const portfolioDesc = y.portfolio.map(p => `${p.preset.name.substring(0,4)}:${(p.percentage*100).toFixed(0)}%`).join(' ');
-  const badge = `<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 text-xs font-semibold rounded-full">${portfolioDesc || '정의되지 않음'}</span>`;
+  const portfolioDesc = y.portfolio.map(p => {
+      const name = p.preset.name;
+      const displayName = name.length > 7 ? name.substring(0, 7) + '...' : name;
+      return `${displayName}:${(p.percentage*100).toFixed(0)}%`;
+    }).join(' ');
+  const badge = `<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 text-xs font-semibold rounded-full" title="${y.portfolio.map(p => p.preset.name).join(', ')}">${portfolioDesc || '정의되지 않음'}</span>`;
 
   const highlight = y.age === state.inputs.ageRetire ? "bg-emerald-50/60 dark:bg-emerald-900/10" : "";
 
@@ -533,7 +537,7 @@ function renderAnnualTable(results) {
 
 function renderChart(results) {
   const filteredYears = results.years.filter(passesFilter);
-  const labels = filteredYears.map(y => [String(y.year), `${y.age}세`]);
+  const labels = filteredYears.map(y => [`${String(y.year)}`, `${y.age}세`]);
   const datasets = {};
   
   // This is a simplified view for the chart. We calculate total principal and total returns.

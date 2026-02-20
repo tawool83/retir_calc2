@@ -16,4 +16,4 @@ This is a retirement simulator that allows users to project their savings over t
 
 ## Current Plan
 
-I will now update the `blueprint.md` file to reflect the latest changes, which include adding the user's age to the chart's x-axis labels.
+I will now update the `blueprint.md` file to reflect the latest changes, which include truncating long portfolio names in the table and displaying the full name in a tooltip.
