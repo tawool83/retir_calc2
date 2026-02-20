@@ -504,6 +504,97 @@ function simulate() {
 }
 
 /** =============================
+ *  Timeline Rendering
+ *  ============================= */
+function renderTimeline() {
+  const container = $("timelineContainer");
+  const { ageNow, ageRetire } = state.inputs;
+  const endAge = state.maxAge;
+  container.innerHTML = ''; // Clear previous timeline
+
+  // Create main timeline bar
+  const bar = document.createElement("div");
+  bar.className = "w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-full";
+  container.appendChild(bar);
+
+  // --- Markers ---
+  const allPoints = [
+    { age: ageNow, type: 'now', label: '현재', icon: 'radio_button_checked' },
+    { age: ageRetire, type: 'retire', label: '은퇴', icon: 'retirement' },
+    ...state.events.map(e => ({ 
+      age: e.age, 
+      type: e.type,
+      label: e.label || e.type,
+      data: e
+    }))
+  ].sort((a,b) => a.age - b.age);
+
+  const uniquePoints = [];
+  const seenAges = new Set();
+  for (const point of allPoints.reverse()) { // Prioritize events over default markers
+    if (!seenAges.has(point.age)) {
+      uniquePoints.push(point);
+      seenAges.add(point.age);
+    }
+  }
+  uniquePoints.reverse(); // Restore original order
+
+  uniquePoints.forEach(point => {
+    const percentage = (point.age - ageNow) / (endAge - ageNow) * 100;
+    const marker = document.createElement("div");
+    marker.className = "absolute -top-1.5 transform -translate-x-1/2";
+    marker.style.left = `${clamp(percentage, 0, 100)}%`;
+
+    let icon, color, title;
+    switch (point.type) {
+      case 'now':
+        icon = 'radio_button_checked'; color = 'text-primary'; title = `현재: ${point.age}세`;
+        break;
+      case 'retire':
+        icon = 'flag'; color = 'text-emerald-500'; title = `은퇴: ${point.age}세`;
+        break;
+      case 'portfolio':
+        const preset = state.presets.find(p => p.id === point.data.presetId);
+        icon = 'cases'; color = 'text-purple-500'; title = `${point.age}세: 포트폴리오 변경 (${preset ? preset.name : 'N/A'})`
+        break;
+      case 'monthly':
+        icon = 'paid'; color = 'text-blue-500'; title = `${point.age}세: 월 납입액 변경 (${fmtMoney(point.data.amount)})`;
+        break;
+      case 'lump':
+        icon = 'add_card'; color = 'text-slate-500'; title = `${point.age}세: 일시불 입금 (${fmtMoney(point.data.amount)})`;
+        break;
+      case 'withdrawal':
+        icon = 'credit_card'; color = 'text-red-500'; title = `${point.age}세: 현금 인출 (${fmtMoney(point.data.amount)}/월)`;
+        break;
+      default:
+        icon = 'help'; color = 'text-gray-400'; title = `알 수 없는 이벤트`;
+    }
+
+    marker.innerHTML = `
+      <span class="material-symbols-outlined ${color} text-3xl cursor-pointer" title="${title}"> 
+        ${icon}
+      </span>
+       <p class="absolute top-full left-1/2 -translate-x-1/2 text-[10px] font-bold mt-1.5 whitespace-nowrap">${point.age}세</p>
+    `;
+    container.appendChild(marker);
+
+    // Tooltip Logic
+    const tooltip = $('timelineTooltip');
+    const iconEl = marker.querySelector('span');
+    iconEl.addEventListener('mouseenter', (e) => {
+      tooltip.textContent = title;
+      tooltip.classList.remove('hidden');
+      const rect = e.target.getBoundingClientRect();
+      tooltip.style.left = `${rect.left + rect.width / 2 - tooltip.offsetWidth / 2}px`;
+      tooltip.style.top = `${rect.top - tooltip.offsetHeight - 8}px`;
+    });
+    iconEl.addEventListener('mouseleave', () => {
+      tooltip.classList.add('hidden');
+    });
+  });
+}
+
+/** =============================
  *  Render table + Chart
  *  ============================= */
 function buildAnnualRow(y) {
@@ -711,6 +802,7 @@ function recalcAndRender() {
 
   renderAnnualTable(results);
   updateObservation(results);
+  renderTimeline();
 
   if (!$("chartPanel").classList.contains("hidden")) {
     renderChart(results);
