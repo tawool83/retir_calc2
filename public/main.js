@@ -757,7 +757,7 @@ function recalcAndRender() {
  *  Inputs init
  *  ============================= */
 function initInputs() {
-  const inputsToWatch = ["ageNow", "ageRetire", "initialInvestment", "monthlyContribution", "filterEnabled", "filterAgeFrom", "filterAgeTo"];
+  const inputsToWatch = ["ageNow", "ageRetire", "initialInvestment", "monthlyContribution"];
   inputsToWatch.forEach(id => {
       const el = $(id);
       el.addEventListener("input", () => { recalcAndRender(); saveStateDebounced(); });
@@ -771,6 +771,29 @@ function initInputs() {
           saveStateDebounced();
       });
   });
+
+    // Filter logic
+    const filterPanel = $('filterPanel');
+    const btnToggleFilter = $('btnToggleFilter');
+    btnToggleFilter.addEventListener('click', (e) => {
+        e.stopPropagation();
+        filterPanel.classList.toggle('hidden');
+    });
+    document.addEventListener('click', (e) => {
+        if (!filterPanel.contains(e.target) && !btnToggleFilter.contains(e.target)) {
+            filterPanel.classList.add('hidden');
+        }
+    });
+    const filterInputs = ["filterEnabled", "filterAgeFrom", "filterAgeTo"];
+    filterInputs.forEach(id => {
+        const el = $(id);
+        el.addEventListener("input", () => { recalcAndRender(); saveStateDebounced(); });
+        if(el.type !== 'text') el.addEventListener("change", () => { recalcAndRender(); saveStateDebounced(); });
+        el.addEventListener("blur", () => { 
+            syncUiToStateFromInputs();
+            saveStateDebounced();
+        });
+    });
 
   $("btnToggleChart").addEventListener("click", () => {
     $("chartPanel").classList.toggle("hidden");
