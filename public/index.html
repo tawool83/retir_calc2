@@ -109,11 +109,16 @@
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-bold flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">event_note</span>
-            시나리오 이벤트
+            시나리오
           </h2>
-          <button id="btnAddEvent" class="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition-colors">
-            <span class="material-symbols-outlined text-sm">add_circle</span> 이벤트 추가
-          </button>
+           <div class="flex items-center gap-2">
+            <button id="btnAddPreset" class="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-primary transition-colors px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 hover:border-primary">
+              <span class="material-symbols-outlined text-sm">settings</span> 프리셋
+            </button>
+            <button id="btnAddEvent" class="flex items-center gap-1.5 text-xs font-bold text-white bg-primary hover:bg-secondary transition-colors px-3 py-2 rounded-lg shadow-md shadow-primary/20">
+              <span class="material-symbols-outlined text-sm">add_circle</span> 이벤트 추가
+            </button>
+          </div>
         </div>
 
         <div id="eventList" class="mt-6"></div>
@@ -123,9 +128,6 @@
           <span class="font-semibold">월 납입액 변경</span>, <span class="font-semibold">일시불</span>,
           <span class="font-semibold">현금 인출(월)</span>.
         </div>
-         <button id="btnAddPreset" class="mt-4 w-full flex items-center justify-center gap-1 text-xs font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition-colors border border-primary/50 rounded-lg py-2">
-            <span class="material-symbols-outlined text-sm">add_circle</span> 투자 프리셋 관리
-          </button>
       </div>
 
     </aside>

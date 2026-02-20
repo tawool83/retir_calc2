@@ -11,7 +11,7 @@ const defaultEvents = [
     age: 30,
     type: 'monthly',
     amount: 1500000,
-    label: '초기 월 납입액'
+    label: '월 분할 투자금'
   },
   {
     id: 'evt_3',
