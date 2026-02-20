@@ -538,13 +538,7 @@ function getActivePortfolio(age) {
         .sort((a,b) => b.age - a.age);
 
     if (!portfolioEvents.length) {
-        const firstPreset = state.presets[0];
-        if (!firstPreset) return [];
-        return [{
-            preset: firstPreset,
-            weight: 10,
-            percentage: 1
-        }];
+        return [];
     }
 
     const latestAge = portfolioEvents[0].age;
