@@ -79,7 +79,6 @@ const state = {
     ageRetire: 65,
     initialInvestment: 50000000,
     monthlyContribution: 2000000,
-    autoZeroAfterRetire: true,
     filterEnabled: false,
     filterAgeFrom: 30,
     filterAgeTo: 100
@@ -121,6 +120,11 @@ function applySnapshot(snap) {
   if (snap.inputs && typeof snap.inputs === 'object') {
      Object.assign(state.inputs, snap.inputs);
   }
+   // Migration for removing autoZeroAfterRetire
+  if (state.inputs.autoZeroAfterRetire) {
+    delete state.inputs.autoZeroAfterRetire;
+  }
+
 
   // Events
   if (Array.isArray(snap.events) && snap.events.length > 0) {
@@ -140,8 +144,7 @@ function syncStateToUi() {
   $("ageRetire").value = state.inputs.ageRetire;
   $("initialInvestment").value = state.inputs.initialInvestment.toLocaleString();
   $("monthlyContribution").value = state.inputs.monthlyContribution.toLocaleString();
-  $("autoZeroAfterRetire").checked = state.inputs.autoZeroAfterRetire;
-
+  
   $("filterEnabled").checked = state.inputs.filterEnabled;
   $("filterAgeFrom").value = state.inputs.filterAgeFrom;
   $("filterAgeTo").value = state.inputs.filterAgeTo;
@@ -154,7 +157,6 @@ function syncUiToStateFromInputs() {
   state.inputs.ageRetire = clamp(Number($("ageRetire").value || 0), 0, 120);
   state.inputs.initialInvestment = parseMoney($("initialInvestment").value);
   state.inputs.monthlyContribution = parseMoney($("monthlyContribution").value);
-  state.inputs.autoZeroAfterRetire = $("autoZeroAfterRetire").checked;
 
   state.inputs.filterEnabled = $("filterEnabled").checked;
   state.inputs.filterAgeFrom = clamp(Number($("filterAgeFrom").value || 0), 0, 120);
@@ -396,7 +398,7 @@ function getPortfolioSignature(portfolio) {
 
 function simulate() {
   syncUiToStateFromInputs();
-  const { ageNow, ageRetire, initialInvestment, monthlyContribution, autoZeroAfterRetire } = state.inputs;
+  const { ageNow, ageRetire, initialInvestment, monthlyContribution } = state.inputs;
   const endAge = state.maxAge;
   const startYear = state.startYear;
 
@@ -422,10 +424,9 @@ function simulate() {
         p.yearDividend = 0;
     });
 
-    const baseMonthly = autoZeroAfterRetire && age >= ageRetire ? 0 : monthlyContribution;
     const activeMonthly = state.events
         .filter(e => e.type === "monthly" && e.age <= age)
-        .sort((a,b) => b.age - a.age)[0]?.amount ?? baseMonthly;
+        .sort((a,b) => b.age - a.age)[0]?.amount ?? monthlyContribution;
     const lumpSum = state.events.filter(e => e.type === 'lump' && e.age === age).reduce((sum, e) => sum + e.amount, 0);
     const withdrawalMonthly = state.events.filter(e => e.type === 'withdrawal' && e.age <= age).reduce((sum, e) => sum + e.amount, 0);
 
@@ -711,7 +712,7 @@ function recalcAndRender() {
  *  Inputs init
  *  ============================= */
 function initInputs() {
-  const inputsToWatch = ["ageNow", "ageRetire", "initialInvestment", "monthlyContribution", "autoZeroAfterRetire", "filterEnabled", "filterAgeFrom", "filterAgeTo"];
+  const inputsToWatch = ["ageNow", "ageRetire", "initialInvestment", "monthlyContribution", "filterEnabled", "filterAgeFrom", "filterAgeTo"];
   inputsToWatch.forEach(id => {
       const el = $(id);
       el.addEventListener("input", () => { recalcAndRender(); saveStateDebounced(); });
