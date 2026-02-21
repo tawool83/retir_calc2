@@ -773,7 +773,7 @@ function buildAnnualRow(y) {
     }
     
     let ageExtra = [];
-    if (y.age === state.inputs.ageRetire) ageExtra.push('은퇴');
+    if (y.age === state.inputs.ageRetire) ageExtra.push('은퇴 ❤️');
     if (hasEvents) ageExtra.push('이벤트');
 
     return `
