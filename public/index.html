@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>은퇴 시뮬레이터 (동적 포트폴리오)</title>
+  <title data-i18n-key="APP_TITLE"></title>
 
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -55,15 +55,13 @@
   <!-- Header -->
   <div class="mb-4 flex items-center justify-between">
     <div>
-      <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-        은퇴 <span class="text-primary">시뮬레이터</span>
-      </h1>
-      <p class="text-slate-500 text-sm mt-1">동적 포트폴리오 • 이벤트 기반 • 영구 저장</p>
+      <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100" data-i18n-key="HEADER.TITLE"></h1>
+      <p class="text-slate-500 text-sm mt-1" data-i18n-key="HEADER.SUBTITLE"></p>
     </div>
     <div class="flex items-center gap-4">
       <div class="text-right hidden sm:block">
-        <p class="text-xs font-bold text-slate-900 dark:text-slate-100 leading-none">로컬 프로필</p>
-        <p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">브라우저에 저장됨</p>
+        <p class="text-xs font-bold text-slate-900 dark:text-slate-100 leading-none" data-i18n-key="HEADER.PROFILE_TITLE"></p>
+        <p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold" data-i18n-key="HEADER.PROFILE_SUBTITLE"></p>
       </div>
       <div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden border-2 border-primary/20 flex items-center justify-center">
         <span class="material-symbols-outlined text-slate-500 dark:text-slate-200">person</span>
@@ -81,22 +79,20 @@
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-lg font-bold flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">tune</span>
-            기본 설정
+            <span data-i18n-key="CONFIG.TITLE"></span>
           </h2>
-          <button id="btnResetAll" class="px-3 py-2 rounded-lg text-xs font-bold bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-200 hover:bg-red-100 dark:hover:bg-red-900/30">
-            저장된 데이터 초기화
-          </button>
+          <button id="btnResetAll" class="px-3 py-2 rounded-lg text-xs font-bold bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-200 hover:bg-red-100 dark:hover:bg-red-900/30" data-i18n-key="CONFIG.RESET_BUTTON"></button>
         </div>
 
         <div class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-1.5">
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">현재 나이</label>
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n-key="CONFIG.AGE_NOW_LABEL"></label>
               <input id="ageNow" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2.5 px-4 focus:ring-primary focus:border-primary text-sm font-semibold"
                      type="number" min="0" max="120" value="30"/>
             </div>
             <div class="space-y-1.5">
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">은퇴 나이</label>
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n-key="CONFIG.AGE_RETIRE_LABEL"></label>
               <input id="ageRetire" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2.5 px-4 focus:ring-primary focus:border-primary text-sm font-semibold"
                      type="number" min="0" max="120" value="65"/>
             </div>
@@ -109,25 +105,21 @@
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-bold flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">event_note</span>
-            시나리오
+            <span data-i18n-key="SCENARIO.TITLE"></span>
           </h2>
            <div class="flex items-center gap-2">
             <button id="btnAddPreset" class="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-primary transition-colors px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 hover:border-primary">
-              <span class="material-symbols-outlined text-sm">settings</span> 프리셋
+              <span class="material-symbols-outlined text-sm">settings</span> <span data-i18n-key="SCENARIO.PRESET_BUTTON"></span>
             </button>
             <button id="btnAddEvent" class="flex items-center gap-1.5 text-xs font-bold text-white bg-primary hover:bg-secondary transition-colors px-3 py-2 rounded-lg shadow-md shadow-primary/20">
-              <span class="material-symbols-outlined text-sm">add_circle</span> 시나리오 추가
+              <span class="material-symbols-outlined text-sm">add_circle</span> <span data-i18n-key="SCENARIO.ADD_BUTTON"></span>
             </button>
           </div>
         </div>
 
         <div id="eventList" class="mt-6"></div>
 
-        <div class="mt-4 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-          지원 항목: <span class="font-semibold">포트폴리오 변경</span>,
-          <span class="font-semibold">월 정기 투자금 변경</span>, <span class="font-semibold">일시불</span>,
-          <span class="font-semibold">월 정기 출금</span>.
-        </div>
+        <div class="mt-4 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed" data-i18n-key="SCENARIO.SUPPORTED_ITEMS"></div>
       </div>
 
     </aside>
@@ -139,29 +131,29 @@
       <div class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col h-full overflow-hidden">
         <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-900 z-20">
           <div>
-            <h2 class="text-lg font-bold">연간 성장 예측</h2>
+            <h2 class="text-lg font-bold" data-i18n-key="RESULTS.TITLE"></h2>
             <p id="rangeLabel" class="text-xs text-slate-500 mt-0.5"></p>
           </div>
           <div class="flex gap-2 items-center relative">
-            <button id="btnToggleFilter" class="size-10 flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all hover:scale-105 active:scale-95 group" title="결과 필터">
+            <button id="btnToggleFilter" class="size-10 flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all hover:scale-105 active:scale-95 group" data-i18n-key="[title]RESULTS.FILTER_TOOLTIP">
                 <span class="material-symbols-outlined">filter_alt</span>
             </button>
-            <button id="btnToggleChart" class="size-10 flex items-center justify-center bg-primary text-white rounded-lg shadow-lg shadow-primary/20 hover:bg-secondary transition-all hover:scale-105 active:scale-95 group" title="차트 보기">
+            <button id="btnToggleChart" class="size-10 flex items-center justify-center bg-primary text-white rounded-lg shadow-lg shadow-primary/20 hover:bg-secondary transition-all hover:scale-105 active:scale-95 group" data-i18n-key="[title]RESULTS.CHART_TOOLTIP">
               <span class="material-symbols-outlined">bar_chart</span>
             </button>
 
             <!-- Filter Panel -->
             <div id="filterPanel" class="hidden absolute top-full right-0 mt-2 w-72 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg z-30 p-4">
-                <h3 class="text-sm font-bold mb-3">표 필터 (나이 범위)</h3>
+                <h3 class="text-sm font-bold mb-3" data-i18n-key="FILTER.TITLE"></h3>
                  <div class="grid grid-cols-2 gap-3">
                   <label class="block">
-                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">시작 나이</span>
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="FILTER.AGE_FROM_LABEL"></span>
                     <input id="filterAgeFrom" type="number" min="0" max="120"
                            class="mt-1 w-full bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm font-semibold"
                            value="30"/>
                   </label>
                   <label class="block">
-                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">종료 나이</span>
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="FILTER.AGE_TO_LABEL"></span>
                     <input id="filterAgeTo" type="number" min="0" max="120"
                            class="mt-1 w-full bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm font-semibold"
                            value="100"/>
@@ -170,7 +162,7 @@
 
                 <div class="mt-4 flex items-center justify-between bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2">
                   <div>
-                    <p class="text-xs font-bold">필터 활성화</p>
+                    <p class="text-xs font-bold" data-i18n-key="FILTER.ENABLE_LABEL"></p>
                   </div>
                   <label class="inline-flex items-center cursor-pointer">
                     <input id="filterEnabled" type="checkbox" class="sr-only peer">
@@ -186,8 +178,8 @@
         <!-- Chart Panel -->
         <div id="chartPanel" class="hidden border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 p-4">
           <div class="flex items-center justify-between mb-2">
-            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">자산 구성</p>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">연도별 누적 투자원금 및 투자수익</p>
+            <p class="text-xs font-bold uppercase tracking-wider text-slate-500" data-i18n-key="CHART.TITLE"></p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400" data-i18n-key="CHART.SUBTITLE"></p>
           </div>
           <div class="bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 p-3">
             <canvas id="balanceChart" height="360"></canvas>
@@ -198,45 +190,45 @@
           <table class="w-full text-left text-sm">
             <thead class="sticky top-0 bg-slate-50 dark:bg-slate-800 z-10 shadow-sm">
               <tr class="text-slate-500 font-bold uppercase text-xs tracking-wider">
-                <th class="px-4 py-4">연도<br/>나이</th>
+                <th class="px-4 py-4" data-i18n-key="TABLE.HEADER_YEAR_AGE"></th>
                 <th id="th-contribute" class="px-4 py-4 relative">
                   <div class="flex items-center gap-1 cursor-help">
-                    <span>연 투자금</span>
+                    <span data-i18n-key="TABLE.HEADER_CONTRIBUTION"></span>
                     <span class="material-symbols-outlined text-xs help-icon">help</span>
                   </div>
                   <div class="header-tooltip hidden absolute z-20 -left-4 mt-2 w-64 p-3 bg-slate-900 text-white rounded-lg shadow-xl normal-case font-medium leading-relaxed text-xs"></div>
                 </th>
                 <th id="th-return" class="px-4 py-4 relative">
                   <div class="flex items-center gap-1 cursor-help">
-                    <span>평가<br/>수익</span>
+                    <span data-i18n-key="TABLE.HEADER_RETURN"></span>
                     <span class="material-symbols-outlined text-xs help-icon">help</span>
                   </div>
                   <div class="header-tooltip hidden absolute z-20 -left-4 mt-2 w-72 p-3 bg-slate-900 text-white rounded-lg shadow-xl normal-case font-medium leading-relaxed text-xs"></div>
                 </th>
                 <th id="th-dividend" class="px-4 py-4 relative">
                   <div class="flex items-center gap-1 cursor-help">
-                    <span>배당금<br/>(세후)</span>
+                    <span data-i18n-key="TABLE.HEADER_DIVIDEND"></span>
                     <span class="material-symbols-outlined text-xs help-icon">help</span>
                   </div>
                   <div class="header-tooltip hidden absolute z-20 -left-4 mt-2 w-72 p-3 bg-slate-900 text-white rounded-lg shadow-xl normal-case font-medium leading-relaxed text-xs"></div>
                 </th>
                 <th id="th-withdrawal" class="px-4 py-4 relative">
                   <div class="flex items-center gap-1 cursor-help">
-                    <span>출금<br/>(현금화)</span>
+                    <span data-i18n-key="TABLE.HEADER_WITHDRAWAL"></span>
                     <span class="material-symbols-outlined text-xs help-icon">help</span>
                   </div>
                   <div class="header-tooltip hidden absolute z-20 -left-4 mt-2 w-64 p-3 bg-slate-900 text-white rounded-lg shadow-xl normal-case font-medium leading-relaxed text-xs"></div>
                 </th>
                 <th id="th-balance" class="px-4 py-4 relative">
                   <div class="flex items-center gap-1 cursor-help">
-                    <span>연말<br/>잔액</span>
+                    <span data-i18n-key="TABLE.HEADER_BALANCE"></span>
                     <span class="material-symbols-outlined text-xs help-icon">help</span>
                   </div>
                   <div class="header-tooltip hidden absolute z-20 -left-4 mt-2 w-80 p-3 bg-slate-900 text-white rounded-lg shadow-xl normal-case font-medium leading-relaxed text-xs"></div>
                 </th>
                 <th id="th-portfolio" class="px-4 py-4 relative">
                   <div class="flex items-center gap-1 cursor-help">
-                    <span>포트폴리오</span>
+                    <span data-i18n-key="TABLE.HEADER_PORTFOLIO"></span>
                     <span class="material-symbols-outlined text-xs help-icon">help</span>
                   </div>
                   <div class="header-tooltip hidden absolute z-20 right-0 mt-2 w-60 p-3 bg-slate-900 text-white rounded-lg shadow-xl normal-case font-medium leading-relaxed text-xs"></div>
@@ -254,10 +246,8 @@
           <span class="material-symbols-outlined block">lightbulb</span>
         </div>
         <div>
-          <h4 class="text-sm font-bold text-slate-900 dark:text-white">분석 결과 요약</h4>
-          <p id="observation" class="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-            좌측 설정을 변경하여 나의 은퇴 계획을 분석해보세요.
-          </p>
+          <h4 class="text-sm font-bold text-slate-900 dark:text-white" data-i18n-key="OBSERVATION.TITLE"></h4>
+          <p id="observation" class="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed"></p>
         </div>
       </div>
 
@@ -273,7 +263,7 @@
   <div class="max-w-[1440px] mx-auto px-10 flex flex-col md:flex-row items-center justify-between gap-6 text-slate-500 text-[11px] font-medium">
     <div class="flex items-center gap-4">
       <span class="material-symbols-outlined text-primary text-sm">verified_user</span>
-      <p>© 2024 은퇴계획 Pro. 데이터는 브라우저에 저장됩니다. 본 시뮬레이션은 투자 자문이 아닙니다.</p>
+      <p data-i18n-key="FOOTER.COPYRIGHT"></p>
     </div>
   </div>
 </footer>
@@ -282,7 +272,7 @@
 <dialog id="eventDialog" class="rounded-xl p-0 w-[92vw] max-w-md bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl">
   <form method="dialog" class="p-5">
     <div class="flex items-center justify-between mb-3">
-      <h3 class="text-sm font-extrabold">시나리오 이벤트 추가</h3>
+      <h3 id="dlgEventTitle" class="text-sm font-extrabold"></h3>
       <button value="cancel" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
         <span class="material-symbols-outlined">close</span>
       </button>
@@ -291,28 +281,28 @@
     <div class="space-y-3">
       <div class="grid grid-cols-2 gap-3">
         <label class="block">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">나이</span>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.AGE_LABEL"></span>
           <input id="dlgAge" type="number" min="0" max="120"
                  class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
         </label>
         <label class="block">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">종류</span>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.TYPE_LABEL"></span>
           <select id="dlgType" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold">
-            <option value="portfolio">포트폴리오 변경</option>
-            <option value="monthly">월 정기 투자금 변경</option>
-            <option value="lump">일시 입/출금</option>
-            <option value="withdrawal">월 정기 출금</option>
+            <option value="portfolio" data-i18n-key="EVENT_DIALOG.TYPE_PORTFOLIO"></option>
+            <option value="monthly" data-i18n-key="EVENT_DIALOG.TYPE_MONTHLY"></option>
+            <option value="lump" data-i18n-key="EVENT_DIALOG.TYPE_LUMP"></option>
+            <option value="withdrawal" data-i18n-key="EVENT_DIALOG.TYPE_WITHDRAWAL"></option>
           </select>
         </label>
       </div>
 
       <div id="dlgFieldsPortfolio" class="space-y-3 pt-2">
         <label class="block">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">투자 프리셋</span>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.PRESET_LABEL"></span>
           <select id="dlgPresetId" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"></select>
         </label>
          <label class="block">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">비중 (1-10)</span>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.WEIGHT_LABEL"></span>
           <input id="dlgWeight" type="number" min="1" max="10" value="10"
                  class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
         </label>
@@ -320,14 +310,12 @@
 
       <div id="dlgFieldsMonetary" class="hidden space-y-3 pt-2">
          <label class="block">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">라벨</span>
-          <input id="dlgLabel" type="text" placeholder="예: 초기 투자금"
-                 class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.LABEL_LABEL"></span>
+          <input id="dlgLabel" type="text" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold" data-i18n-key="[placeholder]EVENT_DIALOG.LABEL_PLACEHOLDER"/>
         </label>
         <label class="block">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">금액 (₩)</span>
-          <input id="dlgAmount" type="text" placeholder="예: 1500000"
-                 class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.AMOUNT_LABEL"></span>
+          <input id="dlgAmount" type="text" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold" data-i18n-key="[placeholder]EVENT_DIALOG.AMOUNT_PLACEHOLDER"/>
         </label>
       </div>
 
@@ -335,8 +323,8 @@
     </div>
 
     <div class="mt-5 flex gap-2 justify-end">
-      <button value="cancel" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">취소</button>
-      <button id="dlgSave" value="ok" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary">시나리오 추가</button>
+      <button value="cancel" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700" data-i18n-key="EVENT_DIALOG.CANCEL_BUTTON"></button>
+      <button id="dlgSave" value="ok" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary"></button>
     </div>
   </form>
 </dialog>
@@ -345,7 +333,7 @@
 <dialog id="presetDialog" class="rounded-xl p-0 w-[92vw] max-w-md bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl">
   <div class="p-5">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-sm font-extrabold">투자 프리셋 관리</h3>
+      <h3 class="text-sm font-extrabold" data-i18n-key="PRESET_DIALOG.TITLE"></h3>
       <form method="dialog">
         <button value="cancel" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
           <span class="material-symbols-outlined">close</span>
@@ -353,34 +341,34 @@
       </form>
     </div>
     
-    <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">프리셋을 클릭하여 수정하거나, 아래에서 새 프리셋을 추가하세요.</p>
+    <p class="text-xs text-slate-500 dark:text-slate-400 mb-3" data-i18n-key="PRESET_DIALOG.INFO"></p>
     <div id="presetList" class="space-y-2 mb-4"></div>
 
-    <h4 id="dlgPresetTitle" class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 pt-4 border-t border-slate-200 dark:border-slate-800">새 프리셋 추가</h4>
+    <h4 id="dlgPresetTitle" class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 pt-4 border-t border-slate-200 dark:border-slate-800"></h4>
     <form id="newPresetForm" class="space-y-3">
       <label class="block">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">프리셋 이름</span>
-        <input id="dlgPresetName" type="text" placeholder="예: 성장주 포트폴리오"
-               class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="PRESET_DIALOG.NAME_LABEL"></span>
+        <input id="dlgPresetName" type="text" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold" data-i18n-key="[placeholder]PRESET_DIALOG.NAME_PLACEHOLDER"/>
       </label>
 
       <div class="grid grid-cols-2 gap-3">
         <label class="block">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">연간 수익률 (%)</span>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="PRESET_DIALOG.RETURN_LABEL"></span>
           <input id="dlgPresetReturn" type="text" value="9.0"
                  class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
         </label>
         <label class="block">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">배당 수익률 (%)</span>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="PRESET_DIALOG.DIVIDEND_LABEL"></span>
           <input id="dlgPresetDiv" type="text" value="2.0"
                  class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
         </label>
       </div>
-      <button id="dlgPresetSave" type="submit" class="w-full px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary">저장</button>
+      <button id="dlgPresetSave" type="submit" class="w-full px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary" data-i18n-key="PRESET_DIALOG.SAVE_BUTTON"></button>
     </form>
   </div>
 </dialog>
 
+<script src="strings.js"></script>
 <script src="presets.js"></script>
 <script src="events.js"></script>
 <script src="main.js"></script>

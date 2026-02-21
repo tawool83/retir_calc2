@@ -1,4 +1,45 @@
 /** =============================
+ *  Localization
+ *  ============================= */
+function getText(key, ...args) {
+    let text = key.split('.').reduce((o, i) => o && o[i], STRINGS);
+    if (!text) return key;
+    return text.replace(/\{(\d+)\}/g, (match, number) => {
+        return typeof args[number] !== 'undefined' ? args[number] : match;
+    });
+}
+
+function applyLocalization() {
+    document.querySelectorAll('[data-i18n-key]').forEach(el => {
+        const key = el.dataset.i18nKey;
+        let attribute = 'innerHTML';
+
+        if (key.startsWith('[')) {
+            const parts = key.match(/\[(.*?)\](.*)/);
+            if (parts) {
+                attribute = parts[1];
+                const actualKey = parts[2];
+                const text = getText(actualKey);
+                el.setAttribute(attribute, text);
+                if (attribute.toLowerCase() === 'innerhtml') {
+                    el.innerHTML = text;
+                } else {
+                    el.textContent = text;
+                }
+                return;
+            }
+        }
+
+        const text = getText(key);
+        if (attribute === 'innerHTML') {
+            el.innerHTML = text;
+        } else {
+            el.textContent = text;
+        }
+    });
+}
+
+/** =============================
  *  Persistence (localStorage)
  *  ============================= */
 const STORAGE_KEY = "retire_sim_v2_dynamic_portfolio";
@@ -187,7 +228,7 @@ function renderPresetList() {
         item.className = "flex items-center justify-between gap-2 text-sm p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors";
         item.innerHTML = `
             <div class="flex-grow min-w-0">
-                <div class="font-bold truncate">${p.name} ${p.builtin ? '(기본)' : ''}</div>
+                <div class="font-bold truncate">${p.name} ${p.builtin ? getText('COMMON.BUILTIN') : ''}</div>
                 <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">수익 ${p.annualReturnPct}% / 배당 ${p.dividendPct}%</div>
             </div>
             ${!p.builtin ? `<button data-del-preset="${p.id}" class="text-red-500 hover:text-red-400 shrink-0"><span class="material-symbols-outlined text-base">delete</span></button>` : '<div class="w-8 shrink-0"></div>'}
@@ -222,13 +263,13 @@ function setPresetEditMode(presetId) {
     if (presetId) {
         const preset = state.presets.find(p => p.id === presetId);
         if (!preset) return;
-        title.textContent = '프리셋 수정';
+        title.textContent = getText('PRESET_DIALOG.EDIT_TITLE');
         $('dlgPresetName').value = preset.name;
         $('dlgPresetReturn').value = preset.annualReturnPct;
         $('dlgPresetDiv').value = preset.dividendPct;
         $('dlgPresetName').disabled = preset.builtin;
     } else {
-        title.textContent = '새 프리셋 추가';
+        title.textContent = getText('PRESET_DIALOG.ADD_TITLE');
         form.reset();
         $('dlgPresetName').disabled = false;
     }
@@ -295,43 +336,47 @@ function getEventSubtitle(ev, theme = 'light') {
     switch (ev.type) {
         case 'portfolio':
             const preset = state.presets.find(p => p.id === ev.presetId);
-            return `전략: ${preset ? preset.name : '알 수 없음'}, 비중: ${ev.weight}`;
+            return getText('EVENT_CARD.SUBTITLE_PORTFOLIO', preset ? preset.name : '알 수 없음', ev.weight);
         case 'monthly':
-            return `${labelPart} 월 정기 투자금 ${fmtMoney(ev.amount)}으로 변경`;
+            return getText('EVENT_CARD.SUBTITLE_MONTHLY', labelPart, fmtMoney(ev.amount));
         case 'lump':
-            return `${labelPart} 일시불 ${ev.amount >= 0 ? "입금" : "출금"} ${fmtMoney(Math.abs(ev.amount))}`;
+            return ev.amount >= 0 
+                ? getText('EVENT_CARD.SUBTITLE_LUMP_IN', labelPart, fmtMoney(Math.abs(ev.amount)))
+                : getText('EVENT_CARD.SUBTITLE_LUMP_OUT', labelPart, fmtMoney(Math.abs(ev.amount)));
         case 'withdrawal':
-            return `${labelPart} 월 정기 출금 ${fmtMoney(ev.amount)}/월`;
+            return getText('EVENT_CARD.SUBTITLE_WITHDRAWAL', labelPart, fmtMoney(ev.amount));
         default:
-            return "알 수 없는 이벤트";
+            return getText('EVENT_CARD.UNKNOWN_EVENT');
     }
 }
 
 function createEventCard(ev) {
-    let border, pill;
+    let border, pillText;
     const subtitle = getEventSubtitle(ev);
 
     switch (ev.type) {
         case 'portfolio':
             border = "border-purple-500";
-            pill = `<span class="px-2 py-0.5 bg-purple-500 text-white text-[10px] font-bold rounded-full uppercase">포트폴리오</span>`;
+            pillText = getText('EVENT_CARD.PILL_PORTFOLIO');
             break;
         case 'monthly':
             border = "border-primary";
-            pill = `<span class="px-2 py-0.5 bg-primary text-white text-[10px] font-bold rounded-full uppercase">정기 투자</span>`;
+            pillText = getText('EVENT_CARD.PILL_MONTHLY');
             break;
         case 'lump':
             border = "border-slate-500";
-            pill = `<span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-200 text-[10px] font-bold rounded-full uppercase">일시불</span>`;
+            pillText = getText('EVENT_CARD.PILL_LUMP');
             break;
         case 'withdrawal':
             border = "border-emerald-400";
-            pill = `<span class="px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full uppercase">현금 인출</span>`;
+            pillText = getText('EVENT_CARD.PILL_WITHDRAWAL');
             break;
         default: 
-            pill = "";
+            pillText = "";
             border = "border-slate-300";
     }
+    
+    const pill = `<span class="px-2 py-0.5 bg-${border.split('-')[1]}-500 text-white text-[10px] font-bold rounded-full uppercase">${pillText}</span>`;
 
     const node = document.createElement("div");
     node.className = `p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border-l-4 ${border} relative`;
@@ -344,10 +389,10 @@ function createEventCard(ev) {
           <p class="text-[11px] text-slate-500 mt-1">${subtitle}</p>
         </div>
         <div class="flex items-center">
-            <button class="text-slate-400 hover:text-primary transition-colors shrink-0" data-edit="${ev.id}" title="수정">
+            <button class="text-slate-400 hover:text-primary transition-colors shrink-0" data-edit="${ev.id}" title="${getText('EVENT_CARD.EDIT_TOOLTIP')}">
               <span class="material-symbols-outlined text-sm">edit</span>
             </button>
-            <button class="text-slate-400 hover:text-red-500 transition-colors shrink-0" data-del="${ev.id}" title="삭제">
+            <button class="text-slate-400 hover:text-red-500 transition-colors shrink-0" data-del="${ev.id}" title="${getText('EVENT_CARD.DELETE_TOOLTIP')}">
               <span class="material-symbols-outlined text-sm">delete</span>
             </button>
          </div>
@@ -377,7 +422,7 @@ function renderEventList() {
 
     const sortedEvents = [...state.events].sort((a,b) => a.age - b.age);
     if (sortedEvents.length === 0) {
-        wrap.innerHTML = `<div class="text-[11px] text-slate-500 dark:text-slate-400">시나리오가 없습니다. “시나리오 추가”를 클릭하여 시작하세요.</div>`;
+        wrap.innerHTML = `<div class="text-[11px] text-slate-500 dark:text-slate-400">${getText('SCENARIO.NO_EVENTS')}</div>`;
         return;
     }
 
@@ -450,8 +495,8 @@ function renderEventList() {
         btn.id = 'btnToggleEventList';
         btn.className = 'text-primary hover:text-secondary text-xs font-bold uppercase tracking-wider flex items-center gap-1';
         btn.innerHTML = state.isEventListExpanded 
-            ? '<span class="material-symbols-outlined text-sm">unfold_less</span> 간략히 보기'
-            : `<span class="material-symbols-outlined text-sm">unfold_more</span> 전체 보기 (+${eventGroups.length - 5}개)`;
+            ? `<span class="material-symbols-outlined text-sm">unfold_less</span> ${getText('SCENARIO.VIEW_LESS')}`
+            : `<span class="material-symbols-outlined text-sm">unfold_more</span> ${getText('SCENARIO.VIEW_MORE', eventGroups.length - 5)}`;
 
         btn.addEventListener('click', () => {
             state.isEventListExpanded = !state.isEventListExpanded;
@@ -467,7 +512,7 @@ function renderEventList() {
 
 function openEventDialog(eventId = null) {
     const dlg = $("eventDialog");
-    const title = dlg.querySelector("h3");
+    const title = $("dlgEventTitle");
     const saveBtn = $("dlgSave");
 
     state.editingEventId = eventId;
@@ -479,8 +524,8 @@ function openEventDialog(eventId = null) {
             state.editingEventId = null;
             return;
         }
-        title.textContent = "시나리오 이벤트 수정";
-        saveBtn.textContent = "변경 내용 저장";
+        title.textContent = getText("EVENT_DIALOG.EDIT_TITLE");
+        saveBtn.textContent = getText("EVENT_DIALOG.SAVE_BUTTON");
 
         $("dlgAge").value = eventToEdit.age;
         $("dlgType").value = eventToEdit.type;
@@ -492,8 +537,8 @@ function openEventDialog(eventId = null) {
         presetSelect.innerHTML = state.presets.map(p => `<option value="${p.id}" ${p.id === eventToEdit.presetId ? 'selected' : ''}>${p.name}</option>`).join('');
 
     } else { // Add mode
-        title.textContent = "시나리오 이벤트 추가";
-        saveBtn.textContent = "시나리오 추가";
+        title.textContent = getText("EVENT_DIALOG.ADD_TITLE");
+        saveBtn.textContent = getText("EVENT_DIALOG.ADD_BUTTON");
         const ageNow = state.inputs.ageNow;
         $("dlgAge").value = clamp(ageNow + 5, 0, 120);
         $("dlgType").value = "portfolio";
@@ -529,14 +574,8 @@ function initEventDialog() {
     fieldsPortfolio.classList.toggle('hidden', type !== 'portfolio');
     fieldsMonetary.classList.toggle('hidden', type === 'portfolio');
 
-    let infoText = '';
-    switch (type) {
-        case 'portfolio': infoText = '해당 나이부터 포트폴리오 구성을 변경합니다. 같은 나이에 여러 개의 프리셋을 추가하여 비중을 조절할 수 있습니다.'; break;
-        case 'monthly': infoText = '해당 나이부터 월 정기 투자금을 새로 설정합니다.'; break;
-        case 'lump': infoText = '해당 나이에 일시불로 입금 또는 출금합니다.'; break;
-        case 'withdrawal': infoText = '해당 나이부터 매월 고정된 금액을 정기적으로 출금합니다.'; break;
-    }
-    infoEl.textContent = infoText;
+    let infoKey = 'INFO_' + type.toUpperCase();
+    infoEl.textContent = getText('EVENT_DIALOG.' + infoKey);
   };
 
   $("btnAddEvent").addEventListener("click", () => openEventDialog());
@@ -722,7 +761,7 @@ function simulate() {
     }));
 
     if (uninvestedCash > 0) {
-        detailedPortfolioResult.push({ name: '미투자 현금', balance: uninvestedCash, return: 0, dividend: 0 });
+        detailedPortfolioResult.push({ name: getText('TABLE.UNINVESTED_CASH'), balance: uninvestedCash, return: 0, dividend: 0 });
     }
 
     years.push({
@@ -750,9 +789,9 @@ function buildAnnualRow(y) {
     let portfolioDisplayHtml;
     if (y.portfolio.length === 0) {
         if (y.endBalance > 0) {
-            portfolioDisplayHtml = `<span class="text-xs text-amber-500">미투자 현금</span>`;
+            portfolioDisplayHtml = `<span class="text-xs text-amber-500">${getText('TABLE.UNINVESTED_CASH')}</span>`;
         } else {
-            portfolioDisplayHtml = `<span class="text-xs text-slate-400">정의되지 않음</span>`;
+            portfolioDisplayHtml = `<span class="text-xs text-slate-400">${getText('TABLE.PORTFOLIO_UNDEFINED')}</span>`;
         }
     } else {
         const itemsToDisplay = y.portfolio.slice(0, 2);
@@ -777,8 +816,8 @@ function buildAnnualRow(y) {
     }
     
     let ageExtra = [];
-    if (y.age === state.inputs.ageRetire) ageExtra.push('은퇴 ❤️');
-    if (hasEvents) ageExtra.push('이벤트');
+    if (y.age === state.inputs.ageRetire) ageExtra.push(getText('COMMON.RETIRE'));
+    if (hasEvents) ageExtra.push(getText('COMMON.EVENT'));
 
     return `
     <tr class="annual-row ${highlight} hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group" data-year="${y.year}">
@@ -842,8 +881,8 @@ function renderChart(results) {
     data: {
       labels,
       datasets: [
-        { label: '누적 투자원금', data: principalData, backgroundColor: '#2563eb' },
-        { label: '누적 투자수익', data: returnData, backgroundColor: '#84cc16' }
+        { label: getText('CHART.PRINCIPAL_LABEL'), data: principalData, backgroundColor: '#2563eb' },
+        { label: getText('CHART.RETURN_LABEL'), data: returnData, backgroundColor: '#84cc16' }
       ]
     },
     options: {
@@ -867,7 +906,7 @@ function renderChart(results) {
                 tooltipItems.forEach(function(tooltipItem) {
                     sum += tooltipItem.parsed.y;
                 });
-                return '총합: ' + fmtMoney(sum, true);
+                return getText('CHART.TOTAL_LABEL', fmtMoney(sum, true));
             }
           }
         }
@@ -899,30 +938,30 @@ function initTooltips() {
       const yearData = state.results.years.find(y => y.year === year);
       if (!yearData) return;
       
-      let html = `<div class="font-bold mb-2 text-base">${year}년 포트폴리오</div>`;
+      let html = `<div class="font-bold mb-2 text-base">${getText('TOOLTIP.PORTFOLIO_TITLE', year)}</div>`;
       if (yearData.detailedPortfolio.length > 0) {
           html += yearData.detailedPortfolio.map(p => {
-            const isCash = p.name === '미투자 현금';
+            const isCash = p.name === getText('TABLE.UNINVESTED_CASH');
             return `
             <div class="grid grid-cols-[1fr,auto] items-center gap-x-4 gap-y-1 text-xs mb-2 pb-2 border-b border-slate-700 last:border-b-0 last:pb-0 last:mb-0">
                 <div class="font-bold col-span-2">${p.name}</div>
-                <div class="text-slate-400">연말 잔액</div>
+                <div class="text-slate-400">${getText('TOOLTIP.BALANCE_LABEL')}</div>
                 <div class="text-slate-100 font-bold">${fmtMoney(p.balance)}</div>
                 ${!isCash ? `
-                <div class="text-slate-400">평가 수익</div>
+                <div class="text-slate-400">${getText('TOOLTIP.RETURN_LABEL')}</div>
                 <div class="text-green-400">+${fmtMoney(p.return)}</div>
-                <div class="text-slate-400">세후 배당금</div>
+                <div class="text-slate-400">${getText('TOOLTIP.DIVIDEND_LABEL')}</div>
                 <div class="text-blue-400">+${fmtMoney(p.dividend)}</div>
                 ` : ''}
             </div>
           `}).join('');
       } else {
-          html += `<div class="text-slate-400">데이터 없음</div>`;
+          html += `<div class="text-slate-400">${getText('TOOLTIP.NO_DATA')}</div>`;
       }
 
       const eventsAtAge = state.events.filter(e => e.age === yearData.age);
         if (eventsAtAge.length > 0) {
-            html += `<div class="font-bold mt-3 mb-2 text-base border-t border-slate-700 pt-2">시나리오</div>`;
+            html += `<div class="font-bold mt-3 mb-2 text-base border-t border-slate-700 pt-2">${getText('TOOLTIP.EVENT_TITLE')}</div>`;
             html += eventsAtAge.map(ev => {
                 const subtitle = getEventSubtitle(ev, 'dark');
                 return `<p class="text-xs text-slate-300 mb-1">${subtitle}</p>`;
@@ -936,7 +975,6 @@ function initTooltips() {
       let left = e.pageX + 10;
       let top = e.pageY + 10;
 
-      // 현재 뷰포트의 경계를 확인합니다.
       const viewportRight = window.scrollX + window.innerWidth;
       const viewportBottom = window.scrollY + window.innerHeight;
 
@@ -957,12 +995,12 @@ function initTooltips() {
   });
 
   const headerTooltips = {
-      'th-contribute': '연간 총 투자금입니다.<br>계산식: <b>월 정기 투자금 x 12 + 일시불 입금</b>',
-      'th-return': '연간 발생한 총 투자 수익금입니다. (배당 제외)',
-      'th-dividend': '연간 발생한 총 배당금입니다. (세후 15.4% 적용)',
-      'th-withdrawal': '연간 인출한 총 금액입니다. (일시불 출금 + 정기 출금)',
-      'th-balance': '해당 연도 말 기준 총 잔액입니다.<br>계산식: <b>기초 잔액 + 연간 투자금 + 평가 수익 + 배당금 - 연간 총 출금</b>',
-      'th-portfolio': '해당 연도에 적용된 포트폴리오 구성입니다. 마우스를 올리면 전체 구성을 확인할 수 있습니다.'
+      'th-contribute': getText('TABLE.TOOLTIP_CONTRIBUTION'),
+      'th-return': getText('TABLE.TOOLTIP_RETURN'),
+      'th-dividend': getText('TABLE.TOOLTIP_DIVIDEND'),
+      'th-withdrawal': getText('TABLE.TOOLTIP_WITHDRAWAL'),
+      'th-balance': getText('TABLE.TOOLTIP_BALANCE'),
+      'th-portfolio': getText('TABLE.TOOLTIP_PORTFOLIO')
   };
 
   Object.entries(headerTooltips).forEach(([id, text]) => {
@@ -991,12 +1029,12 @@ function updateObservation(results) {
 
   let msg = ``;
   if (retireRow) {
-    msg += `${state.inputs.ageRetire}세 (${retireRow.year}) 은퇴 시점에 예상 잔액은 ${fmtMoney(retireRow.endBalance, true)}으로 예상됩니다. `;
+    msg += getText('OBSERVATION.RETIRE_RESULT', state.inputs.ageRetire, retireRow.year, fmtMoney(retireRow.endBalance, true));
   }
   if (last) {
-    msg += `${state.maxAge}세 (${last.year})에 예상 잔액은 ${fmtMoney(last.endBalance, true)}으로 예상됩니다.`;
+    msg += getText('OBSERVATION.FINAL_RESULT', state.maxAge, last.year, fmtMoney(last.endBalance, true));
   }
-  $("observation").textContent = msg || '분석 결과가 없습니다.';
+  $("observation").textContent = msg || getText('OBSERVATION.NO_RESULT');
 }
 
 /** =============================
@@ -1006,7 +1044,7 @@ function recalcAndRender() {
   const results = simulate();
   state.results = results;
 
-  $("rangeLabel").textContent = `분석 기간: ${results.startYear}년 (${results.ageNow}세) ~ ${results.endAge}년 (${results.endAge}세)`;
+  $("rangeLabel").textContent = getText('RESULTS.RANGE_LABEL', results.startYear, results.ageNow, results.endAge, results.endAge);
 
   renderAnnualTable(results);
   updateObservation(results);
@@ -1066,7 +1104,7 @@ function initInputs() {
   });
   
   $("btnResetAll").addEventListener("click", () => {
-    if (confirm("저장된 모든 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) {
+    if (confirm(getText('CONFIG.RESET_CONFIRM'))) {
       resetSavedState();
       location.reload();
     }
@@ -1077,6 +1115,7 @@ function initInputs() {
  *  Boot
  *  ============================= */
 (function boot() {
+  applyLocalization();
   const saved = loadSavedState();
   applySnapshot(saved);
   syncStateToUi();
