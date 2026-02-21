@@ -286,8 +286,12 @@ function initPresetManagement() {
 /** =============================
  *  Events UI
  *  ============================= */
-function getEventSubtitle(ev) {
-    const labelPart = ev.label ? `<span class="font-bold text-slate-800 dark:text-slate-100">${ev.label}:</span>` : '';
+function getEventSubtitle(ev, theme = 'light') {
+    const labelColor = (theme === 'dark') 
+        ? 'text-slate-300' 
+        : 'text-slate-800 dark:text-slate-100';
+    const labelPart = ev.label ? `<span class="font-bold ${labelColor}">${ev.label}:</span>` : '';
+    
     switch (ev.type) {
         case 'portfolio':
             const preset = state.presets.find(p => p.id === ev.presetId);
@@ -769,7 +773,7 @@ function buildAnnualRow(y) {
     if (y.age === state.inputs.ageRetire) {
         highlight = "bg-emerald-50/60 dark:bg-emerald-900/10";
     } else if (hasEvents) {
-        highlight = "bg-blue-50/60 dark:bg-blue-900/20";
+        highlight = "bg-teal-50/60 dark:bg-teal-900/20";
     }
     
     let ageExtra = [];
@@ -920,7 +924,7 @@ function initTooltips() {
         if (eventsAtAge.length > 0) {
             html += `<div class="font-bold mt-3 mb-2 text-base border-t border-slate-700 pt-2">이벤트</div>`;
             html += eventsAtAge.map(ev => {
-                const subtitle = getEventSubtitle(ev);
+                const subtitle = getEventSubtitle(ev, 'dark');
                 return `<p class="text-xs text-slate-300 mb-1">${subtitle}</p>`;
             }).join('');
         }
