@@ -1,19 +1,38 @@
-# Blueprint
+# 청사진 (Blueprint)
 
-## Overview
+## 개요
 
-This is a retirement simulator that allows users to project their savings over time based on their current age, retirement age, initial investment, and monthly contributions. It also allows for custom events, such as changing the portfolio, making lump-sum investments, or receiving a pension.
+이 프로젝트는 사용자의 현재 나이, 은퇴 나이 및 인생의 여러 이벤트를 기반으로 시간 경과에 따른 자산 평가액을 예측하는 은퇴 시뮬레이터입니다. 동적이고 이벤트에 기반한 시스템을 사용하여 사용자의 일생에 걸친 투자 전략, 기여금 및 현금 흐름의 변화를 모델링합니다. 모든 데이터는 지속성을 위해 브라우저에 로컬로 저장됩니다.
 
-## Features
+## 주요 기능
 
-*   **Core Logic:** All business logic is encapsulated in `main.js`, which is responsible for running the simulation and rendering the data.
-*   **Data Persistence:** The application saves the user's data to the browser's local storage, allowing them to pick up where they left off.
-*   **Dynamic Portfolio:** Users can define custom investment portfolios with different return and dividend rates, and the simulation will adjust accordingly.
-*   **Event-Based Scenarios:** Users can create events at different ages to simulate real-life scenarios, such as a promotion or a large purchase.
-*   **Tooltip:** When hovering over a row in the table, a tooltip appears, showing a detailed breakdown of the portfolio for that year, including the value, return, and dividend for each asset.
-*   **Chart:** The application includes a chart that visualizes the user's savings over time, with labels showing both the year and the user's age.
-*   **Responsive Design:** The application is fully responsive and works on both desktop and mobile devices.
+*   **핵심 로직:** 모든 비즈니스 로직은 `main.js`에 캡슐화되어 있습니다. 시뮬레이션은 포트폴리오 수익, 배당금, 기여금 및 인출을 기반으로 연간 자산 성장을 계산합니다.
+*   **데이터 지속성:** 애플리케이션은 사용자의 전체 구성(입력, 프리셋 및 이벤트)을 브라우저의 로컬 스토리지에 저장하여 중단한 부분부터 다시 시작할 수 있도록 합니다.
+*   **동적 포트폴리오:** 사용자는 다양한 예상 연간 수익률 및 배당률로 사용자 지정 투자 포트폴리오 프리셋을 정의할 수 있습니다. 시나리오를 생성하여 모든 연령대에서 활성 포트폴리오 구성을 변경할 수 있습니다.
+*   **이벤트 기반 시나리오:** 사용자는 다양한 연령대에서 금융 이벤트의 타임라인을 만들 수 있습니다. 지원되는 이벤트 유형은 다음과 같습니다.
+    *   **포트폴리오 변경:** 투자 전략을 전환합니다.
+    *   **월 정기 기여금 변경:** 매달 투자하는 정기 금액을 조정합니다.
+    *   **일시불:** 일회성 입금 또는 출금입니다.
+    *   **월 정기 인출:** 일반적으로 은퇴 후 생활비를 위한 정기적이고 고정된 인출입니다.
+    *   **월 정기 기타 수입:** 국민연금, 개인연금 등 투자와 무관한 정기적인 수입원입니다. 이 수입은 월별 인출을 직접 상쇄하여 포트폴리오에서 자산을 매도할 필요성을 줄입니다.
+*   **이벤트 활성화/비활성화 (What-if 분석):** 각 시나리오 이벤트는 한 번의 클릭(눈 아이콘)으로 개별적으로 활성화하거나 비활성화할 수 있습니다. 이를 통해 사용자는 특정 이벤트가 장기 예측에 미치는 영향을 즉시 확인하여 강력한 What-if 분석을 용이하게 할 수 있습니다.
+*   **상세 결과 및 툴팁:** 기본 출력은 기여금, 평가 증가액, 배당금, 순 현금 흐름 및 연말 평가액을 보여주는 연간 표입니다. 행 위로 마우스를 가져가면 상세한 툴팁이 해당 연도의 포트폴리오 내 각 자산의 성과 내역을 제공합니다.
+*   **자산 성장 차트:** 애플리케이션에는 누적 원금과 누적 평가 증가액으로 분류하여 시간 경과에 따른 사용자의 총자산을 시각화하는 누적 막대 차트가 포함되어 있습니다.
+*   **현지화:** 모든 사용자 대상 텍스트는 손쉬운 유지 관리 및 향후 언어 지원을 위해 `public/strings.js`에서 관리됩니다.
+*   **반응형 디자인:** 애플리케이션은 완벽하게 반응하며 데스크톱과 모바일 장치 모두에서 작동합니다.
 
-## Current Plan
+## 현재 계획
 
-I will now update the `blueprint.md` file to reflect the latest changes, which include renaming the “pension” feature to “cash withdrawal” to better reflect its function.
+**신규 사용자를 위한 '시작 가이드' 기능 추가**
+
+금융 지식이 많지 않은 사용자도 시뮬레이터의 핵심 목표를 쉽게 이해하고 사용할 수 있도록, 단계별 안내를 제공하는 시작 가이드(Onboarding) 기능을 구현합니다.
+
+**구현 단계:**
+
+1.  **HTML 구조 추가:** 가이드 모달창의 기본 HTML을 `index.html`에 추가합니다.
+2.  **CSS 스타일링:** 가이드 모달창이 명확하고 시각적으로 매력적으로 보이도록 `style.css`에 스타일을 추가합니다.
+3.  **로직 구현 (`main.js`):**
+    *   사용자의 첫 방문 여부를 `localStorage`로 확인하여, 첫 방문 시에만 가이드가 표시되도록 합니다.
+    *   가이드 내에서 '다음', '이전' 버튼을 통해 단계별(나이 입력 -> 시나리오 추가 등)로 안내하는 기능을 구현합니다.
+    *   가이드가 완료되거나 닫힐 때, `localStorage`에 상태를 저장하여 다시 표시되지 않도록 합니다.
+4.  **텍스트 추가 (`strings.js`):** 가이드에 사용될 모든 제목, 설명, 버튼 텍스트를 `strings.js`에 추가하여 관리합니다.

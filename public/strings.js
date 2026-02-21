@@ -37,24 +37,24 @@ const STRINGS = {
     },
     CHART: {
         TITLE: "자산 구성",
-        SUBTITLE: "연도별 누적 투자원금 및 투자수익",
+        SUBTITLE: "연도별 누적 투자원금 및 평가 증가액",
         PRINCIPAL_LABEL: "누적 투자원금",
-        RETURN_LABEL: "누적 투자수익",
+        RETURN_LABEL: "누적 평가 증가액",
         TOTAL_LABEL: "총합: {0}"
     },
     TABLE: {
         HEADER_YEAR_AGE: "연도<br/>나이",
         HEADER_CONTRIBUTION: "연 투자금",
-        HEADER_RETURN: "평가<br/>수익",
+        HEADER_RETURN: "평가<br/>증가액",
         HEADER_DIVIDEND: "배당금<br/>(세후)",
         HEADER_WITHDRAWAL: "현금흐름<br/>(출금)",
-        HEADER_BALANCE: "연말<br/>잔액",
+        HEADER_BALANCE: "연말<br/>평가액",
         HEADER_PORTFOLIO: "포트폴리오",
-        TOOLTIP_CONTRIBUTION: "연간 총 투자금입니다.<br>계산식: <b>월 정기 투자금 x 12 + 일시불 입금</b>",
-        TOOLTIP_RETURN: "연간 발생한 총 투자 수익금입니다. (배당 제외)",
+        TOOLTIP_CONTRIBUTION: "연간 총 투자금입니다.<br>계산식: <b>(월 정기 투자금 x 12) + 일시불 입금</b>",
+        TOOLTIP_RETURN: "연간 발생한 총 평가 증가액입니다. (배당 제외)",
         TOOLTIP_DIVIDEND: "연간 발생한 총 배당금입니다. (세후 15.4% 적용)",
         TOOLTIP_WITHDRAWAL: "연간 순수 현금 흐름입니다. 양수(+)는 순수입, 음수(-)는 순출금을 의미합니다.<br><b>계산식: (기타 수입) - (정기 출금 + 일시불 출금)</b>",
-        TOOLTIP_BALANCE: "해당 연도 말 기준 총 잔액입니다.<br>계산식: <b>기초 잔액 + 연간 투자금 + 평가 수익 + 배당금 - 포트폴리오 인출액</b>",
+        TOOLTIP_BALANCE: "해당 연도 말 기준 총 평가액입니다.<br>계산식: <b>기초 평가액 + 연간 투자금 + 평가 증가액 + 배당금 - 포트폴리오 인출액</b>",
         TOOLTIP_PORTFOLIO: "해당 연도에 적용된 포트폴리오 구성입니다. 마우스를 올리면 전체 구성을 확인할 수 있습니다.",
         PORTFOLIO_UNDEFINED: "정의되지 않음",
         UNINVESTED_CASH: "미투자 현금"
@@ -62,8 +62,8 @@ const STRINGS = {
     OBSERVATION: {
         TITLE: "분석 결과 요약",
         INITIAL_TEXT: "좌측 설정을 변경하여 나의 은퇴 계획을 분석해보세요.",
-        RETIRE_RESULT: "{0}세 ({1}) 은퇴 시점에 예상 잔액은 {2}으로 예상됩니다. ",
-        FINAL_RESULT: "{0}세 ({1})에 예상 잔액은 {2}으로 예상됩니다.",
+        RETIRE_RESULT: "{0}세 ({1}) 은퇴 시점에 예상 평가액은 {2}으로 예상됩니다. ",
+        FINAL_RESULT: "{0}세 ({1})에 예상 평가액은 {2}으로 예상됩니다.",
         NO_RESULT: "분석 결과가 없습니다."
     },
     FOOTER: {
@@ -125,11 +125,24 @@ const STRINGS = {
     },
     TOOLTIP: {
         PORTFOLIO_TITLE: "{0}년 포트폴리오",
-        BALANCE_LABEL: "연말 잔액",
-        RETURN_LABEL: "평가 수익",
+        BALANCE_LABEL: "연말 평가액",
+        RETURN_LABEL: "평가 증가액",
         DIVIDEND_LABEL: "세후 배당금",
         NO_DATA: "데이터 없음",
         EVENT_TITLE: "시나리오"
+    },
+    ONBOARDING: {
+        TITLE_STEP_1: "환영합니다!",
+        CONTENT_STEP_1: "이 시뮬레이터는 은퇴 후 필요한 현금 흐름을 만들기 위해 얼마를 모아야 하는지 계산해줍니다. 몇 가지 간단한 단계를 통해 당신의 은퇴 계획을 시뮬레이션 해보세요.",
+        TITLE_STEP_2: "기본 정보 입력",
+        CONTENT_STEP_2: "먼저, 당신의 <b class='text-primary'>현재 나이</b>와 <b class='text-primary'>목표 은퇴 나이</b>를 입력해주세요. 이 정보는 전체 시뮬레이션 기간을 설정하는 데 사용됩니다.",
+        TITLE_STEP_3: "첫 시나리오 추가",
+        CONTENT_STEP_3: "이제 당신의 인생 계획을 이벤트로 추가해봅시다. <b class='text-primary'>시나리오 추가</b> 버튼을 눌러 첫 투자 계획을 세워보세요. 예를 들어, ‘초기 투자금’ 또는 ‘월 정기 투자’를 설정할 수 있습니다.",
+        TITLE_STEP_4: "결과 확인 및 분석",
+        CONTENT_STEP_4: "시나리오를 추가하면 우측에서 연도별 자산 성장 예측 결과를 바로 확인할 수 있습니다. 궁금한 항목에 마우스를 올려 상세 설명을 확인하고, 차트 아이콘을 클릭해 자산 구성을 시각적으로 분석해보세요!",
+        PREV_BUTTON: "이전",
+        NEXT_BUTTON: "다음",
+        DONE_BUTTON: "완료"
     },
     COMMON: {
         BUILTIN: "(기본)",

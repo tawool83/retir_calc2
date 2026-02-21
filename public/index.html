@@ -45,6 +45,20 @@
     .row-chevron { transition: transform .15s ease; }
     .row-open .row-chevron { transform: rotate(90deg); }
     dialog::backdrop { background: rgba(0,0,0,.35); }
+
+    /* Onboarding Guide Styles */
+    .onboarding-highlight {
+      position: relative;
+      z-index: 60; /* Higher than the backdrop */
+      box-shadow: 0 0 0 9999px rgba(0,0,0,.6);
+      border-radius: .75rem; /* Default rounded-xl */
+    }
+    .onboarding-dot {
+      @apply w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600 transition-colors;
+    }
+    .onboarding-dot.active {
+      @apply bg-primary;
+    }
   </style>
 </head>
 
@@ -75,7 +89,7 @@
     <aside class="w-full lg:w-[440px] flex flex-col gap-6">
 
       <!-- Config -->
-      <div class="bg-white dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div id="config-section" class="bg-white dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-lg font-bold flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">tune</span>
@@ -101,7 +115,7 @@
       </div>
 
       <!-- Events -->
-      <div class="bg-white dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div id="events-section" class="bg-white dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-bold flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">event_note</span>
@@ -368,6 +382,33 @@
     </form>
   </div>
 </dialog>
+
+<!-- Onboarding Guide -->
+<div id="onboarding-guide" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col">
+    
+    <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+      <h2 id="onboarding-title" class="text-lg font-bold"></h2>
+      <button id="close-onboarding" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div id="onboarding-content" class="p-6 space-y-4 text-sm text-slate-600 dark:text-slate-300 flex-1">
+      <!-- Guide steps will be injected here -->
+    </div>
+
+    <div class="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+      <div id="onboarding-dots" class="flex gap-2">
+        <!-- Dots will be generated here -->
+      </div>
+      <div class="flex gap-3">
+        <button id="onboarding-prev" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600" data-i18n-key="ONBOARDING.PREV_BUTTON"></button>
+        <button id="onboarding-next" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary" data-i18n-key="ONBOARDING.NEXT_BUTTON"></button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="strings.js"></script>
 <script src="presets.js"></script>
