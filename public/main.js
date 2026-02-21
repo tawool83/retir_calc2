@@ -906,7 +906,7 @@ function initTooltips() {
             return `
             <div class="grid grid-cols-[1fr,auto] items-center gap-x-4 gap-y-1 text-xs mb-2 pb-2 border-b border-slate-700 last:border-b-0 last:pb-0 last:mb-0">
                 <div class="font-bold col-span-2">${p.name}</div>
-                <div class="text-slate-400">기말 잔액</div>
+                <div class="text-slate-400">연말 잔액</div>
                 <div class="text-slate-100 font-bold">${fmtMoney(p.balance)}</div>
                 ${!isCash ? `
                 <div class="text-slate-400">평가 수익</div>
@@ -957,9 +957,9 @@ function initTooltips() {
   });
 
   const headerTooltips = {
-      'th-contribute': '연간 총 납입액입니다.<br>계산식: <b>월 납입액 x 12</b>',
-      'th-return': '연간 발생한 총 투자 수익금입니다. (배당 제외)<br>계산식: <b>(기말 잔액 - 연간 납입액 - 배당금)</b>',
-      'th-dividend': '연간 발생한 총 배당금입니다. (세후 15.4% 적용)<br>계산식: <b>(배당 수익률 * (1 - 0.154))</b>',
+      'th-contribute': '해당 연도 말 기준 총 투자액입니다.<br>계산식: <b>월 투자액 x 12</b>',
+      'th-return': '해당 연도 말 기준 총 투자 수익금입니다. (배당 제외)<br>계산식: <b>(기말 잔액 - 연간 납입액 - 배당금)</b>',
+      'th-dividend': '해당 연도 말 기준 총 배당금입니다. (세후 15.4% 적용)<br>계산식: <b>(배당 수익률 * (1 - 0.154))</b>',
       'th-withdrawal': '연간 인출한 총 현금액입니다.<br>계산식: <b>월 현금 인출액 x 12</b>',
       'th-balance': '해당 연도 말 기준 총 잔액입니다.<br>계산식: <b>기초 잔액 + 연간 납입액 + 평가 수익 + 배당금 - 현금 인출</b>',
       'th-portfolio': '해당 연도에 적용된 포트폴리오 구성입니다. 마우스를 올리면 전체 구성을 확인할 수 있습니다.'
