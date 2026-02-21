@@ -143,6 +143,7 @@ function buildSnapshot() {
 
 function applySnapshot(snap) {
   if (!snap || snap.version !== 2) {
+    state.presets = [...defaultPresets]; // Explicitly reset presets
     state.events = defaultEvents.map(e => ({ ...e, id: uid(), enabled: true }));
     return;
   }
