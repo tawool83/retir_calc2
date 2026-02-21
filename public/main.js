@@ -297,11 +297,11 @@ function getEventSubtitle(ev, theme = 'light') {
             const preset = state.presets.find(p => p.id === ev.presetId);
             return `전략: ${preset ? preset.name : '알 수 없음'}, 비중: ${ev.weight}`;
         case 'monthly':
-            return `${labelPart} 월 납입액 ${fmtMoney(ev.amount)}으로 변경`;
+            return `${labelPart} 월 정기 투자금 ${fmtMoney(ev.amount)}으로 변경`;
         case 'lump':
             return `${labelPart} 일시불 ${ev.amount >= 0 ? "입금" : "출금"} ${fmtMoney(Math.abs(ev.amount))}`;
         case 'withdrawal':
-            return `${labelPart} 현금 인출 시작: 매월 ${fmtMoney(ev.amount)} (인출)`;
+            return `${labelPart} 월 정기 출금 ${fmtMoney(ev.amount)}/월`;
         default:
             return "알 수 없는 이벤트";
     }
@@ -318,7 +318,7 @@ function createEventCard(ev) {
             break;
         case 'monthly':
             border = "border-primary";
-            pill = `<span class="px-2 py-0.5 bg-primary text-white text-[10px] font-bold rounded-full uppercase">월납입</span>`;
+            pill = `<span class="px-2 py-0.5 bg-primary text-white text-[10px] font-bold rounded-full uppercase">정기 투자</span>`;
             break;
         case 'lump':
             border = "border-slate-500";
@@ -377,7 +377,7 @@ function renderEventList() {
 
     const sortedEvents = [...state.events].sort((a,b) => a.age - b.age);
     if (sortedEvents.length === 0) {
-        wrap.innerHTML = `<div class="text-[11px] text-slate-500 dark:text-slate-400">이벤트가 없습니다. “이벤트 추가”를 클릭하세요.</div>`;
+        wrap.innerHTML = `<div class="text-[11px] text-slate-500 dark:text-slate-400">시나리오가 없습니다. “시나리오 추가”를 클릭하여 시작하세요.</div>`;
         return;
     }
 
@@ -493,7 +493,7 @@ function openEventDialog(eventId = null) {
 
     } else { // Add mode
         title.textContent = "시나리오 이벤트 추가";
-        saveBtn.textContent = "이벤트 추가";
+        saveBtn.textContent = "시나리오 추가";
         const ageNow = state.inputs.ageNow;
         $("dlgAge").value = clamp(ageNow + 5, 0, 120);
         $("dlgType").value = "portfolio";
@@ -532,9 +532,9 @@ function initEventDialog() {
     let infoText = '';
     switch (type) {
         case 'portfolio': infoText = '해당 나이부터 포트폴리오 구성을 변경합니다. 같은 나이에 여러 개의 프리셋을 추가하여 비중을 조절할 수 있습니다.'; break;
-        case 'monthly': infoText = '해당 나이부터 월 납입액을 새로 설정합니다.'; break;
+        case 'monthly': infoText = '해당 나이부터 월 정기 투자금을 새로 설정합니다.'; break;
         case 'lump': infoText = '해당 나이에 일시불로 입금 또는 출금합니다.'; break;
-        case 'withdrawal': infoText = '해당 나이부터 매월 잔액에서 고정 금액을 인출합니다.'; break;
+        case 'withdrawal': infoText = '해당 나이부터 매월 고정된 금액을 정기적으로 출금합니다.'; break;
     }
     infoEl.textContent = infoText;
   };
@@ -922,7 +922,7 @@ function initTooltips() {
 
       const eventsAtAge = state.events.filter(e => e.age === yearData.age);
         if (eventsAtAge.length > 0) {
-            html += `<div class="font-bold mt-3 mb-2 text-base border-t border-slate-700 pt-2">이벤트</div>`;
+            html += `<div class="font-bold mt-3 mb-2 text-base border-t border-slate-700 pt-2">시나리오</div>`;
             html += eventsAtAge.map(ev => {
                 const subtitle = getEventSubtitle(ev, 'dark');
                 return `<p class="text-xs text-slate-300 mb-1">${subtitle}</p>`;
@@ -957,11 +957,11 @@ function initTooltips() {
   });
 
   const headerTooltips = {
-      'th-contribute': '해당 연도 말 기준 총 투자액입니다.<br>계산식: <b>월 투자액 x 12</b>',
-      'th-return': '해당 연도 말 기준 총 투자 수익금입니다. (배당 제외)<br>계산식: <b>(기말 잔액 - 연간 납입액 - 배당금)</b>',
-      'th-dividend': '해당 연도 말 기준 총 배당금입니다. (세후 15.4% 적용)<br>계산식: <b>(배당 수익률 * (1 - 0.154))</b>',
-      'th-withdrawal': '연간 인출한 총 현금액입니다.<br>계산식: <b>월 현금 인출액 x 12</b>',
-      'th-balance': '해당 연도 말 기준 총 잔액입니다.<br>계산식: <b>기초 잔액 + 연간 납입액 + 평가 수익 + 배당금 - 현금 인출</b>',
+      'th-contribute': '연간 총 투자금입니다.<br>계산식: <b>월 정기 투자금 x 12 + 일시불 입금</b>',
+      'th-return': '연간 발생한 총 투자 수익금입니다. (배당 제외)',
+      'th-dividend': '연간 발생한 총 배당금입니다. (세후 15.4% 적용)',
+      'th-withdrawal': '연간 인출한 총 금액입니다. (일시불 출금 + 정기 출금)',
+      'th-balance': '해당 연도 말 기준 총 잔액입니다.<br>계산식: <b>기초 잔액 + 연간 투자금 + 평가 수익 + 배당금 - 연간 총 출금</b>',
       'th-portfolio': '해당 연도에 적용된 포트폴리오 구성입니다. 마우스를 올리면 전체 구성을 확인할 수 있습니다.'
   };
 
@@ -991,12 +991,12 @@ function updateObservation(results) {
 
   let msg = ``;
   if (retireRow) {
-    msg += `${state.inputs.ageRetire}세 (${retireRow.year}) 은퇴 시점에 예상 잔액은 ${fmtMoney(retireRow.endBalance, true)} 입니다. `;
+    msg += `${state.inputs.ageRetire}세 (${retireRow.year}) 은퇴 시점에 예상 잔액은 ${fmtMoney(retireRow.endBalance, true)}으로 예상됩니다. `;
   }
   if (last) {
-    msg += `${state.maxAge}세 (${last.year})에 예상 잔액은 ${fmtMoney(last.endBalance, true)}가 될 수 있습니다.`;
+    msg += `${state.maxAge}세 (${last.year})에 예상 잔액은 ${fmtMoney(last.endBalance, true)}으로 예상됩니다.`;
   }
-  $("observation").textContent = msg || '시뮬레이션 결과가 없습니다.';
+  $("observation").textContent = msg || '분석 결과가 없습니다.';
 }
 
 /** =============================
@@ -1006,7 +1006,7 @@ function recalcAndRender() {
   const results = simulate();
   state.results = results;
 
-  $("rangeLabel").textContent = `시작 연도 ${results.startYear} • ${results.ageNow}세 → ${results.endAge}세 • 은퇴 ${results.ageRetire}세`;
+  $("rangeLabel").textContent = `분석 기간: ${results.startYear}년 (${results.ageNow}세) ~ ${results.endAge}년 (${results.endAge}세)`;
 
   renderAnnualTable(results);
   updateObservation(results);
@@ -1029,7 +1029,7 @@ function initInputs() {
       if (!el) return;
       el.addEventListener("input", () => { recalcAndRender(); saveStateDebounced(); });
       if(el.type !== 'text') el.addEventListener("change", () => { recalcAndRender(); saveStateDebounced(); });
-      el.addEventListener("blur", () => {
+      el.addEventListener('blur', () => {
           syncUiToStateFromInputs(); 
           saveStateDebounced();
       });
@@ -1052,7 +1052,7 @@ function initInputs() {
         if (!el) return;
         el.addEventListener("input", () => { recalcAndRender(); saveStateDebounced(); });
         if(el.type !== 'text') el.addEventListener("change", () => { recalcAndRender(); saveStateDebounced(); });
-        el.addEventListener("blur", () => { 
+        el.addEventListener('blur', () => { 
             syncUiToStateFromInputs();
             saveStateDebounced();
         });

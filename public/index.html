@@ -96,7 +96,7 @@
                      type="number" min="0" max="120" value="30"/>
             </div>
             <div class="space-y-1.5">
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">희망 은퇴 나이</label>
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">은퇴 나이</label>
               <input id="ageRetire" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2.5 px-4 focus:ring-primary focus:border-primary text-sm font-semibold"
                      type="number" min="0" max="120" value="65"/>
             </div>
@@ -116,7 +116,7 @@
               <span class="material-symbols-outlined text-sm">settings</span> 프리셋
             </button>
             <button id="btnAddEvent" class="flex items-center gap-1.5 text-xs font-bold text-white bg-primary hover:bg-secondary transition-colors px-3 py-2 rounded-lg shadow-md shadow-primary/20">
-              <span class="material-symbols-outlined text-sm">add_circle</span> 이벤트 추가
+              <span class="material-symbols-outlined text-sm">add_circle</span> 시나리오 추가
             </button>
           </div>
         </div>
@@ -125,8 +125,8 @@
 
         <div class="mt-4 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
           지원 항목: <span class="font-semibold">포트폴리오 변경</span>,
-          <span class="font-semibold">월 정기투자금 변경</span>, <span class="font-semibold">일시불</span>,
-          <span class="font-semibold">월 현금 인출</span>.
+          <span class="font-semibold">월 정기 투자금 변경</span>, <span class="font-semibold">일시불</span>,
+          <span class="font-semibold">월 정기 출금</span>.
         </div>
       </div>
 
@@ -140,7 +140,7 @@
         <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-900 z-20">
           <div>
             <h2 class="text-lg font-bold">연간 성장 예측</h2>
-            <p id="rangeLabel" class="text-xs text-slate-500 mt-0.5">예상 분석</p>
+            <p id="rangeLabel" class="text-xs text-slate-500 mt-0.5"></p>
           </div>
           <div class="flex gap-2 items-center relative">
             <button id="btnToggleFilter" class="size-10 flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all hover:scale-105 active:scale-95 group" title="결과 필터">
@@ -254,9 +254,9 @@
           <span class="material-symbols-outlined block">lightbulb</span>
         </div>
         <div>
-          <h4 class="text-sm font-bold text-slate-900 dark:text-white">스마트 요약</h4>
+          <h4 class="text-sm font-bold text-slate-900 dark:text-white">분석 결과 요약</h4>
           <p id="observation" class="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-            왼쪽 항목들을 수정하여 은퇴 계획을 시뮬레이션 해보세요.
+            좌측 설정을 변경하여 나의 은퇴 계획을 분석해보세요.
           </p>
         </div>
       </div>
@@ -300,8 +300,8 @@
           <select id="dlgType" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold">
             <option value="portfolio">포트폴리오 변경</option>
             <option value="monthly">월 정기 투자금 변경</option>
-            <option value="lump">일회성 입/출금</option>
-            <option value="withdrawal">월 정기 출금(현금화)</option>
+            <option value="lump">일시 입/출금</option>
+            <option value="withdrawal">월 정기 출금</option>
           </select>
         </label>
       </div>
@@ -336,7 +336,7 @@
 
     <div class="mt-5 flex gap-2 justify-end">
       <button value="cancel" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">취소</button>
-      <button id="dlgSave" value="ok" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary">이벤트 추가</button>
+      <button id="dlgSave" value="ok" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary">시나리오 추가</button>
     </div>
   </form>
 </dialog>
