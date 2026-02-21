@@ -336,41 +336,53 @@ function getEventSubtitle(ev, theme = 'light') {
                 : getText('EVENT_CARD.SUBTITLE_LUMP_OUT', labelPart, fmtMoney(Math.abs(ev.amount)));
         case 'withdrawal':
             return getText('EVENT_CARD.SUBTITLE_WITHDRAWAL', labelPart, fmtMoney(ev.amount));
+        case 'income':
+            return getText('EVENT_CARD.SUBTITLE_INCOME', labelPart, fmtMoney(ev.amount));
         default:
             return getText('EVENT_CARD.UNKNOWN_EVENT');
     }
 }
 
 function createEventCard(ev) {
-    let border, pillText;
+    let borderClass, pillBgClass, pillText;
     const subtitle = getEventSubtitle(ev);
 
     switch (ev.type) {
         case 'portfolio':
-            border = "border-purple-500";
+            borderClass = "border-purple-500";
+            pillBgClass = "bg-purple-500";
             pillText = getText('EVENT_CARD.PILL_PORTFOLIO');
             break;
         case 'monthly':
-            border = "border-primary";
+            borderClass = "border-primary";
+            pillBgClass = "bg-primary";
             pillText = getText('EVENT_CARD.PILL_MONTHLY');
             break;
         case 'lump':
-            border = "border-slate-500";
+            borderClass = "border-slate-500";
+            pillBgClass = "bg-slate-500";
             pillText = getText('EVENT_CARD.PILL_LUMP');
             break;
         case 'withdrawal':
-            border = "border-emerald-400";
+            borderClass = "border-emerald-500";
+            pillBgClass = "bg-emerald-500";
             pillText = getText('EVENT_CARD.PILL_WITHDRAWAL');
+            break;
+        case 'income':
+            borderClass = "border-sky-500";
+            pillBgClass = "bg-sky-500";
+            pillText = getText('EVENT_CARD.PILL_INCOME');
             break;
         default: 
             pillText = "";
-            border = "border-slate-300";
+            borderClass = "border-slate-300";
+            pillBgClass = "bg-slate-300";
     }
     
-    const pill = `<span class="px-2 py-0.5 bg-${border.split('-')[1]}-500 text-white text-[10px] font-bold rounded-full uppercase">${pillText}</span>`;
+    const pill = `<span class="px-2 py-0.5 ${pillBgClass} text-white text-[10px] font-bold rounded-full uppercase">${pillText}</span>`;
 
     const node = document.createElement("div");
-    node.className = `p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border-l-4 ${border} relative`;
+    node.className = `p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border-l-4 ${borderClass} relative`;
     node.innerHTML = `
       <div class="flex justify-between items-start gap-2">
         <div class="min-w-0">
@@ -541,33 +553,36 @@ function openEventDialog(eventId = null) {
         presetSelect.innerHTML = state.presets.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
     }
 
-    const typeSelect = $("dlgType");
-    const fieldsPortfolio = $('dlgFieldsPortfolio');
-    const fieldsMonetary = $('dlgFieldsMonetary');
-    const type = typeSelect.value;
-    fieldsPortfolio.classList.toggle('hidden', type !== 'portfolio');
-    fieldsMonetary.classList.toggle('hidden', type === 'portfolio');
-
+    updateDialogFields(); // Ensure fields are shown/hidden correctly
     dlg.showModal();
 }
 
+function updateDialogFields() {
+    const typeSelect = $("dlgType");
+    const fieldsPortfolio = $('dlgFieldsPortfolio');
+    const fieldsMonetary = $('dlgFieldsMonetary');
+    const infoEl = $('dlgInfo');
+    const type = typeSelect.value;
+    
+    fieldsPortfolio.classList.toggle('hidden', type !== 'portfolio');
+    fieldsMonetary.classList.toggle('hidden', type === 'portfolio');
+
+    let infoKey;
+    switch(type) {
+        case 'portfolio': infoKey = 'INFO_PORTFOLIO'; break;
+        case 'monthly': infoKey = 'INFO_MONTHLY'; break;
+        case 'lump': infoKey = 'INFO_LUMP'; break;
+        case 'withdrawal': infoKey = 'INFO_WITHDRAWAL'; break;
+        case 'income': infoKey = 'INFO_INCOME'; break;
+        default: infoKey = '';
+    }
+    infoEl.textContent = infoKey ? getText('EVENT_DIALOG.' + infoKey) : '';
+}
 
 function initEventDialog() {
   const dlg = $("eventDialog");
   const typeSelect = $("dlgType");
-  const fieldsPortfolio = $('dlgFieldsPortfolio');
-  const fieldsMonetary = $('dlgFieldsMonetary');
-  const infoEl = $('dlgInfo');
   let downTarget = null;
-
-  const updateDialogFields = () => {
-    const type = typeSelect.value;
-    fieldsPortfolio.classList.toggle('hidden', type !== 'portfolio');
-    fieldsMonetary.classList.toggle('hidden', type === 'portfolio');
-
-    let infoKey = 'INFO_' + type.toUpperCase();
-    infoEl.textContent = getText('EVENT_DIALOG.' + infoKey);
-  };
 
   $("btnAddEvent").addEventListener("click", () => openEventDialog());
 
@@ -685,10 +700,11 @@ function simulate() {
     const activeMonthly = state.events.filter(e => e.type === "monthly" && e.age <= age).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
     const lumpSum = state.events.filter(e => e.type === 'lump' && e.age === age).reduce((sum, e) => sum + e.amount, 0);
     const withdrawalMonthly = state.events.filter(e => e.type === 'withdrawal' && e.age <= age).reduce((sum, e) => sum + e.amount, 0);
+    const incomeMonthly = state.events.filter(e => e.type === 'income' && e.age <= age).reduce((sum, e) => sum + e.amount, 0);
 
     uninvestedCash += lumpSum;
 
-    let yContr = 0, yReturn = 0, yDiv = 0, yWithdrawal = 0;
+    let yContr = 0, yReturn = 0, yDiv = 0, yNetCashFlow = 0, yPortfolioWithdrawal = 0;
 
     for (let m = 1; m <= 12; m++) {
       yContr += activeMonthly;
@@ -719,25 +735,17 @@ function simulate() {
           yDiv += d_posttax;
       });
 
-      if (withdrawalMonthly > 0) {
-          let totalDrawable = portfolioState.reduce((sum, p) => sum + p.balance, 0) + uninvestedCash;
-          if (totalDrawable > withdrawalMonthly) {
-              yWithdrawal += withdrawalMonthly;
-              let drawnFromCash = Math.min(uninvestedCash, withdrawalMonthly);
-              uninvestedCash -= drawnFromCash;
-              let remainingToDraw = withdrawalMonthly - drawnFromCash;
-              
-              if (remainingToDraw > 0) {
-                  const totalInvested = portfolioState.reduce((sum, p) => sum + p.balance, 0);
-                  if (totalInvested > 0) {
-                      const fraction = remainingToDraw / totalInvested;
-                      portfolioState.forEach(p => { p.balance -= p.balance * fraction; });
-                  }
-              }
-          } else {
-              yWithdrawal += totalDrawable;
-              uninvestedCash = 0;
-              portfolioState.forEach(p => { p.balance = 0; });
+      const neededFromPortfolio = withdrawalMonthly - incomeMonthly;
+      yNetCashFlow += (incomeMonthly - withdrawalMonthly);
+
+      if (neededFromPortfolio > 0) {
+          let totalDrawable = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+          const drawAmount = Math.min(totalDrawable, neededFromPortfolio);
+          yPortfolioWithdrawal += drawAmount;
+
+          if (drawAmount > 0) {
+              const fraction = drawAmount / totalDrawable;
+              portfolioState.forEach(p => { p.balance -= p.balance * fraction; });
           }
       }
     }
@@ -760,7 +768,8 @@ function simulate() {
       annualContribution: yContr + (lumpSum > 0 ? lumpSum : 0),
       returnEarned: yReturn, 
       dividends: yDiv, 
-      withdrawalOut: yWithdrawal + (lumpSum < 0 ? -lumpSum : 0),
+      netCashFlow: yNetCashFlow - (lumpSum < 0 ? lumpSum : 0), // Positive is net income, negative is net withdrawal
+      portfolioWithdrawal: yPortfolioWithdrawal, // Actual amount withdrawn from portfolio
       endBalance,
       portfolio: currentPortfolioConfig,
       detailedPortfolio: detailedPortfolioResult
@@ -810,6 +819,9 @@ function buildAnnualRow(y) {
     if (y.age === state.inputs.ageRetire) ageExtra.push(getText('COMMON.RETIRE'));
     if (hasEvents) ageExtra.push(getText('COMMON.EVENT'));
 
+    const netCashFlowColor = y.netCashFlow >= 0 ? "text-emerald-600 dark:text-emerald-300" : "text-red-600 dark:text-red-400";
+    const netCashFlowPrefix = y.netCashFlow >= 0 ? "+" : "";
+
     return `
     <tr class="annual-row ${highlight} hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group" data-year="${y.year}">
       <td class="px-4 py-4 font-bold text-slate-900 dark:text-slate-100">
@@ -821,7 +833,7 @@ function buildAnnualRow(y) {
       <td class="px-4 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.annualContribution, true)}</td>
       <td class="px-4 py-4 font-bold text-primary">+${fmtMoney(y.returnEarned, true)}</td>
       <td class="px-4 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.dividends, true)}</td>
-      <td class="px-4 py-4 font-medium text-emerald-600 dark:text-emerald-300">-${fmtMoney(y.withdrawalOut, true)}</td>
+      <td class="px-4 py-4 font-medium ${netCashFlowColor}">${netCashFlowPrefix}${fmtMoney(y.netCashFlow, true)}</td>
       <td class="px-4 py-4 font-black">${fmtMoney(y.endBalance, true)}</td>
       <td class="px-4 py-4" title="${fullPortfolioTitle}">${portfolioDisplayHtml}</td>
     </tr>
@@ -854,9 +866,11 @@ function renderChart(results) {
 
   results.years.forEach(year => {
       cumulativePrincipal += year.annualContribution;
+      cumulativePrincipal -= year.portfolioWithdrawal; // Subtract what was taken out
+
       if(passesFilter(year)){
-          const principalComponent = Math.min(cumulativePrincipal, year.endBalance);
-          const returnComponent = Math.max(0, year.endBalance - cumulativePrincipal);
+          const principalComponent = Math.max(0, Math.min(cumulativePrincipal, year.endBalance));
+          const returnComponent = Math.max(0, year.endBalance - principalComponent);
           principalData.push(principalComponent);
           returnData.push(returnComponent);
           endBalanceData.push(year.endBalance);
@@ -1058,7 +1072,7 @@ function initInputs() {
       if (!el) return;
       el.addEventListener("input", () => { recalcAndRender(); saveStateDebounced(); });
       if(el.type !== 'text') el.addEventListener("change", () => { recalcAndRender(); saveStateDebounced(); });
-      el.addEventListener('blur', () => {
+      el.addEventListener("blur", () => {
           syncUiToStateFromInputs(); 
           saveStateDebounced();
       });
@@ -1081,7 +1095,7 @@ function initInputs() {
         if (!el) return;
         el.addEventListener("input", () => { recalcAndRender(); saveStateDebounced(); });
         if(el.type !== 'text') el.addEventListener("change", () => { recalcAndRender(); saveStateDebounced(); });
-        el.addEventListener("blur", () => { 
+        el.addEventListener('blur', () => { 
             syncUiToStateFromInputs();
             saveStateDebounced();
         });
