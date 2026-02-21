@@ -12,30 +12,21 @@ function getText(key, ...args) {
 function applyLocalization() {
     document.querySelectorAll('[data-i18n-key]').forEach(el => {
         const key = el.dataset.i18nKey;
-        let attribute = 'innerHTML';
 
         if (key.startsWith('[')) {
             const parts = key.match(/\[(.*?)\](.*)/);
             if (parts) {
-                attribute = parts[1];
+                const attribute = parts[1];
                 const actualKey = parts[2];
                 const text = getText(actualKey);
                 el.setAttribute(attribute, text);
-                if (attribute.toLowerCase() === 'innerhtml') {
-                    el.innerHTML = text;
-                } else {
-                    el.textContent = text;
-                }
+                // Do not change the content if an attribute is specified
                 return;
             }
         }
 
         const text = getText(key);
-        if (attribute === 'innerHTML') {
-            el.innerHTML = text;
-        } else {
-            el.textContent = text;
-        }
+        el.innerHTML = text;
     });
 }
 
@@ -1090,7 +1081,7 @@ function initInputs() {
         if (!el) return;
         el.addEventListener("input", () => { recalcAndRender(); saveStateDebounced(); });
         if(el.type !== 'text') el.addEventListener("change", () => { recalcAndRender(); saveStateDebounced(); });
-        el.addEventListener('blur', () => { 
+        el.addEventListener("blur", () => { 
             syncUiToStateFromInputs();
             saveStateDebounced();
         });
