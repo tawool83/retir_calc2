@@ -118,6 +118,8 @@ const STRINGS = {
         PILL_LUMP: "일시불",
         PILL_WITHDRAWAL: "현금 인출",
         PILL_INCOME: "기타 수입",
+        TOOLTIP_ENABLE: "시뮬레이션에 적용",
+        TOOLTIP_DISABLE: "시뮬레이션에서 제외",
         EDIT_TOOLTIP: "수정",
         DELETE_TOOLTIP: "삭제"
     },

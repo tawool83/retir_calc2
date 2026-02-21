@@ -141,7 +141,7 @@ function buildSnapshot() {
 
 function applySnapshot(snap) {
   if (!snap || snap.version !== 2) {
-    state.events = defaultEvents.map(e => ({ ...e, id: uid() }));
+    state.events = defaultEvents.map(e => ({ ...e, id: uid(), enabled: true }));
     return;
   }
 
@@ -167,9 +167,9 @@ function applySnapshot(snap) {
   if (Array.isArray(snap.events)) {
     state.events = snap.events
       .filter(e => e && e.type && e.age != null)
-      .map(e => ({ ...e, id: e.id || uid() }));
+      .map(e => ({ ...e, id: e.id || uid(), enabled: e.enabled !== false }));
   } else {
-    state.events = defaultEvents.map(e => ({ ...e, id: uid() }));
+    state.events = defaultEvents.map(e => ({ ...e, id: uid(), enabled: true }));
   }
 }
 
@@ -382,7 +382,11 @@ function createEventCard(ev) {
     const pill = `<span class="px-2 py-0.5 ${pillBgClass} text-white text-[10px] font-bold rounded-full uppercase">${pillText}</span>`;
 
     const node = document.createElement("div");
-    node.className = `p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border-l-4 ${borderClass} relative`;
+    node.className = `p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border-l-4 ${borderClass} relative transition-opacity`;
+    if (!ev.enabled) {
+        node.classList.add('opacity-40');
+    }
+
     node.innerHTML = `
       <div class="flex justify-between items-start gap-2">
         <div class="min-w-0">
@@ -392,6 +396,9 @@ function createEventCard(ev) {
           <p class="text-[11px] text-slate-500 mt-1">${subtitle}</p>
         </div>
         <div class="flex items-center">
+            <button class="text-slate-400 hover:text-primary transition-colors shrink-0" data-toggle="${ev.id}" title="${ev.enabled ? getText('EVENT_CARD.TOOLTIP_DISABLE') : getText('EVENT_CARD.TOOLTIP_ENABLE')}">
+              <span class="material-symbols-outlined text-sm">${ev.enabled ? 'visibility' : 'visibility_off'}</span>
+            </button>
             <button class="text-slate-400 hover:text-primary transition-colors shrink-0" data-edit="${ev.id}" title="${getText('EVENT_CARD.EDIT_TOOLTIP')}">
               <span class="material-symbols-outlined text-sm">edit</span>
             </button>
@@ -401,6 +408,15 @@ function createEventCard(ev) {
          </div>
       </div>
     `;
+
+    node.querySelector("[data-toggle]").addEventListener("click", () => {
+        const event = state.events.find(e => e.id === ev.id);
+        if(event) {
+            event.enabled = !event.enabled;
+            recalcAndRender();
+            saveStateDebounced();
+        }
+    });
 
     node.querySelector("[data-del]").addEventListener("click", () => {
       state.events = state.events.filter(e => e.id !== ev.id);
@@ -609,6 +625,7 @@ function initEventDialog() {
         }
     } else { // Add new event
         eventData.id = uid();
+        eventData.enabled = true; // New events are enabled by default
         state.events.push(eventData);
     }
     
@@ -634,7 +651,7 @@ function initEventDialog() {
  *  ============================= */
 function getActivePortfolio(age) {
     const portfolioEvents = state.events
-        .filter(e => e.type === 'portfolio' && e.age <= age)
+        .filter(e => e.type === 'portfolio' && e.enabled && e.age <= age)
         .sort((a,b) => b.age - a.age);
 
     if (!portfolioEvents.length) {
@@ -667,6 +684,7 @@ function simulate() {
   const { ageNow, ageRetire, initialInvestment } = state.inputs;
   const endAge = state.maxAge;
   const startYear = state.startYear;
+  const activeEvents = state.events.filter(e => e.enabled);
 
   const years = [];
   let portfolioState = [];
@@ -697,10 +715,10 @@ function simulate() {
         p.yearDividend = 0;
     });
 
-    const activeMonthly = state.events.filter(e => e.type === "monthly" && e.age <= age).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
-    const lumpSum = state.events.filter(e => e.type === 'lump' && e.age === age).reduce((sum, e) => sum + e.amount, 0);
-    const withdrawalMonthly = state.events.filter(e => e.type === 'withdrawal' && e.age <= age).reduce((sum, e) => sum + e.amount, 0);
-    const incomeMonthly = state.events.filter(e => e.type === 'income' && e.age <= age).reduce((sum, e) => sum + e.amount, 0);
+    const activeMonthly = activeEvents.filter(e => e.type === "monthly" && e.age <= age).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
+    const lumpSum = activeEvents.filter(e => e.type === 'lump' && e.age === age).reduce((sum, e) => sum + e.amount, 0);
+    const withdrawalMonthly = activeEvents.filter(e => e.type === 'withdrawal' && e.age <= age).reduce((sum, e) => sum + e.amount, 0);
+    const incomeMonthly = activeEvents.filter(e => e.type === 'income' && e.age <= age).reduce((sum, e) => sum + e.amount, 0);
 
     uninvestedCash += lumpSum;
 
@@ -969,7 +987,7 @@ function initTooltips() {
             html += `<div class="font-bold mt-3 mb-2 text-base border-t border-slate-700 pt-2">${getText('TOOLTIP.EVENT_TITLE')}</div>`;
             html += eventsAtAge.map(ev => {
                 const subtitle = getEventSubtitle(ev, 'dark');
-                return `<p class="text-xs text-slate-300 mb-1">${subtitle}</p>`;
+                return `<p class="text-xs text-slate-300 mb-1 ${!ev.enabled ? 'line-through' : ''}">${subtitle}</p>`;
             }).join('');
         }
 
@@ -1095,7 +1113,7 @@ function initInputs() {
         if (!el) return;
         el.addEventListener("input", () => { recalcAndRender(); saveStateDebounced(); });
         if(el.type !== 'text') el.addEventListener("change", () => { recalcAndRender(); saveStateDebounced(); });
-        el.addEventListener('blur', () => { 
+        el.addEventListener("blur", () => { 
             syncUiToStateFromInputs();
             saveStateDebounced();
         });
