@@ -74,6 +74,7 @@ const state = {
   isEventListExpanded: false,
 
   presets: [...defaultPresets],
+  editingPresetId: null,
 
   inputs: {
     ageNow: 30,
@@ -175,33 +176,62 @@ function updateFilterButton() {
     }
 }
 
-
 /** =============================
  *  Presets Management
  *  ============================= */
 function renderPresetList() {
-  const listEl = $("presetList");
-  listEl.innerHTML = "";
-  state.presets.forEach(p => {
-    const item = document.createElement("div");
-    item.className = "flex items-center justify-between gap-2 text-sm p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50";
-    item.innerHTML = `
-      <div class="font-bold">${p.name} ${p.builtin ? '(기본)' : ''}</div>
-      <div class="text-xs text-slate-500">수익 ${p.annualReturnPct}% / 배당 ${p.dividendPct}%</div>
-      ${!p.builtin ? `<button data-del-preset="${p.id}" class="text-red-500 hover:text-red-400"><span class="material-symbols-outlined text-sm">delete</span></button>` : ''}
-    `;
-    listEl.appendChild(item);
-  });
+    const listEl = $("presetList");
+    listEl.innerHTML = "";
+    state.presets.forEach(p => {
+        const item = document.createElement("div");
+        item.className = "flex items-center justify-between gap-2 text-sm p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors";
+        item.innerHTML = `
+            <div class="flex-grow min-w-0">
+                <div class="font-bold truncate">${p.name} ${p.builtin ? '(기본)' : ''}</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">수익 ${p.annualReturnPct}% / 배당 ${p.dividendPct}%</div>
+            </div>
+            ${!p.builtin ? `<button data-del-preset="${p.id}" class="text-red-500 hover:text-red-400 shrink-0"><span class="material-symbols-outlined text-base">delete</span></button>` : '<div class="w-8 shrink-0"></div>'}
+        `;
+        listEl.appendChild(item);
 
-  listEl.querySelectorAll("[data-del-preset]").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-          const id = e.currentTarget.getAttribute("data-del-preset");
-          state.presets = state.presets.filter(p => p.id !== id);
-          renderPresetList();
-          recalcAndRender();
-          saveStateDebounced();
-      });
-  });
+        item.addEventListener('click', (e) => {
+            if (e.target.closest('[data-del-preset]')) return;
+            setPresetEditMode(p.id);
+        });
+
+        const delBtn = item.querySelector("[data-del-preset]");
+        if (delBtn) {
+            delBtn.addEventListener("click", () => {
+                state.presets = state.presets.filter(pr => pr.id !== p.id);
+                if (state.editingPresetId === p.id) {
+                    setPresetEditMode(null);
+                }
+                renderPresetList();
+                recalcAndRender();
+                saveStateDebounced();
+            });
+        }
+    });
+}
+
+function setPresetEditMode(presetId) {
+    state.editingPresetId = presetId;
+    const form = $('newPresetForm');
+    const title = $('dlgPresetTitle');
+    
+    if (presetId) {
+        const preset = state.presets.find(p => p.id === presetId);
+        if (!preset) return;
+        title.textContent = '프리셋 수정';
+        $('dlgPresetName').value = preset.name;
+        $('dlgPresetReturn').value = preset.annualReturnPct;
+        $('dlgPresetDiv').value = preset.dividendPct;
+        $('dlgPresetName').disabled = preset.builtin;
+    } else {
+        title.textContent = '새 프리셋 추가';
+        form.reset();
+        $('dlgPresetName').disabled = false;
+    }
 }
 
 function initPresetManagement() {
@@ -209,8 +239,8 @@ function initPresetManagement() {
     let downTarget = null;
 
     $('btnAddPreset').addEventListener('click', () => {
+        setPresetEditMode(null);
         renderPresetList();
-        $('newPresetForm').reset();
         dlg.showModal();
     });
 
@@ -221,13 +251,26 @@ function initPresetManagement() {
         const d = parsePct($("dlgPresetDiv").value);
 
         if (!name) return;
-        const id = "u_" + uid().slice(0, 8);
+        
+        if (state.editingPresetId) { // Edit mode
+            const index = state.presets.findIndex(p => p.id === state.editingPresetId);
+            if (index > -1) {
+                const p = state.presets[index];
+                p.annualReturnPct = r;
+                p.dividendPct = d;
+                if (!p.builtin) {
+                    p.name = name;
+                }
+            }
+        } else { // Add mode
+            const id = "u_" + uid().slice(0, 8);
+            state.presets.push({ id, name, annualReturnPct: r, dividendPct: d, builtin: false });
+        }
 
-        state.presets.push({ id, name, annualReturnPct: r, dividendPct: d, builtin: false });
+        setPresetEditMode(null);
         renderPresetList();
         recalcAndRender();
         saveStateDebounced();
-        e.target.reset();
     });
 
     dlg.addEventListener("mousedown", e => { downTarget = e.target; });
@@ -236,7 +279,9 @@ function initPresetManagement() {
         dlg.close();
       }
     });
+    dlg.addEventListener('close', () => setPresetEditMode(null));
 }
+
 
 /** =============================
  *  Events UI
