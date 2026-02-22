@@ -531,117 +531,125 @@ function getPortfolioSignature(portfolio) {
 }
 
 function simulate() {
-  syncUiToStateFromInputs();
-  const { ageNow, ageRetire, initialInvestment } = state.inputs;
-  const endAge = state.maxAge;
-  const startYear = state.startYear;
-  const activeEvents = state.events.filter(e => e.enabled);
-  const years = [];
-  let portfolioState = [];
-  let uninvestedCash = initialInvestment;
-  let initialPortfolioConfig = getActivePortfolio(ageNow);
-  if (initialPortfolioConfig.length > 0 && uninvestedCash > 0) {
-      portfolioState = initialPortfolioConfig.map(p => ({ ...p, balance: uninvestedCash * p.percentage, yearReturn: 0, yearDividend: 0 }));
-      uninvestedCash = 0;
-  }
-  let lastPortfolioSignature = getPortfolioSignature(initialPortfolioConfig);
+    syncUiToStateFromInputs();
+    const { ageNow, ageRetire, initialInvestment } = state.inputs;
+    const endAge = state.maxAge;
+    const startYear = state.startYear;
+    const activeEvents = state.events.filter(e => e.enabled);
 
-  for (let age = ageNow; age <= endAge; age++) {
-    const year = startYear + (age - ageNow);
-    let currentPortfolioConfig = getActivePortfolio(age);
-    const currentPortfolioSignature = getPortfolioSignature(currentPortfolioConfig);
+    // Determine the starting age for the simulation calculation.
+    const allEventAges = activeEvents.map(e => e.age);
+    const calculationStartAge = allEventAges.length > 0 ? Math.min(...allEventAges) : ageNow;
 
-    if (currentPortfolioSignature !== lastPortfolioSignature && currentPortfolioSignature !== '') {
-        const totalBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0) + uninvestedCash;
-        portfolioState = currentPortfolioConfig.map(p => ({ ...p, balance: totalBalance * p.percentage, yearReturn: 0, yearDividend: 0 }));
-        uninvestedCash = 0;
-        lastPortfolioSignature = currentPortfolioSignature;
+    const years = [];
+    let portfolioState = [];
+    let uninvestedCash = 0;
+
+    let initialPortfolioConfig = getActivePortfolio(calculationStartAge);
+    if (initialPortfolioConfig.length > 0) {
+        portfolioState = initialPortfolioConfig.map(p => ({ ...p, balance: 0, yearReturn: 0, yearDividend: 0 }));
     }
+    let lastPortfolioSignature = getPortfolioSignature(initialPortfolioConfig);
 
-    portfolioState.forEach(p => { p.yearReturn = 0; p.yearDividend = 0; });
+    for (let age = calculationStartAge; age <= endAge; age++) {
+        const year = startYear + (age - ageNow);
+        let currentPortfolioConfig = getActivePortfolio(age);
+        const currentPortfolioSignature = getPortfolioSignature(currentPortfolioConfig);
 
-    const activeMonthly = activeEvents.filter(e => e.type === "monthly" && e.age <= age).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
-    const lumpSum = activeEvents.filter(e => e.type === 'lump' && e.age === age).reduce((sum, e) => sum + e.amount, 0);
-    const withdrawalMonthly = activeEvents.filter(e => e.type === 'withdrawal' && e.age <= age).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
-    const incomeMonthly = activeEvents.filter(e => e.type === 'income' && e.age <= age).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
-
-    uninvestedCash += lumpSum > 0 ? lumpSum : 0;
-
-    let yContr = 0, yReturn = 0, yDiv = 0, yWithdrawal = 0;
-    let annualCashFlow = incomeMonthly * 12;
-
-    for (let m = 1; m <= 12; m++) {
-      yContr += activeMonthly;
-      uninvestedCash += activeMonthly;
-      
-      if (uninvestedCash > 0 && currentPortfolioConfig.length > 0) {
-          if (portfolioState.length === 0) {
-               portfolioState = currentPortfolioConfig.map(p => ({ ...p, balance: 0, yearReturn: 0, yearDividend: 0 }));
-          }
-          const totalInvested = portfolioState.reduce((sum, p) => sum + p.balance, 0);
-          if (totalInvested > 0) {
-              portfolioState.forEach(p => { p.balance += uninvestedCash * (p.balance / totalInvested); });
-          } else {
-              portfolioState.forEach(p => { p.balance += uninvestedCash * p.percentage; });
-          }
-          uninvestedCash = 0;
-      }
-      
-      portfolioState.forEach(p => {
-          const r = p.balance * (p.preset.annualReturnPct / 100 / 12);
-          const d_pretax = p.balance * (p.preset.dividendPct / 100 / 12);
-          const d_posttax = d_pretax * (1 - state.dividendTaxRate);
-          p.balance += r + d_posttax;
-          p.yearReturn += r;
-          p.yearDividend += d_posttax;
-          yReturn += r;
-          yDiv += d_posttax;
-      });
-
-      if (withdrawalMonthly > 0) {
-          let totalDrawable = portfolioState.reduce((sum, p) => sum + p.balance, 0);
-          const drawAmount = Math.min(totalDrawable, withdrawalMonthly);
-          yWithdrawal += drawAmount;
-          if (drawAmount > 0) {
-              const fraction = drawAmount / totalDrawable;
-              portfolioState.forEach(p => { p.balance -= p.balance * fraction; });
-          }
-      }
-    }
-    
-    const lumpSumWithdrawal = lumpSum < 0 ? Math.abs(lumpSum) : 0;
-    if (lumpSumWithdrawal > 0) {
-        let totalDrawable = portfolioState.reduce((sum, p) => sum + p.balance, 0);
-        const drawAmount = Math.min(totalDrawable, lumpSumWithdrawal);
-        yWithdrawal += drawAmount;
-        if (drawAmount > 0) {
-            const fraction = drawAmount / totalDrawable;
-            portfolioState.forEach(p => { p.balance -= p.balance * fraction; });
+        if (currentPortfolioSignature !== lastPortfolioSignature && currentPortfolioSignature !== '') {
+            const totalBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0) + uninvestedCash;
+            portfolioState = currentPortfolioConfig.map(p => ({ ...p, balance: totalBalance * p.percentage, yearReturn: 0, yearDividend: 0 }));
+            uninvestedCash = 0;
+            lastPortfolioSignature = currentPortfolioSignature;
         }
+
+        portfolioState.forEach(p => { p.yearReturn = 0; p.yearDividend = 0; });
+
+        const activeMonthly = activeEvents.filter(e => e.type === "monthly" && e.age <= age).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
+        let lumpSum = activeEvents.filter(e => e.type === 'lump' && e.age === age).reduce((sum, e) => sum + e.amount, 0);
+        if (age === ageNow) {
+            lumpSum += initialInvestment;
+        }
+        const withdrawalMonthly = activeEvents.filter(e => e.type === 'withdrawal' && e.age <= age).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
+        const incomeMonthly = activeEvents.filter(e => e.type === 'income' && e.age <= age).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
+
+        uninvestedCash += lumpSum > 0 ? lumpSum : 0;
+
+        let yContr = 0, yReturn = 0, yDiv = 0, yWithdrawal = 0;
+        let annualCashFlow = incomeMonthly * 12;
+
+        for (let m = 1; m <= 12; m++) {
+            yContr += activeMonthly;
+            uninvestedCash += activeMonthly;
+
+            if (uninvestedCash > 0 && currentPortfolioConfig.length > 0) {
+                if (portfolioState.length === 0) {
+                    portfolioState = currentPortfolioConfig.map(p => ({ ...p, balance: 0, yearReturn: 0, yearDividend: 0 }));
+                }
+                const totalInvested = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+                if (totalInvested > 0) {
+                    portfolioState.forEach(p => { p.balance += uninvestedCash * (p.balance / totalInvested); });
+                } else {
+                    portfolioState.forEach(p => { p.balance += uninvestedCash * p.percentage; });
+                }
+                uninvestedCash = 0;
+            }
+
+            portfolioState.forEach(p => {
+                const r = p.balance * (p.preset.annualReturnPct / 100 / 12);
+                const d_pretax = p.balance * (p.preset.dividendPct / 100 / 12);
+                const d_posttax = d_pretax * (1 - state.dividendTaxRate);
+                p.balance += r + d_posttax;
+                p.yearReturn += r;
+                p.yearDividend += d_posttax;
+                yReturn += r;
+                yDiv += d_posttax;
+            });
+
+            if (withdrawalMonthly > 0) {
+                let totalDrawable = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+                const drawAmount = Math.min(totalDrawable, withdrawalMonthly);
+                yWithdrawal += drawAmount;
+                if (drawAmount > 0) {
+                    const fraction = drawAmount / totalDrawable;
+                    portfolioState.forEach(p => { p.balance -= p.balance * fraction; });
+                }
+            }
+        }
+
+        const lumpSumWithdrawal = lumpSum < 0 ? Math.abs(lumpSum) : 0;
+        if (lumpSumWithdrawal > 0) {
+            let totalDrawable = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+            const drawAmount = Math.min(totalDrawable, lumpSumWithdrawal);
+            yWithdrawal += drawAmount;
+            if (drawAmount > 0) {
+                const fraction = drawAmount / totalDrawable;
+                portfolioState.forEach(p => { p.balance -= p.balance * fraction; });
+            }
+        }
+
+        annualCashFlow += yWithdrawal;
+
+        const endBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0) + uninvestedCash;
+        let detailedPortfolioResult = portfolioState.map(p => ({ name: p.preset.name, balance: p.balance, return: p.yearReturn, dividend: p.yearDividend }));
+        if (uninvestedCash > 0) {
+            detailedPortfolioResult.push({ name: getText('TABLE.UNINVESTED_CASH'), balance: uninvestedCash, return: 0, dividend: 0 });
+        }
+
+        years.push({
+            year, age,
+            annualContribution: yContr + (lumpSum > 0 ? lumpSum : 0),
+            annualCashFlow: annualCashFlow,
+            annualWithdrawal: yWithdrawal,
+            returnEarned: yReturn,
+            dividends: yDiv,
+            endBalance,
+            portfolio: currentPortfolioConfig,
+            detailedPortfolio: detailedPortfolioResult
+        });
     }
 
-    annualCashFlow += yWithdrawal;
-
-    const endBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0) + uninvestedCash;
-    let detailedPortfolioResult = portfolioState.map(p => ({ name: p.preset.name, balance: p.balance, return: p.yearReturn, dividend: p.yearDividend }));
-    if (uninvestedCash > 0) {
-        detailedPortfolioResult.push({ name: getText('TABLE.UNINVESTED_CASH'), balance: uninvestedCash, return: 0, dividend: 0 });
-    }
-
-    years.push({
-      year, age, 
-      annualContribution: yContr + (lumpSum > 0 ? lumpSum : 0),
-      annualCashFlow: annualCashFlow,
-      annualWithdrawal: yWithdrawal, 
-      returnEarned: yReturn, 
-      dividends: yDiv, 
-      endBalance,
-      portfolio: currentPortfolioConfig,
-      detailedPortfolio: detailedPortfolioResult
-    });
-  }
-
-  return { years, startYear, ageNow, endAge, ageRetire };
+    return { years, startYear, ageNow, endAge, ageRetire };
 }
 
 /** =============================
@@ -713,7 +721,7 @@ function renderAnnualTable(results) {
 function renderChart(results) {
   const filteredYears = results.years.filter(passesFilter);
   const labels = filteredYears.map(y => [`${String(y.year)}`, `${y.age}세`]);
-  let cumulativePrincipal = state.inputs.initialInvestment;
+  let cumulativePrincipal = 0; // Changed from state.inputs.initialInvestment
   const principalData = [];
   const returnData = [];
 
