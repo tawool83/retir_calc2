@@ -56,7 +56,7 @@ const STRINGS = {
         TOOLTIP_RETURN: "연간 발생한 총 평가 증가액입니다. (배당 제외)",
         TOOLTIP_DIVIDEND: "연간 발생한 총 배당금입니다. (세후 15.4% 적용)",
         TOOLTIP_WITHDRAWAL: "'월 정기 출금'과 '일시불 출금'을 더한 연간 총 출금액입니다.",
-        TOOLTIP_CASH_FLOW: "'월 정기 기타 수입'의 연간 총합입니다. 이 값은 투자 자산과는 별도로 기록되는 보고용 지표입니다.",
+        TOOLTIP_CASH_FLOW: "연간 발생한 투자 외 현금 흐름과 투자 자산에서 발생한 출금액의 총합입니다.<br><b>계산식: (월 정기 기타 수입 x 12) + 연간 총 출금액</b>",
         TOOLTIP_BALANCE: "해당 연도 말 기준 총 평가액입니다.<br>계산식: <b>기초 평가액 + 연간 투자금 + 평가 증가액 + 배당금 - 출금액</b>",
         TOOLTIP_PORTFOLIO: "해당 연도에 적용된 포트폴리오 구성입니다. 마우스를 올리면 전체 구성을 확인할 수 있습니다.",
         PORTFOLIO_UNDEFINED: "정의되지 않음",

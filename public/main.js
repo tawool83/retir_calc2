@@ -568,7 +568,7 @@ function simulate() {
     uninvestedCash += lumpSum > 0 ? lumpSum : 0;
 
     let yContr = 0, yReturn = 0, yDiv = 0, yWithdrawal = 0;
-    const annualCashFlow = incomeMonthly * 12;
+    let annualCashFlow = incomeMonthly * 12;
 
     for (let m = 1; m <= 12; m++) {
       yContr += activeMonthly;
@@ -619,6 +619,8 @@ function simulate() {
             portfolioState.forEach(p => { p.balance -= p.balance * fraction; });
         }
     }
+
+    annualCashFlow += yWithdrawal;
 
     const endBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0) + uninvestedCash;
     let detailedPortfolioResult = portfolioState.map(p => ({ name: p.preset.name, balance: p.balance, return: p.yearReturn, dividend: p.yearDividend }));
