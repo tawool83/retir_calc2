@@ -688,7 +688,7 @@ function buildAnnualRow(y) {
       <td class="px-4 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.annualContribution, true)}</td>
       <td class="px-4 py-4 font-bold text-primary">+${fmtMoney(y.returnEarned, true)}</td>
       <td class="px-4 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.dividends, true)}</td>
-      <td class="px-4 py-4 font-medium text-red-600 dark:text-red-400">-${fmtMoney(y.annualWithdrawal, true)}</td>
+      <td class="px-4 py-4 font-medium text-red-600 dark:text-red-400 hidden">-${fmtMoney(y.annualWithdrawal, true)}</td>
       <td class="px-4 py-4 font-medium text-sky-600 dark:text-sky-300">+${fmtMoney(y.annualCashFlow, true)}</td>
       <td class="px-4 py-4 font-black">${fmtMoney(y.endBalance, true)}</td>
       <td class="px-4 py-4" title="${fullPortfolioTitle}">${portfolioDisplayHtml}</td>
