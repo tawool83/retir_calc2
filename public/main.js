@@ -1,3 +1,4 @@
+
 /** =============================
  *  Localization
  *  ============================= */
@@ -12,7 +13,6 @@ function getText(key, ...args) {
 function applyLocalization() {
     document.querySelectorAll('[data-i18n-key]').forEach(el => {
         const key = el.dataset.i18nKey;
-
         if (key.startsWith('[')) {
             const parts = key.match(/\[(.*?)\](.*)/);
             if (parts) {
@@ -20,11 +20,9 @@ function applyLocalization() {
                 const actualKey = parts[2];
                 const text = getText(actualKey);
                 el.setAttribute(attribute, text);
-                // Do not change the content if an attribute is specified
                 return;
             }
         }
-
         const text = getText(key);
         el.innerHTML = text;
     });
@@ -55,7 +53,6 @@ function saveStateDebounced() {
 
 function resetSavedState() {
   localStorage.removeItem(STORAGE_KEY);
-  // Also clear the onboarding state
   localStorage.removeItem('onboardingCompleted');
 }
 
@@ -74,13 +71,9 @@ function parseMoney(input) {
 function fmtMoney(n, compact = false) {
     const num = Number(n);
     if (!Number.isFinite(num)) return "0원";
-
     if (compact) {
-        if (Math.abs(num) >= 100000000) {
-            return `${parseFloat((num / 100000000).toFixed(2))}억`;
-        } else if (Math.abs(num) >= 10000) {
-            return `${parseFloat((num / 10000).toFixed(0))}만`;
-        }
+        if (Math.abs(num) >= 100000000) return `${parseFloat((num / 100000000).toFixed(2))}억`;
+        if (Math.abs(num) >= 10000) return `${parseFloat((num / 10000).toFixed(0))}만`;
     }
     return `${Math.round(num).toLocaleString()}원`;
 }
@@ -106,10 +99,8 @@ const state = {
   maxAge: 100,
   dividendTaxRate: 0.154,
   isEventListExpanded: false,
-
   presets: [...defaultPresets],
   editingPresetId: null,
-
   inputs: {
     ageNow: 30,
     ageRetire: 65,
@@ -119,7 +110,6 @@ const state = {
     filterAgeFrom: 30,
     filterAgeTo: 100
   },
-
   events: [],
   results: null,
   chart: null,
@@ -143,34 +133,19 @@ function buildSnapshot() {
 
 function applySnapshot(snap) {
   if (!snap || snap.version !== 2) {
-    state.presets = [...defaultPresets]; // Explicitly reset presets
+    state.presets = [...defaultPresets];
     state.events = defaultEvents.map(e => ({ ...e, id: uid(), enabled: true }));
     return;
   }
-
   const builtins = [...defaultPresets];
-  const userPresets = Array.isArray(snap.presets)
-    ? snap.presets.filter(p => p && !p.builtin && p.id && p.name)
-    : [];
+  const userPresets = Array.isArray(snap.presets) ? snap.presets.filter(p => p && !p.builtin && p.id && p.name) : [];
   state.presets = [...builtins, ...userPresets];
-
-  if (snap.inputs && typeof snap.inputs === 'object') {
-     Object.assign(state.inputs, snap.inputs);
-  }
-  
+  if (snap.inputs && typeof snap.inputs === 'object') Object.assign(state.inputs, snap.inputs);
   state.inputs.initialInvestment = 0;
   state.inputs.monthlyContribution = 0;
-  
   state.isEventListExpanded = snap.isEventListExpanded || false;
-
-  if (state.inputs.autoZeroAfterRetire) {
-    delete state.inputs.autoZeroAfterRetire;
-  }
-
   if (Array.isArray(snap.events)) {
-    state.events = snap.events
-      .filter(e => e && e.type && e.age != null)
-      .map(e => ({ ...e, id: e.id || uid(), enabled: e.enabled !== false }));
+    state.events = snap.events.filter(e => e && e.type && e.age != null).map(e => ({ ...e, id: e.id || uid(), enabled: e.enabled !== false }));
   } else {
     state.events = defaultEvents.map(e => ({ ...e, id: uid(), enabled: true }));
   }
@@ -182,11 +157,9 @@ function applySnapshot(snap) {
 function syncStateToUi() {
   $("ageNow").value = state.inputs.ageNow;
   $("ageRetire").value = state.inputs.ageRetire;
-  
   $("filterEnabled").checked = state.inputs.filterEnabled;
   $("filterAgeFrom").value = state.inputs.filterAgeFrom;
   $("filterAgeTo").value = state.inputs.filterAgeTo;
-
   renderEventList();
   updateFilterButton();
 }
@@ -194,7 +167,6 @@ function syncStateToUi() {
 function syncUiToStateFromInputs() {
   state.inputs.ageNow = clamp(Number($("ageNow").value || 0), 0, 120);
   state.inputs.ageRetire = clamp(Number($("ageRetire").value || 0), 0, 120);
-
   state.inputs.filterEnabled = $("filterEnabled").checked;
   state.inputs.filterAgeFrom = clamp(Number($("filterAgeFrom").value || 0), 0, 120);
   state.inputs.filterAgeTo = clamp(Number($("filterAgeTo").value || 0), 0, 120);
@@ -228,19 +200,15 @@ function renderPresetList() {
             ${!p.builtin ? `<button data-del-preset="${p.id}" class="text-red-500 hover:text-red-400 shrink-0"><span class="material-symbols-outlined text-base">delete</span></button>` : '<div class="w-8 shrink-0"></div>'}
         `;
         listEl.appendChild(item);
-
         item.addEventListener('click', (e) => {
             if (e.target.closest('[data-del-preset]')) return;
             setPresetEditMode(p.id);
         });
-
         const delBtn = item.querySelector("[data-del-preset]");
         if (delBtn) {
             delBtn.addEventListener("click", () => {
                 state.presets = state.presets.filter(pr => pr.id !== p.id);
-                if (state.editingPresetId === p.id) {
-                    setPresetEditMode(null);
-                }
+                if (state.editingPresetId === p.id) setPresetEditMode(null);
                 renderPresetList();
                 recalcAndRender();
                 saveStateDebounced();
@@ -253,7 +221,6 @@ function setPresetEditMode(presetId) {
     state.editingPresetId = presetId;
     const form = $('newPresetForm');
     const title = $('dlgPresetTitle');
-    
     if (presetId) {
         const preset = state.presets.find(p => p.id === presetId);
         if (!preset) return;
@@ -272,61 +239,45 @@ function setPresetEditMode(presetId) {
 function initPresetManagement() {
     const dlg = $('presetDialog');
     let downTarget = null;
-
     $('btnAddPreset').addEventListener('click', () => {
         setPresetEditMode(null);
         renderPresetList();
         dlg.showModal();
     });
-
     $('newPresetForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const name = ($("dlgPresetName").value || "").trim();
         const r = parsePct($("dlgPresetReturn").value);
         const d = parsePct($("dlgPresetDiv").value);
-
         if (!name) return;
-        
-        if (state.editingPresetId) { // Edit mode
+        if (state.editingPresetId) {
             const index = state.presets.findIndex(p => p.id === state.editingPresetId);
             if (index > -1) {
                 const p = state.presets[index];
                 p.annualReturnPct = r;
                 p.dividendPct = d;
-                if (!p.builtin) {
-                    p.name = name;
-                }
+                if (!p.builtin) p.name = name;
             }
-        } else { // Add mode
+        } else {
             const id = "u_" + uid().slice(0, 8);
             state.presets.push({ id, name, annualReturnPct: r, dividendPct: d, builtin: false });
         }
-
         setPresetEditMode(null);
         renderPresetList();
         recalcAndRender();
         saveStateDebounced();
     });
-
     dlg.addEventListener("mousedown", e => { downTarget = e.target; });
-    dlg.addEventListener("click", (e) => {
-      if (e.target === dlg && downTarget === dlg) {
-        dlg.close();
-      }
-    });
+    dlg.addEventListener("click", (e) => { if (e.target === dlg && downTarget === dlg) dlg.close(); });
     dlg.addEventListener('close', () => setPresetEditMode(null));
 }
-
 
 /** =============================
  *  Events UI
  *  ============================= */
 function getEventSubtitle(ev, theme = 'light') {
-    const labelColor = (theme === 'dark') 
-        ? 'text-slate-300' 
-        : 'text-slate-800 dark:text-slate-100';
+    const labelColor = (theme === 'dark') ? 'text-slate-300' : 'text-slate-800 dark:text-slate-100';
     const labelPart = ev.label ? `<span class="font-bold ${labelColor}">${ev.label}:</span>` : '';
-    
     switch (ev.type) {
         case 'portfolio':
             const preset = state.presets.find(p => p.id === ev.presetId);
@@ -334,9 +285,7 @@ function getEventSubtitle(ev, theme = 'light') {
         case 'monthly':
             return getText('EVENT_CARD.SUBTITLE_MONTHLY', labelPart, fmtMoney(ev.amount));
         case 'lump':
-            return ev.amount >= 0 
-                ? getText('EVENT_CARD.SUBTITLE_LUMP_IN', labelPart, fmtMoney(Math.abs(ev.amount)))
-                : getText('EVENT_CARD.SUBTITLE_LUMP_OUT', labelPart, fmtMoney(Math.abs(ev.amount)));
+            return ev.amount >= 0 ? getText('EVENT_CARD.SUBTITLE_LUMP_IN', labelPart, fmtMoney(Math.abs(ev.amount))) : getText('EVENT_CARD.SUBTITLE_LUMP_OUT', labelPart, fmtMoney(Math.abs(ev.amount)));
         case 'withdrawal':
             return getText('EVENT_CARD.SUBTITLE_WITHDRAWAL', labelPart, fmtMoney(ev.amount));
         case 'income':
@@ -349,69 +298,37 @@ function getEventSubtitle(ev, theme = 'light') {
 function createEventCard(ev) {
     let borderClass, pillBgClass, pillText;
     const subtitle = getEventSubtitle(ev);
-
     switch (ev.type) {
         case 'portfolio':
-            borderClass = "border-purple-500";
-            pillBgClass = "bg-purple-500";
-            pillText = getText('EVENT_CARD.PILL_PORTFOLIO');
-            break;
+            borderClass = "border-purple-500"; pillBgClass = "bg-purple-500"; pillText = getText('EVENT_CARD.PILL_PORTFOLIO'); break;
         case 'monthly':
-            borderClass = "border-primary";
-            pillBgClass = "bg-primary";
-            pillText = getText('EVENT_CARD.PILL_MONTHLY');
-            break;
+            borderClass = "border-primary"; pillBgClass = "bg-primary"; pillText = getText('EVENT_CARD.PILL_MONTHLY'); break;
         case 'lump':
-            borderClass = "border-slate-500";
-            pillBgClass = "bg-slate-500";
-            pillText = getText('EVENT_CARD.PILL_LUMP');
-            break;
+            borderClass = "border-slate-500"; pillBgClass = "bg-slate-500"; pillText = getText('EVENT_CARD.PILL_LUMP'); break;
         case 'withdrawal':
-            borderClass = "border-emerald-500";
-            pillBgClass = "bg-emerald-500";
-            pillText = getText('EVENT_CARD.PILL_WITHDRAWAL');
-            break;
+            borderClass = "border-emerald-500"; pillBgClass = "bg-emerald-500"; pillText = getText('EVENT_CARD.PILL_WITHDRAWAL'); break;
         case 'income':
-            borderClass = "border-sky-500";
-            pillBgClass = "bg-sky-500";
-            pillText = getText('EVENT_CARD.PILL_INCOME');
-            break;
+            borderClass = "border-sky-500"; pillBgClass = "bg-sky-500"; pillText = getText('EVENT_CARD.PILL_INCOME'); break;
         default: 
-            pillText = "";
-            borderClass = "border-slate-300";
-            pillBgClass = "bg-slate-300";
+            pillText = ""; borderClass = "border-slate-300"; pillBgClass = "bg-slate-300";
     }
-    
     const pill = `<span class="px-2 py-0.5 ${pillBgClass} text-white text-[10px] font-bold rounded-full uppercase">${pillText}</span>`;
-
     const node = document.createElement("div");
     node.className = `p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border-l-4 ${borderClass} relative transition-opacity`;
-    if (!ev.enabled) {
-        node.classList.add('opacity-40');
-    }
-
+    if (!ev.enabled) node.classList.add('opacity-40');
     node.innerHTML = `
       <div class="flex justify-between items-start gap-2">
         <div class="min-w-0">
-          <div class="flex items-center gap-2 flex-wrap">
-            ${pill}
-          </div>
+          <div class="flex items-center gap-2 flex-wrap">${pill}</div>
           <p class="text-[11px] text-slate-500 mt-1">${subtitle}</p>
         </div>
         <div class="flex items-center">
-            <button class="text-slate-400 hover:text-primary transition-colors shrink-0" data-toggle="${ev.id}" title="${ev.enabled ? getText('EVENT_CARD.TOOLTIP_DISABLE') : getText('EVENT_CARD.TOOLTIP_ENABLE')}">
-              <span class="material-symbols-outlined text-sm">${ev.enabled ? 'visibility' : 'visibility_off'}</span>
-            </button>
-            <button class="text-slate-400 hover:text-primary transition-colors shrink-0" data-edit="${ev.id}" title="${getText('EVENT_CARD.EDIT_TOOLTIP')}">
-              <span class="material-symbols-outlined text-sm">edit</span>
-            </button>
-            <button class="text-slate-400 hover:text-red-500 transition-colors shrink-0" data-del="${ev.id}" title="${getText('EVENT_CARD.DELETE_TOOLTIP')}">
-              <span class="material-symbols-outlined text-sm">delete</span>
-            </button>
+            <button class="text-slate-400 hover:text-primary transition-colors shrink-0" data-toggle="${ev.id}" title="${ev.enabled ? getText('EVENT_CARD.TOOLTIP_DISABLE') : getText('EVENT_CARD.TOOLTIP_ENABLE')}"><span class="material-symbols-outlined text-sm">${ev.enabled ? 'visibility' : 'visibility_off'}</span></button>
+            <button class="text-slate-400 hover:text-primary transition-colors shrink-0" data-edit="${ev.id}" title="${getText('EVENT_CARD.EDIT_TOOLTIP')}"><span class="material-symbols-outlined text-sm">edit</span></button>
+            <button class="text-slate-400 hover:text-red-500 transition-colors shrink-0" data-del="${ev.id}" title="${getText('EVENT_CARD.DELETE_TOOLTIP')}"><span class="material-symbols-outlined text-sm">delete</span></button>
          </div>
       </div>
     `;
-
     node.querySelector("[data-toggle]").addEventListener("click", () => {
         const event = state.events.find(e => e.id === ev.id);
         if(event) {
@@ -420,34 +337,24 @@ function createEventCard(ev) {
             saveStateDebounced();
         }
     });
-
     node.querySelector("[data-del]").addEventListener("click", () => {
       state.events = state.events.filter(e => e.id !== ev.id);
       recalcAndRender();
       saveStateDebounced();
     });
-    
-    node.querySelector("[data-edit]").addEventListener("click", () => {
-        openEventDialog(ev.id);
-    });
-
+    node.querySelector("[data-edit]").addEventListener("click", () => openEventDialog(ev.id));
     return node;
 }
 
 function renderEventList() {
     const wrap = $("eventList");
     wrap.innerHTML = "";
-
-    if (typeof state.isEventListExpanded === 'undefined') {
-        state.isEventListExpanded = false;
-    }
-
+    if (typeof state.isEventListExpanded === 'undefined') state.isEventListExpanded = false;
     const sortedEvents = [...state.events].sort((a,b) => a.age - b.age);
     if (sortedEvents.length === 0) {
         wrap.innerHTML = `<div class="text-[11px] text-slate-500 dark:text-slate-400">${getText('SCENARIO.NO_EVENTS')}</div>`;
         return;
     }
-
     const eventGroups = [];
     const eventsByAge = {};
     sortedEvents.forEach(ev => {
@@ -458,74 +365,53 @@ function renderEventList() {
         }
         eventsByAge[ev.age].events.push(ev);
     });
-
     const showAll = state.isEventListExpanded || eventGroups.length <= 5;
     const groupsToShow = showAll ? eventGroups : eventGroups.slice(0, 5);
-
     const container = document.createElement('div');
     container.className = 'relative';
-    
     const line = document.createElement('div');
     line.className = 'absolute left-[15px] top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-700';
     container.appendChild(line);
-
     const rowsContainer = document.createElement('div');
     rowsContainer.className = 'relative z-10';
     container.appendChild(rowsContainer);
-
     groupsToShow.forEach(group => {
         const row = document.createElement('div');
         row.className = 'flex items-start gap-4 pt-4 first:pt-0';
-
         const timelinePart = document.createElement('div');
         timelinePart.className = 'w-8 flex-shrink-0 flex justify-center pt-3';
-        
         const dotWrapper = document.createElement('div');
         dotWrapper.className = 'w-3 h-3 bg-primary rounded-full ring-4 ring-white dark:ring-slate-900 relative';
-        
         const ageLabel = document.createElement('span');
         ageLabel.className = 'absolute -top-1.5 right-full mr-2 text-[10px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap';
         ageLabel.textContent = `${group.age}세`;
-        
         dotWrapper.appendChild(ageLabel);
         timelinePart.appendChild(dotWrapper);
         row.appendChild(timelinePart);
-
         const cardsPart = document.createElement('div');
         cardsPart.className = 'flex-grow space-y-3 min-w-0';
-        group.events.forEach(ev => {
-            cardsPart.appendChild(createEventCard(ev));
-        });
+        group.events.forEach(ev => { cardsPart.appendChild(createEventCard(ev)); });
         row.appendChild(cardsPart);
         rowsContainer.appendChild(row);
     });
-    
     wrap.appendChild(container);
-
     if (eventGroups.length > 5) {
         const btnContainer = document.createElement('div');
         btnContainer.className = 'flex items-start gap-4 pt-3';
-        
         const spacer = document.createElement('div');
         spacer.className = 'w-8 flex-shrink-0';
         btnContainer.appendChild(spacer);
-        
         const btnWrapper = document.createElement('div');
         btnWrapper.className = 'flex-grow';
-        
         const btn = document.createElement('button');
         btn.id = 'btnToggleEventList';
         btn.className = 'text-primary hover:text-secondary text-xs font-bold uppercase tracking-wider flex items-center gap-1';
-        btn.innerHTML = state.isEventListExpanded 
-            ? `<span class="material-symbols-outlined text-sm">unfold_less</span> ${getText('SCENARIO.VIEW_LESS')}`
-            : `<span class="material-symbols-outlined text-sm">unfold_more</span> ${getText('SCENARIO.VIEW_MORE', eventGroups.length - 5)}`;
-
+        btn.innerHTML = state.isEventListExpanded ? `<span class="material-symbols-outlined text-sm">unfold_less</span> ${getText('SCENARIO.VIEW_LESS')}` : `<span class="material-symbols-outlined text-sm">unfold_more</span> ${getText('SCENARIO.VIEW_MORE', eventGroups.length - 5)}`;
         btn.addEventListener('click', () => {
             state.isEventListExpanded = !state.isEventListExpanded;
             renderEventList();
             saveStateDebounced();
         });
-
         btnWrapper.appendChild(btn);
         btnContainer.appendChild(btnWrapper);
         wrap.appendChild(btnContainer);
@@ -536,10 +422,8 @@ function openEventDialog(eventId = null) {
     const dlg = $("eventDialog");
     const title = $("dlgEventTitle");
     const saveBtn = $("dlgSave");
-
     state.editingEventId = eventId;
-
-    if (eventId) { // Edit mode
+    if (eventId) {
         const eventToEdit = state.events.find(e => e.id === eventId);
         if (!eventToEdit) {
             console.error("Event not found:", eventId);
@@ -548,17 +432,14 @@ function openEventDialog(eventId = null) {
         }
         title.textContent = getText("EVENT_DIALOG.EDIT_TITLE");
         saveBtn.textContent = getText("EVENT_DIALOG.SAVE_BUTTON");
-
         $("dlgAge").value = eventToEdit.age;
         $("dlgType").value = eventToEdit.type;
         $("dlgLabel").value = eventToEdit.label || "";
         $("dlgAmount").value = (eventToEdit.amount || "").toLocaleString();
         $('dlgWeight').value = eventToEdit.weight || 10;
-        
         const presetSelect = $("dlgPresetId");
         presetSelect.innerHTML = state.presets.map(p => `<option value="${p.id}" ${p.id === eventToEdit.presetId ? 'selected' : ''}>${p.name}</option>`).join('');
-
-    } else { // Add mode
+    } else {
         title.textContent = getText("EVENT_DIALOG.ADD_TITLE");
         saveBtn.textContent = getText("EVENT_DIALOG.ADD_BUTTON");
         const ageNow = state.inputs.ageNow;
@@ -567,12 +448,10 @@ function openEventDialog(eventId = null) {
         $("dlgLabel").value = "";
         $("dlgAmount").value = "";
         $('dlgWeight').value = 10;
-        
         const presetSelect = $("dlgPresetId");
         presetSelect.innerHTML = state.presets.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
     }
-
-    updateDialogFields(); // Ensure fields are shown/hidden correctly
+    updateDialogFields();
     dlg.showModal();
 }
 
@@ -582,10 +461,8 @@ function updateDialogFields() {
     const fieldsMonetary = $('dlgFieldsMonetary');
     const infoEl = $('dlgInfo');
     const type = typeSelect.value;
-    
     fieldsPortfolio.classList.toggle('hidden', type !== 'portfolio');
     fieldsMonetary.classList.toggle('hidden', type === 'portfolio');
-
     let infoKey;
     switch(type) {
         case 'portfolio': infoKey = 'INFO_PORTFOLIO'; break;
@@ -602,17 +479,12 @@ function initEventDialog() {
   const dlg = $("eventDialog");
   const typeSelect = $("dlgType");
   let downTarget = null;
-
   $("btnAddEvent").addEventListener("click", () => openEventDialog());
-
   typeSelect.addEventListener('change', updateDialogFields);
-
   $("dlgSave").addEventListener("click", () => {
     const age = clamp(Number($("dlgAge").value || 0), 0, 120);
     const type = typeSelect.value;
-    
     let eventData = { age, type };
-
     if (type === 'portfolio') {
         eventData.presetId = $('dlgPresetId').value;
         eventData.weight = clamp(Number($('dlgWeight').value), 1, 10);
@@ -620,60 +492,36 @@ function initEventDialog() {
         eventData.amount = parseMoney($("dlgAmount").value);
         eventData.label = $('dlgLabel').value.trim();
     }
-
-    if (state.editingEventId) { // Update existing event
+    if (state.editingEventId) {
         const index = state.events.findIndex(e => e.id === state.editingEventId);
-        if (index !== -1) {
-            state.events[index] = { ...state.events[index], ...eventData };
-        }
-    } else { // Add new event
+        if (index !== -1) state.events[index] = { ...state.events[index], ...eventData };
+    } else {
         eventData.id = uid();
-        eventData.enabled = true; // New events are enabled by default
+        eventData.enabled = true;
         state.events.push(eventData);
     }
-    
-    state.editingEventId = null; // Reset editing state
+    state.editingEventId = null;
     recalcAndRender();
     saveStateDebounced();
   });
-
   dlg.addEventListener("mousedown", e => { downTarget = e.target; });
-  dlg.addEventListener("click", (e) => {
-    if (e.target === dlg && downTarget === dlg) {
-      dlg.close();
-    }
-  });
-  
-  dlg.addEventListener('close', () => {
-      state.editingEventId = null;
-  });
+  dlg.addEventListener("click", (e) => { if (e.target === dlg && downTarget === dlg) dlg.close(); });
+  dlg.addEventListener('close', () => { state.editingEventId = null; });
 }
 
 /** =============================
  *  Simulation Core
  *  ============================= */
 function getActivePortfolio(age) {
-    const portfolioEvents = state.events
-        .filter(e => e.type === 'portfolio' && e.enabled && e.age <= age)
-        .sort((a,b) => b.age - a.age);
-
-    if (!portfolioEvents.length) {
-        return [];
-    }
-
+    const portfolioEvents = state.events.filter(e => e.type === 'portfolio' && e.enabled && e.age <= age).sort((a,b) => b.age - a.age);
+    if (!portfolioEvents.length) return [];
     const latestAge = portfolioEvents[0].age;
     const activeEvents = portfolioEvents.filter(e => e.age === latestAge);
-    
     const totalWeight = activeEvents.reduce((sum, e) => sum + e.weight, 0);
     if (totalWeight === 0) return [];
-
     return activeEvents.map(e => {
         const preset = state.presets.find(p => p.id === e.presetId);
-        return {
-            preset: preset || { annualReturnPct: 0, dividendPct: 0, name: 'Unknown' },
-            weight: e.weight,
-            percentage: e.weight / totalWeight
-        };
+        return { preset: preset || { annualReturnPct: 0, dividendPct: 0, name: 'Unknown' }, weight: e.weight, percentage: e.weight / totalWeight };
     });
 }
 
@@ -688,17 +536,14 @@ function simulate() {
   const endAge = state.maxAge;
   const startYear = state.startYear;
   const activeEvents = state.events.filter(e => e.enabled);
-
   const years = [];
   let portfolioState = [];
   let uninvestedCash = initialInvestment;
-
   let initialPortfolioConfig = getActivePortfolio(ageNow);
   if (initialPortfolioConfig.length > 0 && uninvestedCash > 0) {
       portfolioState = initialPortfolioConfig.map(p => ({ ...p, balance: uninvestedCash * p.percentage, yearReturn: 0, yearDividend: 0 }));
       uninvestedCash = 0;
   }
-  
   let lastPortfolioSignature = getPortfolioSignature(initialPortfolioConfig);
 
   for (let age = ageNow; age <= endAge; age++) {
@@ -713,19 +558,17 @@ function simulate() {
         lastPortfolioSignature = currentPortfolioSignature;
     }
 
-    portfolioState.forEach(p => {
-        p.yearReturn = 0;
-        p.yearDividend = 0;
-    });
+    portfolioState.forEach(p => { p.yearReturn = 0; p.yearDividend = 0; });
 
     const activeMonthly = activeEvents.filter(e => e.type === "monthly" && e.age <= age).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
     const lumpSum = activeEvents.filter(e => e.type === 'lump' && e.age === age).reduce((sum, e) => sum + e.amount, 0);
     const withdrawalMonthly = activeEvents.filter(e => e.type === 'withdrawal' && e.age <= age).reduce((sum, e) => sum + e.amount, 0);
     const incomeMonthly = activeEvents.filter(e => e.type === 'income' && e.age <= age).reduce((sum, e) => sum + e.amount, 0);
 
-    uninvestedCash += lumpSum;
+    uninvestedCash += lumpSum > 0 ? lumpSum : 0;
 
-    let yContr = 0, yReturn = 0, yDiv = 0, yNetCashFlow = 0, yPortfolioWithdrawal = 0;
+    let yContr = 0, yReturn = 0, yDiv = 0, yWithdrawal = 0;
+    const annualCashFlow = incomeMonthly * 12;
 
     for (let m = 1; m <= 12; m++) {
       yContr += activeMonthly;
@@ -748,7 +591,6 @@ function simulate() {
           const r = p.balance * (p.preset.annualReturnPct / 100 / 12);
           const d_pretax = p.balance * (p.preset.dividendPct / 100 / 12);
           const d_posttax = d_pretax * (1 - state.dividendTaxRate);
-          
           p.balance += r + d_posttax;
           p.yearReturn += r;
           p.yearDividend += d_posttax;
@@ -756,30 +598,30 @@ function simulate() {
           yDiv += d_posttax;
       });
 
-      const neededFromPortfolio = withdrawalMonthly - incomeMonthly;
-      yNetCashFlow += (incomeMonthly - withdrawalMonthly);
-
-      if (neededFromPortfolio > 0) {
+      if (withdrawalMonthly > 0) {
           let totalDrawable = portfolioState.reduce((sum, p) => sum + p.balance, 0);
-          const drawAmount = Math.min(totalDrawable, neededFromPortfolio);
-          yPortfolioWithdrawal += drawAmount;
-
+          const drawAmount = Math.min(totalDrawable, withdrawalMonthly);
+          yWithdrawal += drawAmount;
           if (drawAmount > 0) {
               const fraction = drawAmount / totalDrawable;
               portfolioState.forEach(p => { p.balance -= p.balance * fraction; });
           }
       }
     }
+    
+    const lumpSumWithdrawal = lumpSum < 0 ? Math.abs(lumpSum) : 0;
+    if (lumpSumWithdrawal > 0) {
+        let totalDrawable = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+        const drawAmount = Math.min(totalDrawable, lumpSumWithdrawal);
+        yWithdrawal += drawAmount;
+        if (drawAmount > 0) {
+            const fraction = drawAmount / totalDrawable;
+            portfolioState.forEach(p => { p.balance -= p.balance * fraction; });
+        }
+    }
 
     const endBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0) + uninvestedCash;
-
-    let detailedPortfolioResult = portfolioState.map(p => ({ 
-        name: p.preset.name, 
-        balance: p.balance,
-        return: p.yearReturn,
-        dividend: p.yearDividend
-    }));
-
+    let detailedPortfolioResult = portfolioState.map(p => ({ name: p.preset.name, balance: p.balance, return: p.yearReturn, dividend: p.yearDividend }));
     if (uninvestedCash > 0) {
         detailedPortfolioResult.push({ name: getText('TABLE.UNINVESTED_CASH'), balance: uninvestedCash, return: 0, dividend: 0 });
     }
@@ -787,10 +629,10 @@ function simulate() {
     years.push({
       year, age, 
       annualContribution: yContr + (lumpSum > 0 ? lumpSum : 0),
+      annualCashFlow: annualCashFlow,
+      annualWithdrawal: yWithdrawal, 
       returnEarned: yReturn, 
       dividends: yDiv, 
-      netCashFlow: yNetCashFlow - (lumpSum < 0 ? lumpSum : 0), // Positive is net income, negative is net withdrawal
-      portfolioWithdrawal: yPortfolioWithdrawal, // Actual amount withdrawn from portfolio
       endBalance,
       portfolio: currentPortfolioConfig,
       detailedPortfolio: detailedPortfolioResult
@@ -800,13 +642,11 @@ function simulate() {
   return { years, startYear, ageNow, endAge, ageRetire };
 }
 
-
 /** =============================
  *  Render table + Chart
  *  ============================= */
 function buildAnnualRow(y) {
     const fullPortfolioTitle = y.portfolio.map(p => `${p.preset.name}: ${(p.percentage*100).toFixed(0)}%`).join(', ');
-
     let portfolioDisplayHtml;
     if (y.portfolio.length === 0) {
         if (y.endBalance > 0) {
@@ -816,15 +656,10 @@ function buildAnnualRow(y) {
         }
     } else {
         const itemsToDisplay = y.portfolio.slice(0, 2);
-        let htmlItems = itemsToDisplay.map(p => {
-            const content = `${p.preset.name}: ${(p.percentage * 100).toFixed(0)}%`;
-            return `<div class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md text-xs font-semibold text-slate-700 dark:text-slate-300">${content}</div>`;
-        });
-
+        let htmlItems = itemsToDisplay.map(p => `<div class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md text-xs font-semibold text-slate-700 dark:text-slate-300">${p.preset.name}: ${(p.percentage * 100).toFixed(0)}%</div>`);
         if (y.portfolio.length > 2) {
             htmlItems[1] = `<div class="flex items-center gap-1.5">${htmlItems[1]} <span class="font-bold">...</span></div>`;
         }
-        
         portfolioDisplayHtml = `<div class="flex flex-col items-start gap-1">${htmlItems.join('')}</div>`;
     }
 
@@ -840,9 +675,6 @@ function buildAnnualRow(y) {
     if (y.age === state.inputs.ageRetire) ageExtra.push(getText('COMMON.RETIRE'));
     if (hasEvents) ageExtra.push(getText('COMMON.EVENT'));
 
-    const netCashFlowColor = y.netCashFlow >= 0 ? "text-emerald-600 dark:text-emerald-300" : "text-red-600 dark:text-red-400";
-    const netCashFlowPrefix = y.netCashFlow >= 0 ? "+" : "";
-
     return `
     <tr class="annual-row ${highlight} hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group" data-year="${y.year}">
       <td class="px-4 py-4 font-bold text-slate-900 dark:text-slate-100">
@@ -852,9 +684,10 @@ function buildAnnualRow(y) {
         </div>
       </td>
       <td class="px-4 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.annualContribution, true)}</td>
+      <td class="px-4 py-4 font-medium text-sky-600 dark:text-sky-300">+${fmtMoney(y.annualCashFlow, true)}</td>
+      <td class="px-4 py-4 font-medium text-red-600 dark:text-red-400">-${fmtMoney(y.annualWithdrawal, true)}</td>
       <td class="px-4 py-4 font-bold text-primary">+${fmtMoney(y.returnEarned, true)}</td>
       <td class="px-4 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.dividends, true)}</td>
-      <td class="px-4 py-4 font-medium ${netCashFlowColor}">${netCashFlowPrefix}${fmtMoney(y.netCashFlow, true)}</td>
       <td class="px-4 py-4 font-black">${fmtMoney(y.endBalance, true)}</td>
       <td class="px-4 py-4" title="${fullPortfolioTitle}">${portfolioDisplayHtml}</td>
     </tr>
@@ -878,23 +711,17 @@ function renderAnnualTable(results) {
 function renderChart(results) {
   const filteredYears = results.years.filter(passesFilter);
   const labels = filteredYears.map(y => [`${String(y.year)}`, `${y.age}세`]);
-  const datasets = {};
-  
   let cumulativePrincipal = state.inputs.initialInvestment;
   const principalData = [];
   const returnData = [];
-  const endBalanceData = [];
 
   results.years.forEach(year => {
-      cumulativePrincipal += year.annualContribution;
-      cumulativePrincipal -= year.portfolioWithdrawal; // Subtract what was taken out
-
+      cumulativePrincipal += year.annualContribution - year.annualWithdrawal;
       if(passesFilter(year)){
           const principalComponent = Math.max(0, Math.min(cumulativePrincipal, year.endBalance));
           const returnComponent = Math.max(0, year.endBalance - principalComponent);
           principalData.push(principalComponent);
           returnData.push(returnComponent);
-          endBalanceData.push(year.endBalance);
       }
   });
 
@@ -919,39 +746,22 @@ function renderChart(results) {
           callbacks: {
             label: function(context) {
               let label = context.dataset.label || '';
-              if (label) {
-                label += ': ';
-              }
-              if (context.parsed.y !== null) {
-                label += fmtMoney(context.parsed.y, true);
-              }
+              if (label) label += ': ';
+              if (context.parsed.y !== null) label += fmtMoney(context.parsed.y, true);
               return label;
             },
             footer: function(tooltipItems) {
                 let sum = 0;
-                tooltipItems.forEach(function(tooltipItem) {
-                    sum += tooltipItem.parsed.y;
-                });
+                tooltipItems.forEach(function(tooltipItem) { sum += tooltipItem.parsed.y; });
                 return getText('CHART.TOTAL_LABEL', fmtMoney(sum, true));
             }
           }
         }
       },
-      scales: {
-        x: { stacked: true },
-        y: {
-          stacked: true,
-          ticks: {
-            callback: function(value, index, values) {
-              return fmtMoney(value, true);
-            }
-          }
-        }
-      }
+      scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: (value) => fmtMoney(value, true) } } }
     }
   });
 }
-
 
 /** =============================
  *  Tooltip
@@ -963,7 +773,6 @@ function initTooltips() {
       const year = Number(e.currentTarget.dataset.year);
       const yearData = state.results.years.find(y => y.year === year);
       if (!yearData) return;
-      
       let html = `<div class="font-bold mb-2 text-base">${getText('TOOLTIP.PORTFOLIO_TITLE', year)}</div>`;
       if (yearData.detailedPortfolio.length > 0) {
           html += yearData.detailedPortfolio.map(p => {
@@ -984,47 +793,29 @@ function initTooltips() {
       } else {
           html += `<div class="text-slate-400">${getText('TOOLTIP.NO_DATA')}</div>`;
       }
-
       const eventsAtAge = state.events.filter(e => e.age === yearData.age);
         if (eventsAtAge.length > 0) {
             html += `<div class="font-bold mt-3 mb-2 text-base border-t border-slate-700 pt-2">${getText('TOOLTIP.EVENT_TITLE')}</div>`;
-            html += eventsAtAge.map(ev => {
-                const subtitle = getEventSubtitle(ev, 'dark');
-                return `<p class="text-xs text-slate-300 mb-1 ${!ev.enabled ? 'line-through' : ''}">${subtitle}</p>`;
-            }).join('');
+            html += eventsAtAge.map(ev => `<p class="text-xs text-slate-300 mb-1 ${!ev.enabled ? 'line-through' : ''}">${getEventSubtitle(ev, 'dark')}</p>`).join('');
         }
-
       tooltip.innerHTML = html;
       tooltip.classList.remove('hidden');
-      
       const tooltipRect = tooltip.getBoundingClientRect();
-      let left = e.pageX + 10;
-      let top = e.pageY + 10;
-
-      const viewportRight = window.scrollX + window.innerWidth;
-      const viewportBottom = window.scrollY + window.innerHeight;
-
-      if (left + tooltipRect.width > viewportRight) {
-        left = e.pageX - tooltipRect.width - 10;
-      }
-      if (top + tooltipRect.height > viewportBottom) {
-        top = e.pageY - tooltipRect.height - 10;
-      }
-
+      let left = e.pageX + 10, top = e.pageY + 10;
+      if (left + tooltipRect.width > window.scrollX + window.innerWidth) left = e.pageX - tooltipRect.width - 10;
+      if (top + tooltipRect.height > window.scrollY + window.innerHeight) top = e.pageY - tooltipRect.height - 10;
       tooltip.style.left = `${left}px`;
       tooltip.style.top = `${top}px`;
-
     });
-    row.addEventListener('mouseleave', () => {
-      tooltip.classList.add('hidden');
-    });
+    row.addEventListener('mouseleave', () => { tooltip.classList.add('hidden'); });
   });
 
   const headerTooltips = {
-      'th-contribute': getText('TABLE.TOOLTIP_CONTRIBUTION'),
+      'th-contribution': getText('TABLE.TOOLTIP_CONTRIBUTION'),
+      'th-cash-flow': getText('TABLE.TOOLTIP_CASH_FLOW'),
+      'th-annual-expense': getText('TABLE.TOOLTIP_WITHDRAWAL'),
       'th-return': getText('TABLE.TOOLTIP_RETURN'),
       'th-dividend': getText('TABLE.TOOLTIP_DIVIDEND'),
-      'th-withdrawal': getText('TABLE.TOOLTIP_WITHDRAWAL'),
       'th-balance': getText('TABLE.TOOLTIP_BALANCE'),
       'th-portfolio': getText('TABLE.TOOLTIP_PORTFOLIO')
   };
@@ -1035,16 +826,11 @@ function initTooltips() {
       const tooltip = th.querySelector('.header-tooltip');
       if (tooltip) {
         tooltip.innerHTML = text;
-        th.addEventListener('mouseenter', () => {
-            tooltip.classList.remove('hidden');
-        });
-        th.addEventListener('mouseleave', () => {
-            tooltip.classList.add('hidden');
-        });
+        th.addEventListener('mouseenter', () => { tooltip.classList.remove('hidden'); });
+        th.addEventListener('mouseleave', () => { tooltip.classList.add('hidden'); });
       }
   });
 }
-
 
 /** =============================
  *  Observation
@@ -1052,14 +838,9 @@ function initTooltips() {
 function updateObservation(results) {
   const retireRow = results.years.find(y => y.age === state.inputs.ageRetire);
   const last = results.years[results.years.length - 1];
-
   let msg = ``;
-  if (retireRow) {
-    msg += getText('OBSERVATION.RETIRE_RESULT', state.inputs.ageRetire, retireRow.year, fmtMoney(retireRow.endBalance, true));
-  }
-  if (last) {
-    msg += getText('OBSERVATION.FINAL_RESULT', state.maxAge, last.year, fmtMoney(last.endBalance, true));
-  }
+  if (retireRow) msg += getText('OBSERVATION.RETIRE_RESULT', state.inputs.ageRetire, retireRow.year, fmtMoney(retireRow.endBalance, true));
+  if (last) msg += getText('OBSERVATION.FINAL_RESULT', state.maxAge, last.year, fmtMoney(last.endBalance, true));
   $("observation").textContent = msg || getText('OBSERVATION.NO_RESULT');
 }
 
@@ -1069,17 +850,12 @@ function updateObservation(results) {
 function recalcAndRender() {
   const results = simulate();
   state.results = results;
-
   $("rangeLabel").textContent = getText('RESULTS.RANGE_LABEL', results.startYear, results.ageNow, results.endAge, results.endAge);
-
   renderAnnualTable(results);
   updateObservation(results);
   renderEventList();
   updateFilterButton();
-
-  if (!$("chartPanel").classList.contains("hidden")) {
-    renderChart(results);
-  }
+  if (!$("chartPanel").classList.contains("hidden")) renderChart(state.results);
   runTests();
 }
 
@@ -1093,42 +869,24 @@ function initInputs() {
       if (!el) return;
       el.addEventListener("input", () => { recalcAndRender(); saveStateDebounced(); });
       if(el.type !== 'text') el.addEventListener("change", () => { recalcAndRender(); saveStateDebounced(); });
-      el.addEventListener("blur", () => {
-          syncUiToStateFromInputs(); 
-          saveStateDebounced();
-      });
+      el.addEventListener("blur", () => { syncUiToStateFromInputs(); saveStateDebounced(); });
   });
-
     const filterPanel = $('filterPanel');
     const btnToggleFilter = $('btnToggleFilter');
-    btnToggleFilter.addEventListener('click', (e) => {
-        e.stopPropagation();
-        filterPanel.classList.toggle('hidden');
-    });
-    document.addEventListener('click', (e) => {
-        if (!filterPanel.contains(e.target) && !btnToggleFilter.contains(e.target)) {
-            filterPanel.classList.add('hidden');
-        }
-    });
+    btnToggleFilter.addEventListener('click', (e) => { e.stopPropagation(); filterPanel.classList.toggle('hidden'); });
+    document.addEventListener('click', (e) => { if (!filterPanel.contains(e.target) && !btnToggleFilter.contains(e.target)) filterPanel.classList.add('hidden'); });
     const filterInputs = ["filterEnabled", "filterAgeFrom", "filterAgeTo"];
     filterInputs.forEach(id => {
         const el = $(id);
         if (!el) return;
         el.addEventListener("input", () => { recalcAndRender(); saveStateDebounced(); });
         if(el.type !== 'text') el.addEventListener("change", () => { recalcAndRender(); saveStateDebounced(); });
-        el.addEventListener("blur", () => { 
-            syncUiToStateFromInputs();
-            saveStateDebounced();
-        });
+        el.addEventListener("blur", () => { syncUiToStateFromInputs(); saveStateDebounced(); });
     });
-
   $("btnToggleChart").addEventListener("click", () => {
     $("chartPanel").classList.toggle("hidden");
-    if (!$("chartPanel").classList.contains("hidden")) {
-      renderChart(state.results || simulate());
-    }
+    if (!$("chartPanel").classList.contains("hidden")) renderChart(state.results || simulate());
   });
-  
   $("btnResetAll").addEventListener("click", () => {
     if (confirm(getText('CONFIG.RESET_CONFIRM'))) {
       resetSavedState();
@@ -1141,10 +899,7 @@ function initInputs() {
  *  Onboarding Guide
  *  ============================= */
 function initOnboarding() {
-    if (localStorage.getItem('onboardingCompleted') === 'true') {
-        return;
-    }
-
+    if (localStorage.getItem('onboardingCompleted') === 'true') return;
     const guide = $('onboarding-guide');
     const titleEl = $('onboarding-title');
     const contentEl = $('onboarding-content');
@@ -1152,98 +907,40 @@ function initOnboarding() {
     const prevBtn = $('onboarding-prev');
     const nextBtn = $('onboarding-next');
     const closeBtn = $('close-onboarding');
-
-    let currentStep = 0;
-    let highlightedElement = null;
-
+    let currentStep = 0, highlightedElement = null;
     const steps = [
-        {
-            titleKey: 'ONBOARDING.TITLE_STEP_1',
-            contentKey: 'ONBOARDING.CONTENT_STEP_1',
-            highlightTarget: null
-        },
-        {
-            titleKey: 'ONBOARDING.TITLE_STEP_2',
-            contentKey: 'ONBOARDING.CONTENT_STEP_2',
-            highlightTarget: 'config-section'
-        },
-        {
-            titleKey: 'ONBOARDING.TITLE_STEP_3',
-            contentKey: 'ONBOARDING.CONTENT_STEP_3',
-            highlightTarget: 'events-section'
-        },
-        {
-            titleKey: 'ONBOARDING.TITLE_STEP_4',
-            contentKey: 'ONBOARDING.CONTENT_STEP_4',
-            highlightTarget: null
-        }
+        { titleKey: 'ONBOARDING.TITLE_STEP_1', contentKey: 'ONBOARDING.CONTENT_STEP_1', highlightTarget: null },
+        { titleKey: 'ONBOARDING.TITLE_STEP_2', contentKey: 'ONBOARDING.CONTENT_STEP_2', highlightTarget: 'config-section' },
+        { titleKey: 'ONBOARDING.TITLE_STEP_3', contentKey: 'ONBOARDING.CONTENT_STEP_3', highlightTarget: 'events-section' },
+        { titleKey: 'ONBOARDING.TITLE_STEP_4', contentKey: 'ONBOARDING.CONTENT_STEP_4', highlightTarget: null }
     ];
-
     function renderStep(stepIndex) {
         const step = steps[stepIndex];
-
-        // Update text
         titleEl.innerHTML = getText(step.titleKey);
         contentEl.innerHTML = getText(step.contentKey);
-
-        // Update dots
         dotsEl.innerHTML = '';
         for (let i = 0; i < steps.length; i++) {
             const dot = document.createElement('div');
             dot.className = 'onboarding-dot';
-            if (i === stepIndex) {
-                dot.classList.add('active');
-            }
+            if (i === stepIndex) dot.classList.add('active');
             dotsEl.appendChild(dot);
         }
-
-        // Update buttons
         prevBtn.style.visibility = (stepIndex === 0) ? 'hidden' : 'visible';
-        if (stepIndex === steps.length - 1) {
-            nextBtn.innerHTML = getText('ONBOARDING.DONE_BUTTON');
-        } else {
-            nextBtn.innerHTML = getText('ONBOARDING.NEXT_BUTTON');
-        }
-
-        // Update highlight
-        if (highlightedElement) {
-            highlightedElement.classList.remove('onboarding-highlight');
-        }
+        nextBtn.innerHTML = (stepIndex === steps.length - 1) ? getText('ONBOARDING.DONE_BUTTON') : getText('ONBOARDING.NEXT_BUTTON');
+        if (highlightedElement) highlightedElement.classList.remove('onboarding-highlight');
         if (step.highlightTarget) {
             highlightedElement = $(step.highlightTarget);
-            if (highlightedElement) {
-                highlightedElement.classList.add('onboarding-highlight');
-            }
+            if (highlightedElement) highlightedElement.classList.add('onboarding-highlight');
         }
     }
-
     function completeOnboarding() {
         guide.classList.add('hidden');
-        if (highlightedElement) {
-            highlightedElement.classList.remove('onboarding-highlight');
-        }
+        if (highlightedElement) highlightedElement.classList.remove('onboarding-highlight');
         localStorage.setItem('onboardingCompleted', 'true');
     }
-
-    nextBtn.addEventListener('click', () => {
-        if (currentStep < steps.length - 1) {
-            currentStep++;
-            renderStep(currentStep);
-        } else {
-            completeOnboarding();
-        }
-    });
-
-    prevBtn.addEventListener('click', () => {
-        if (currentStep > 0) {
-            currentStep--;
-            renderStep(currentStep);
-        }
-    });
-
+    nextBtn.addEventListener('click', () => { (currentStep < steps.length - 1) ? renderStep(++currentStep) : completeOnboarding(); });
+    prevBtn.addEventListener('click', () => { if (currentStep > 0) renderStep(--currentStep); });
     closeBtn.addEventListener('click', completeOnboarding);
-
-    // Show the guide
     guide.classList.remove('hidden');
     renderStep(0);
 }
@@ -1259,6 +956,6 @@ function initOnboarding() {
   initPresetManagement();
   initEventDialog();
   initInputs();
-  initOnboarding(); // Initialize the onboarding guide
+  initOnboarding();
   recalcAndRender();
 })();
