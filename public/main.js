@@ -562,8 +562,8 @@ function simulate() {
 
     const activeMonthly = activeEvents.filter(e => e.type === "monthly" && e.age <= age).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
     const lumpSum = activeEvents.filter(e => e.type === 'lump' && e.age === age).reduce((sum, e) => sum + e.amount, 0);
-    const withdrawalMonthly = activeEvents.filter(e => e.type === 'withdrawal' && e.age <= age).reduce((sum, e) => sum + e.amount, 0);
-    const incomeMonthly = activeEvents.filter(e => e.type === 'income' && e.age <= age).reduce((sum, e) => sum + e.amount, 0);
+    const withdrawalMonthly = activeEvents.filter(e => e.type === 'withdrawal' && e.age <= age).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
+    const incomeMonthly = activeEvents.filter(e => e.type === 'income' && e.age <= age).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
 
     uninvestedCash += lumpSum > 0 ? lumpSum : 0;
 
@@ -684,10 +684,10 @@ function buildAnnualRow(y) {
         </div>
       </td>
       <td class="px-4 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.annualContribution, true)}</td>
-      <td class="px-4 py-4 font-medium text-sky-600 dark:text-sky-300">+${fmtMoney(y.annualCashFlow, true)}</td>
-      <td class="px-4 py-4 font-medium text-red-600 dark:text-red-400">-${fmtMoney(y.annualWithdrawal, true)}</td>
       <td class="px-4 py-4 font-bold text-primary">+${fmtMoney(y.returnEarned, true)}</td>
       <td class="px-4 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.dividends, true)}</td>
+      <td class="px-4 py-4 font-medium text-red-600 dark:text-red-400">-${fmtMoney(y.annualWithdrawal, true)}</td>
+      <td class="px-4 py-4 font-medium text-sky-600 dark:text-sky-300">+${fmtMoney(y.annualCashFlow, true)}</td>
       <td class="px-4 py-4 font-black">${fmtMoney(y.endBalance, true)}</td>
       <td class="px-4 py-4" title="${fullPortfolioTitle}">${portfolioDisplayHtml}</td>
     </tr>
@@ -811,11 +811,12 @@ function initTooltips() {
   });
 
   const headerTooltips = {
-      'th-contribution': getText('TABLE.TOOLTIP_CONTRIBUTION'),
-      'th-cash-flow': getText('TABLE.TOOLTIP_CASH_FLOW'),
-      'th-annual-expense': getText('TABLE.TOOLTIP_WITHDRAWAL'),
+      'th-year-age': getText('TABLE.TOOLTIP_YEAR_AGE'),
+      'th-contribution': getText('TABLE.TOOLTIP_ANNUAL_CONTRIBUTION'),
       'th-return': getText('TABLE.TOOLTIP_RETURN'),
       'th-dividend': getText('TABLE.TOOLTIP_DIVIDEND'),
+      'th-withdrawal': getText('TABLE.TOOLTIP_WITHDRAWAL'),
+      'th-cash-flow': getText('TABLE.TOOLTIP_CASH_FLOW'),
       'th-balance': getText('TABLE.TOOLTIP_BALANCE'),
       'th-portfolio': getText('TABLE.TOOLTIP_PORTFOLIO')
   };
