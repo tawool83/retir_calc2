@@ -79,9 +79,9 @@ const STRINGS = {
         TYPE_LABEL: "종류",
         TYPE_PORTFOLIO: "포트폴리오 변경",
         TYPE_MONTHLY: "월 정기 투자금 변경",
-        TYPE_LUMP: "일시 입/출금",
-        TYPE_WITHDRAWAL: "출금",
-        TYPE_INCOME: "월 정기 기타 수입",
+        TYPE_LUMP: "일시 투자금 입금",
+        TYPE_WITHDRAWAL: "출금(현금흐름)",
+        TYPE_INCOME: "월 정기 기타 수입(현금흐름)",
         PRESET_LABEL: "투자 프리셋",
         WEIGHT_LABEL: "비중 (1-10)",
         LABEL_LABEL: "라벨",
@@ -150,6 +150,6 @@ const STRINGS = {
     COMMON: {
         BUILTIN: "(기본)",
         RETIRE: "은퇴 ❤️",
-        EVENT: "이벤트"
+        EVENT: "⭐"
     }
 };
