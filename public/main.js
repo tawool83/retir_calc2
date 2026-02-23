@@ -29,7 +29,7 @@ function applyLocalization() {
 }
 
 /** =============================
- *  Persistence (localStorage)
+ *  Persistence (localStorage & URL)
  *  ============================= */
 const STORAGE_KEY = "retire_sim_v2_dynamic_portfolio";
 
@@ -37,10 +37,23 @@ function safeJsonParse(s) {
   try { return JSON.parse(s); } catch { return null; }
 }
 
-function loadSavedState() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  const data = safeJsonParse(raw);
-  return data && typeof data === "object" ? data : null;
+function loadStateFromSource(source) {
+    if (source === 'url') {
+        try {
+            const hash = window.location.hash.substring(1);
+            if (!hash) return null;
+            const decoded = decodeURIComponent(hash);
+            const compressed = atob(decoded).split('').map(c => c.charCodeAt(0));
+            const decompressed = pako.inflate(new Uint8Array(compressed), { to: 'string' });
+            return safeJsonParse(decompressed);
+        } catch (e) {
+            console.error("Failed to load state from URL", e);
+            return null;
+        }
+    } else {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return safeJsonParse(raw);
+    }
 }
 
 function saveStateDebounced() {
@@ -1013,7 +1026,21 @@ function initInputs() {
   $("btnResetAll").addEventListener("click", () => {
     if (confirm(getText('CONFIG.RESET_CONFIRM'))) {
       resetSavedState();
+      window.location.hash = "";
       location.reload();
+    }
+  });
+  $('btnShare').addEventListener('click', async () => {
+    const snapshot = buildSnapshot();
+    try {
+      const jsonString = JSON.stringify(snapshot);
+      const compressed = pako.deflate(jsonString, { level: 9 });
+      const encoded = btoa(String.fromCharCode.apply(null, compressed));
+      const url = `${window.location.origin}${window.location.pathname}#${encodeURIComponent(encoded)}`;
+      await navigator.clipboard.writeText(url);
+      alert(getText('CONFIG.SHARE_SUCCESS'));
+    } catch (e) {
+      console.error("Failed to create shareable URL", e);
     }
   });
 }
@@ -1071,14 +1098,24 @@ function initOnboarding() {
 /** =============================
  *  Boot
  *  ============================= */
-(function boot() {
-  applyLocalization();
-  const saved = loadSavedState();
-  applySnapshot(saved);
-  syncStateToUi();
-  initPresetManagement();
-  initEventDialog();
-  initInputs();
-  initOnboarding();
-  recalcAndRender();
-})();
+function loadPakoAndBoot() {
+    const script = document.createElement('script');
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js";
+    script.onload = () => {
+        (function boot() {
+          applyLocalization();
+          const fromUrl = loadStateFromSource('url');
+          const saved = fromUrl || loadStateFromSource('local');
+          applySnapshot(saved);
+          syncStateToUi();
+          initPresetManagement();
+          initEventDialog();
+          initInputs();
+          initOnboarding();
+          recalcAndRender();
+        })();
+    };
+    document.head.appendChild(script);
+}
+
+loadPakoAndBoot();

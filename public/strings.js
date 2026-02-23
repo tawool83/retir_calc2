@@ -9,7 +9,9 @@ const STRINGS = {
         "AGE_NOW_LABEL": "현재 나이",
         "AGE_RETIRE_LABEL": "은퇴 나이",
         "RESET_BUTTON": "모두 초기화",
-        "RESET_CONFIRM": "정말로 모든 설정과 시나리오를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+        "RESET_CONFIRM": "정말로 모든 설정과 시나리오를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+        "SHARE_BUTTON": "시나리오 공유",
+        "SHARE_SUCCESS": "URL이 복사되었습니다!"
     },
     "SCENARIO": {
         "TITLE": "시나리오",
@@ -33,7 +35,7 @@ const STRINGS = {
         "TOTAL_LABEL": "총계: {0}"
     },
     "OBSERVATION": {
-        "TITLE": "행복한 은퇴 시뮬레이션 요약",
+        "TITLE": "은퇴 여정 요약",
         "RETIRE_RESULT": "은퇴 시점({0}세, {1}년)에 예상되는 총자산은 약 {2}입니다. ",
         "FINAL_RESULT": "최대 연령({0}세, {1}년)에 예상되는 총자산은 약 {2}입니다.",
         "NO_RESULT": "결과를 표시할 데이터가 충분하지 않습니다. 설정을 확인하거나 시나리오 이벤트를 추가해 주세요.",
