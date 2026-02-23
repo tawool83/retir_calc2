@@ -10,7 +10,7 @@ const STRINGS = {
         "AGE_RETIRE_LABEL": "은퇴 나이",
         "RESET_BUTTON": "모두 초기화",
         "RESET_CONFIRM": "정말로 모든 설정과 시나리오를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-        "SHARE_BUTTON": "공유",
+        "SHARE_BUTTON": "시나리오 공유",
         "SHARE_SUCCESS": "URL이 복사되었습니다!"
     },
     "SCENARIO": {
