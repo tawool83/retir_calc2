@@ -149,7 +149,7 @@ function applySnapshot(snap) {
   if (!snap || snap.version !== 2) {
     state.presets = [...defaultPresets];
     state.events = defaultEvents.map(e => ({ ...e, id: uid(), enabled: true }));
-    return;
+    return false; // Indicate that default state was loaded
   }
   const builtins = [...defaultPresets];
   const userPresets = Array.isArray(snap.presets) ? snap.presets.filter(p => p && !p.builtin && p.id && p.name) : [];
@@ -163,6 +163,7 @@ function applySnapshot(snap) {
   } else {
     state.events = defaultEvents.map(e => ({ ...e, id: uid(), enabled: true }));
   }
+  return true; // Indicate that a snapshot was applied
 }
 
 /** =============================
@@ -1103,16 +1104,24 @@ function loadPakoAndBoot() {
     script.src = "https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js";
     script.onload = () => {
         (function boot() {
-          applyLocalization();
-          const fromUrl = loadStateFromSource('url');
-          const saved = fromUrl || loadStateFromSource('local');
-          applySnapshot(saved);
-          syncStateToUi();
-          initPresetManagement();
-          initEventDialog();
-          initInputs();
-          initOnboarding();
-          recalcAndRender();
+            applyLocalization();
+            const fromUrl = loadStateFromSource('url');
+            const loadedFromUrl = applySnapshot(fromUrl);
+
+            if (!loadedFromUrl) {
+                const fromLocal = loadStateFromSource('local');
+                applySnapshot(fromLocal);
+            }
+
+            syncStateToUi();
+            initPresetManagement();
+            initEventDialog();
+            initInputs();
+            recalcAndRender();
+
+            if (!loadedFromUrl) {
+                initOnboarding();
+            }
         })();
     };
     document.head.appendChild(script);
