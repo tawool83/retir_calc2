@@ -687,19 +687,19 @@ function buildAnnualRow(y) {
 
     return `
     <tr class="annual-row ${highlight} hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group" data-year="${y.year}">
-      <td class="px-4 py-4 font-bold text-slate-900 dark:text-slate-100">
+      <td class="px-2 py-4 font-bold text-slate-900 dark:text-slate-100">
         <div class="flex flex-col">
           <span>${y.year}</span>
           <span class="text-[10px] text-slate-400">${y.age}세${ageExtra.length > 0 ? ` • ${ageExtra.join(' • ')}` : ""}</span>
         </div>
       </td>
-      <td class="px-4 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.annualContribution, true)}</td>
-      <td class="px-4 py-4 font-bold text-primary">+${fmtMoney(y.returnEarned, true)}</td>
-      <td class="px-4 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.dividends, true)}</td>
-      <td class="px-4 py-4 font-medium text-red-600 dark:text-red-400 hidden">-${fmtMoney(y.annualWithdrawal, true)}</td>
-      <td class="px-4 py-4 font-medium text-sky-600 dark:text-sky-300">+${fmtMoney(y.annualCashFlow, true)}</td>
-      <td class="px-4 py-4 font-black">${fmtMoney(y.endBalance, true)}</td>
-      <td class="px-4 py-4" title="${fullPortfolioTitle}">${portfolioDisplayHtml}</td>
+      <td class="px-2 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.annualContribution, true)}</td>
+      <td class="px-2 py-4 font-bold text-primary">+${fmtMoney(y.returnEarned, true)}</td>
+      <td class="px-2 py-4 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.dividends, true)}</td>
+      <td class="px-2 py-4 font-medium text-red-600 dark:text-red-400 hidden">-${fmtMoney(y.annualWithdrawal, true)}</td>
+      <td class="px-2 py-4 font-medium text-sky-600 dark:text-sky-300">+${fmtMoney(y.annualCashFlow, true)}</td>
+      <td class="px-2 py-4 font-black">${fmtMoney(y.endBalance, true)}</td>
+      <td class="px-2 py-4" title="${fullPortfolioTitle}">${portfolioDisplayHtml}</td>
     </tr>
   `;
 }
