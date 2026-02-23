@@ -115,6 +115,7 @@ const state = {
   chart: null,
   activeTooltip: null,
   editingEventId: null,
+  availableIcons: ['❤️','😊','🎵','📍','⭐','✈️','😱']
 };
 
 /** =============================
@@ -277,24 +278,28 @@ function initPresetManagement() {
  *  Events UI
  *  ============================= */
 function getEventSubtitle(ev, theme = 'light') {
+    const icon = ev.icon ? `<span class="text-base mr-1">${ev.icon}</span>` : '';
     const labelColor = (theme === 'dark') ? 'text-slate-300' : 'text-slate-800 dark:text-slate-100';
     const labelPart = ev.label ? `<span class="font-bold ${labelColor}">${ev.label}:</span>` : '';
+    const content = labelPart ? `${icon}${labelPart}` : icon;
+
     switch (ev.type) {
         case 'portfolio':
             const preset = state.presets.find(p => p.id === ev.presetId);
             return getText('EVENT_CARD.SUBTITLE_PORTFOLIO', preset ? preset.name : '알 수 없음', ev.weight);
         case 'monthly':
-            return getText('EVENT_CARD.SUBTITLE_MONTHLY', labelPart, fmtMoney(ev.amount, true));
+            return getText('EVENT_CARD.SUBTITLE_MONTHLY', content, fmtMoney(ev.amount, true));
         case 'lump':
-            return ev.amount >= 0 ? getText('EVENT_CARD.SUBTITLE_LUMP_IN', labelPart, fmtMoney(Math.abs(ev.amount), true)) : getText('EVENT_CARD.SUBTITLE_LUMP_OUT', labelPart, fmtMoney(Math.abs(ev.amount), true));
+            return ev.amount >= 0 ? getText('EVENT_CARD.SUBTITLE_LUMP_IN', content, fmtMoney(Math.abs(ev.amount), true)) : getText('EVENT_CARD.SUBTITLE_LUMP_OUT', content, fmtMoney(Math.abs(ev.amount), true));
         case 'withdrawal':
-            return getText('EVENT_CARD.SUBTITLE_WITHDRAWAL', labelPart, fmtMoney(ev.amount, true));
+            return getText('EVENT_CARD.SUBTITLE_WITHDRAWAL', content, fmtMoney(ev.amount, true));
         case 'income':
-            return getText('EVENT_CARD.SUBTITLE_INCOME', labelPart, fmtMoney(ev.amount, true));
+            return getText('EVENT_CARD.SUBTITLE_INCOME', content, fmtMoney(ev.amount, true));
         default:
             return getText('EVENT_CARD.UNKNOWN_EVENT');
     }
 }
+
 
 function createEventCard(ev) {
     let borderClass, pillBgClass, pillText;
@@ -321,7 +326,7 @@ function createEventCard(ev) {
       <div class="flex justify-between items-start gap-2">
         <div class="min-w-0">
           <div class="flex items-center gap-2 flex-wrap">${pill}</div>
-          <p class="text-[11px] text-slate-500 mt-1">${subtitle}</p>
+          <p class="text-sm text-slate-500 mt-1 flex items-center">${subtitle}</p>
         </div>
         <div class="flex items-center">
             <button class="text-slate-400 hover:text-primary transition-colors shrink-0" data-toggle="${ev.id}" title="${ev.enabled ? getText('EVENT_CARD.TOOLTIP_DISABLE') : getText('EVENT_CARD.TOOLTIP_ENABLE')}"><span class="material-symbols-outlined text-sm">${ev.enabled ? 'visibility' : 'visibility_off'}</span></button>
@@ -440,6 +445,7 @@ function openEventDialog(eventId = null) {
         $('dlgWeight').value = eventToEdit.weight || 10;
         const presetSelect = $("dlgPresetId");
         presetSelect.innerHTML = state.presets.map(p => `<option value="${p.id}" ${p.id === eventToEdit.presetId ? 'selected' : ''}>${p.name}</option>`).join('');
+        renderIconPicker(eventToEdit.icon);
     } else {
         title.textContent = getText("EVENT_DIALOG.ADD_TITLE");
         saveBtn.textContent = getText("EVENT_DIALOG.ADD_BUTTON");
@@ -451,9 +457,36 @@ function openEventDialog(eventId = null) {
         $('dlgWeight').value = 10;
         const presetSelect = $("dlgPresetId");
         presetSelect.innerHTML = state.presets.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        renderIconPicker();
     }
     updateDialogFields();
     dlg.showModal();
+}
+
+function renderIconPicker(selectedIcon = null) {
+    const iconContainer = $('dlgIcons');
+    iconContainer.innerHTML = '';
+    state.availableIcons.forEach(icon => {
+        const iconEl = document.createElement('div');
+        iconEl.className = 'p-2 cursor-pointer';
+        iconEl.textContent = icon;
+        if (icon === selectedIcon) {
+            iconEl.classList.add('selected-icon');
+        }
+        iconEl.addEventListener('click', () => {
+            const currentSelected = iconContainer.querySelector('.selected-icon');
+            if (currentSelected) {
+                currentSelected.classList.remove('selected-icon');
+            }
+            iconEl.classList.add('selected-icon');
+        });
+        iconContainer.appendChild(iconEl);
+    });
+}
+
+function getSelectedIcon() {
+    const selectedEl = $('dlgIcons').querySelector('.selected-icon');
+    return selectedEl ? selectedEl.textContent : null;
 }
 
 function updateDialogFields() {
@@ -497,6 +530,7 @@ function initEventDialog() {
         } else {
             eventData.amount = parseMoney($("dlgAmount").value);
             eventData.label = $('dlgLabel').value.trim();
+            eventData.icon = getSelectedIcon();
         }
 
         if (state.editingEventId) {
@@ -688,23 +722,25 @@ function buildAnnualRow(y) {
     }
 
     let highlight = '';
-    const hasEvents = state.events.some(e => e.age === y.age);
+    const eventsAtAge = state.events.filter(e => e.age === y.age && e.type !== 'portfolio');
     if (y.age === state.inputs.ageRetire) {
         highlight = "bg-emerald-50/60 dark:bg-emerald-900/10";
-    } else if (hasEvents) {
+    } else if (eventsAtAge.length > 0) {
         highlight = "bg-teal-50/60 dark:bg-teal-900/20";
     }
     
     let ageExtra = [];
-    if (y.age === state.inputs.ageRetire) ageExtra.push(getText('COMMON.RETIRE'));
-    if (hasEvents) ageExtra.push(getText('COMMON.EVENT'));
+    if (y.age === state.inputs.ageRetire) ageExtra.push('❤️');
+    ageExtra.push(...eventsAtAge.map(e => e.icon || ' '));
+    const ageExtraHtml = ageExtra.filter(i => i.trim()).join('');
+
 
     return `
     <tr class="annual-row ${highlight} hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group" data-year="${y.year}">
       <td class="px-2 py-2.5 font-bold text-slate-900 dark:text-slate-100 text-center">
         <div class="flex flex-col">
           <span>${y.year}</span>
-          <span class="text-[10px] text-slate-400">${y.age}세${ageExtra.length > 0 ? ` • ${ageExtra.join(' • ')}` : ""}</span>
+          <span class="text-xs text-slate-400">${y.age}세 <span class="text-base ml-1">${ageExtraHtml}</span></span>
         </div>
       </td>
       <td class="px-2 py-2.5 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.annualContribution, true)}</td>

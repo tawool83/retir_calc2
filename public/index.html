@@ -45,6 +45,7 @@
     .table-scroll-area { max-height: 700px; overflow-y: auto; }
     dialog::backdrop { background: rgba(0,0,0,.35); }
     .onboarding-highlight { z-index: 50; position: relative; box-shadow: 0 0 0 4px theme('colors.primary'); transition: box-shadow 0.3s ease-in-out; border-radius: 0.75rem;}
+    .selected-icon { background-color: #e0e7ff; border-radius: 50%; box-shadow: 0 0 0 2px #2563eb; }
   </style>
 </head>
 
@@ -291,6 +292,10 @@
       </div>
 
       <div id="dlgFieldsMonetary" class="hidden space-y-3 pt-2">
+        <div class="block">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.ICON_LABEL"></span>
+            <div id="dlgIcons" class="mt-1 flex gap-2 flex-wrap"></div>
+        </div>
          <label class="block">
           <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.LABEL_LABEL"></span>
           <input id="dlgLabel" type="text" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold" data-i18n-key="[placeholder]EVENT_DIALOG.LABEL_PLACEHOLDER"/>

@@ -73,6 +73,7 @@ const STRINGS = {
         "TYPE_INCOME": "월 기타 수입",
         "PRESET_LABEL": "포트폴리오 프리셋",
         "WEIGHT_LABEL": "비중 (1-10)",
+        "ICON_LABEL": "아이콘",
         "LABEL_LABEL": "레이블 (선택 사항)",
         "LABEL_PLACEHOLDER": "예: 주택 계약금",
         "AMOUNT_LABEL": "금액 (월 기준)",
