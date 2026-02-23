@@ -1,155 +1,149 @@
-
 const STRINGS = {
-    APP_TITLE: "은퇴 시뮬레이터 (동적 포트폴리오)",
-    HEADER: {
-        TITLE: "은퇴 <span class='text-primary'>시뮬레이터</span>",
-        SUBTITLE: "동적 포트폴리오 • 이벤트 기반 • 영구 저장",
-        PROFILE_TITLE: "로컬 프로필",
-        PROFILE_SUBTITLE: "브라우저에 저장됨"
+    "APP_TITLE": "은퇴 시뮬레이터 | 미래를 계획하세요",
+    "HEADER": {
+        "TITLE": "은퇴 여정 시뮬레이터",
+        "SUBTITLE": "동적 시나리오를 통해 재정적 미래를 계획하세요."
     },
-    CONFIG: {
-        TITLE: "기본 설정",
-        RESET_BUTTON: "저장된 데이터 초기화",
-        AGE_NOW_LABEL: "현재 나이",
-        AGE_RETIRE_LABEL: "은퇴 나이",
-        RESET_CONFIRM: "저장된 모든 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+    "CONFIG": {
+        "TITLE": "기본 설정",
+        "AGE_NOW_LABEL": "현재 나이",
+        "AGE_RETIRE_LABEL": "은퇴 나이",
+        "RESET_BUTTON": "모두 초기화",
+        "RESET_CONFIRM": "정말로 모든 설정과 시나리오를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다."
     },
-    SCENARIO: {
-        TITLE: "시나리오",
-        PRESET_BUTTON: "프리셋",
-        ADD_BUTTON: "시나리오 추가",
-        SUPPORTED_ITEMS: "지원 항목: <span class='font-semibold'>포트폴리오 변경</span>, <span class='font-semibold'>월 정기 투자금 변경</span>, <span class='font-semibold'>일시불</span>, <span class='font-semibold'>출금</span>, <span class='font-semibold'>월 정기 기타 수입</span>.",
-        NO_EVENTS: "시나리오가 없습니다. “시나리오 추가”를 클릭하여 시작하세요.",
-        VIEW_MORE: "전체 보기 (+{0}개)",
-        VIEW_LESS: "간략히 보기"
+    "SCENARIO": {
+        "TITLE": "시나리오",
+        "ADD_BUTTON": "이벤트 추가",
+        "PRESET_BUTTON": "포트폴리오 관리",
+        "SUPPORTED_ITEMS": "포트폴리오 변경, 월 투자, 일시금, 월 인출, 기타 수입 이벤트를 지원합니다.",
+        "NO_EVENTS": "미래 예측을 위한 이벤트가 없습니다. '이벤트 추가' 버튼을 눌러 시나리오를 만들어보세요.",
+        "VIEW_MORE": "{0}개 더 보기",
+        "VIEW_LESS": "접기"
     },
-    RESULTS: {
-        TITLE: "연간 성장 예측",
-        RANGE_LABEL: "분석 기간: {0}년 ({1}세) ~ {2}년 ({3}세)",
-        FILTER_TOOLTIP: "결과 필터",
-        CHART_TOOLTIP: "차트 보기"
+    "RESULTS": {
+        "TITLE": "연간 성장 예측",
+        "RANGE_LABEL": "{0}년 ({1}세)부터 {2}년 ({3}세)까지의 예측",
+        "CHART_TOOLTIP": "차트 보기/숨기기",
+        "FILTER_TOOLTIP": "결과 필터링"
     },
-    FILTER: {
-        TITLE: "표 필터 (나이 범위)",
-        AGE_FROM_LABEL: "시작 나이",
-        AGE_TO_LABEL: "종료 나이",
-        ENABLE_LABEL: "필터 활성화"
+    "CHART": {
+        "TITLE": "자산 성장 (누적)",
+        "PRINCIPAL_LABEL": "누적 원금",
+        "RETURN_LABEL": "누적 수익",
+        "TOTAL_LABEL": "총계: {0}"
     },
-    CHART: {
-        TITLE: "자산 구성",
-        SUBTITLE: "연도별 누적 투자원금 및 평가 증가액",
-        PRINCIPAL_LABEL: "누적 투자원금",
-        RETURN_LABEL: "누적 평가 증가액",
-        TOTAL_LABEL: "총합: {0}"
+    "OBSERVATION": {
+        "TITLE": "결과 개요",
+        "RETIRE_RESULT": "은퇴 시점({0}세, {1}년)에 예상되는 총자산은 약 {2}입니다. ",
+        "FINAL_RESULT": "최대 연령({0}세, {1}년)에 예상되는 총자산은 약 {2}입니다.",
+        "NO_RESULT": "결과를 표시할 데이터가 충분하지 않습니다. 설정을 확인하거나 시나리오 이벤트를 추가해 주세요."
     },
-    TABLE: {
-        HEADER_YEAR_AGE: "연도<br/>나이",
-        HEADER_ANNUAL_CONTRIBUTION: "연 투자금",
-        HEADER_RETURN: "평가<br/>증가액",
-        HEADER_DIVIDEND: "배당금<br/>(세후)",
-        HEADER_WITHDRAWAL: "출금",
-        HEADER_CASH_FLOW: "현금흐름",
-        HEADER_BALANCE: "연말<br/>평가액",
-        HEADER_PORTFOLIO: "포트폴리오",
-        TOOLTIP_YEAR_AGE: "시뮬레이션 연도와 해당 연도의 나이입니다.",
-        TOOLTIP_ANNUAL_CONTRIBUTION: "'월 정기 투자'와 '일시불 입금'을 더한 연간 총 투자 원금입니다.",
-        TOOLTIP_RETURN: "연간 발생한 총 평가 증가액입니다. (배당 제외)",
-        TOOLTIP_DIVIDEND: "연간 발생한 총 배당금입니다. (세후 15.4% 적용)",
-        TOOLTIP_WITHDRAWAL: "'월 정기 출금'과 '일시불 출금'을 더한 연간 총 출금액입니다.",
-        TOOLTIP_CASH_FLOW: "연간 발생한 투자 외 현금 흐름과 투자 자산에서 발생한 출금액의 총합입니다.<br><b>계산식: (월 정기 기타 수입 x 12) + 연간 총 출금액</b>",
-        TOOLTIP_BALANCE: "해당 연도 말 기준 총 평가액입니다.<br>계산식: <b>기초 평가액 + 연간 투자금 + 평가 증가액 + 배당금 - 출금액</b>",
-        TOOLTIP_PORTFOLIO: "해당 연도에 적용된 포트폴리오 구성입니다. 마우스를 올리면 전체 구성을 확인할 수 있습니다.",
-        PORTFOLIO_UNDEFINED: "정의되지 않음",
-        UNINVESTED_CASH: "미투자 현금"
+    "TABLE": {
+        "HEADER_YEAR_AGE": "연도/나이",
+        "HEADER_ANNUAL_CONTRIBUTION": "연간 투자",
+        "HEADER_RETURN": "평가수익",
+        "HEADER_DIVIDEND": "배당금",
+        "HEADER_WITHDRAWAL": "연간 인출",
+        "HEADER_BALANCE": "연말 잔고",
+        "HEADER_PORTFOLIO": "포트폴리오",
+        "HEADER_CASH_FLOW": "순 현금흐름",
+        "TOOLTIP_YEAR_AGE": "시뮬레이션 연도와 해당 연도의 나이입니다.",
+        "TOOLTIP_ANNUAL_CONTRIBUTION": "해당 연도에 투자된 총금액 (월 투자금 + 일시금).",
+        "TOOLTIP_RETURN": "포트폴리오의 가격 변동으로 인한 연간 수익입니다.",
+        "TOOLTIP_DIVIDEND": "세금(15.4%)을 제외하고 받은 총 연간 배당금입니다.",
+        "TOOLTIP_WITHDRAWAL": "생활비 또는 기타 목적으로 포트폴리오에서 인출된 총금액입니다.",
+        "TOOLTIP_CASH_FLOW": "연간 인출액과 투자와 무관한 기타 수입(예: 연금)을 합산한 순 현금 흐름입니다.",
+        "TOOLTIP_BALANCE": "연말 기준 포트폴리오의 총 평가액입니다.",
+        "TOOLTIP_PORTFOLIO": "해당 연도 말에 적용된 투자 포트폴리오 구성입니다.",
+        "UNINVESTED_CASH": "미투자 현금",
+        "PORTFOLIO_UNDEFINED": "정의되지 않음"
     },
-    OBSERVATION: {
-        TITLE: "분석 결과 요약",
-        INITIAL_TEXT: "좌측 설정을 변경하여 나의 은퇴 계획을 분석해보세요.",
-        RETIRE_RESULT: "{0}세 ({1}) 은퇴 시점에 예상 평가액은 {2}으로 예상됩니다. ",
-        FINAL_RESULT: "{0}세 ({1})에 예상 평가액은 {2}으로 예상됩니다.",
-        NO_RESULT: "분석 결과가 없습니다."
+    "EVENT_DIALOG": {
+        "ADD_TITLE": "새 이벤트 추가",
+        "EDIT_TITLE": "이벤트 수정",
+        "SAVE_BUTTON": "변경사항 저장",
+        "ADD_BUTTON": "이벤트 추가",
+        "CANCEL_BUTTON": "취소",
+        "AGE_LABEL": "나이",
+        "TYPE_LABEL": "유형",
+        "TYPE_PORTFOLIO": "포트폴리오 변경",
+        "TYPE_MONTHLY": "월 투자",
+        "TYPE_LUMP": "일시금",
+        "TYPE_WITHDRAWAL": "월 인출",
+        "TYPE_INCOME": "월 기타 수입",
+        "PRESET_LABEL": "포트폴리오 프리셋",
+        "WEIGHT_LABEL": "비중 (1-10)",
+        "LABEL_LABEL": "레이블 (선택 사항)",
+        "LABEL_PLACEHOLDER": "예: 주택 계약금",
+        "AMOUNT_LABEL": "금액 (월 기준)",
+        "AMOUNT_PLACEHOLDER": "예: 3,000,000",
+        "INFO_PORTFOLIO": "이 나이부터 적용할 투자 포트폴리오 구성을 설정합니다. 여러 개를 추가하면 가중치에 따라 자산이 배분됩니다.",
+        "INFO_MONTHLY": "이 나이부터 매월 투자할 금액입니다. 이전 값은 이 값으로 대체됩니다.",
+        "INFO_LUMP": "일회성 입금(양수) 또는 출금(음수)입니다.",
+        "INFO_WITHDRAWAL": "이 나이부터 매월 생활비 등으로 인출할 금액입니다. 배당금, 수익, 원금 순으로 차감됩니다.",
+        "INFO_INCOME": "국민연금, 개인연금 등 투자와 무관한 월별 고정 수입입니다. 월 인출액을 상쇄하는 효과가 있습니다."
     },
-    FOOTER: {
-        COPYRIGHT: "© 2024 은퇴계획 Pro. 데이터는 브라우저에 저장됩니다. 본 시뮬레이션은 투자 자문이 아닙니다."
+    "PRESET_DIALOG": {
+        "TITLE": "포트폴리오 프리셋 관리",
+        "INFO": "자주 사용하는 투자 조합을 프리셋으로 저장하고 관리할 수 있습니다.",
+        "ADD_TITLE": "새 프리셋 추가",
+        "EDIT_TITLE": "프리셋 수정",
+        "NAME_PLACEHOLDER": "프리셋 이름 (예: 성장주 중심)",
+        "SAVE_BUTTON": "저장"
     },
-    EVENT_DIALOG: {
-        ADD_TITLE: "시나리오 이벤트 추가",
-        EDIT_TITLE: "시나리오 이벤트 수정",
-        AGE_LABEL: "나이",
-        TYPE_LABEL: "종류",
-        TYPE_PORTFOLIO: "포트폴리오 변경",
-        TYPE_MONTHLY: "월 정기 투자금 변경",
-        TYPE_LUMP: "일시 투자금 입금",
-        TYPE_WITHDRAWAL: "출금(현금흐름)",
-        TYPE_INCOME: "월 정기 기타 수입(현금흐름)",
-        PRESET_LABEL: "투자 프리셋",
-        WEIGHT_LABEL: "비중 (1-10)",
-        LABEL_LABEL: "라벨",
-        LABEL_PLACEHOLDER: "예: 초기 투자금, 국민연금",
-        AMOUNT_LABEL: "금액 (₩)",
-        AMOUNT_PLACEHOLDER: "예: 1500000",
-        INFO_PORTFOLIO: "해당 나이부터 포트폴리오 구성을 변경합니다. 같은 나이에 여러 개의 프리셋을 추가하여 비중을 조절할 수 있습니다.",
-        INFO_MONTHLY: "해당 나이부터 월 정기 투자금을 새로 설정합니다.",
-        INFO_LUMP: "해당 나이에 일시불로 입금 합니다.",
-        INFO_WITHDRAWAL: "해당 나이부터 매월 고정된 금액을 정기적으로 출금합니다. <br/>출금은 평가액에서 차람됩니다.",
-        INFO_INCOME: "국민연금, 개인연금 등 투자와 무관한 월 정기 수입입니다. 이 수입은 투자금에 합산되지 않고, '현금흐름' 항목으로 별도 집계됩니다.",
-        CANCEL_BUTTON: "취소",
-        ADD_BUTTON: "시나리오 추가",
-        SAVE_BUTTON: "변경 내용 저장"
+    "EVENT_CARD": {
+        "PILL_PORTFOLIO": "포트폴리오",
+        "PILL_MONTHLY": "월 투자",
+        "PILL_LUMP": "일시금",
+        "PILL_WITHDRAWAL": "월 인출",
+        "PILL_INCOME": "월 수입",
+        "SUBTITLE_PORTFOLIO": "'{0}' 포트폴리오를 가중치 {1}(으)로 사용",
+        "SUBTITLE_MONTHLY": "{0} 매월 {1} 투자",
+        "SUBTITLE_LUMP_IN": "{0} {1} 입금",
+        "SUBTITLE_LUMP_OUT": "{0} {1} 출금",
+        "SUBTITLE_WITHDRAWAL": "{0} 매월 {1} 인출",
+        "SUBTITLE_INCOME": "{0} 매월 {1} 수입 발생",
+        "UNKNOWN_EVENT": "알 수 없는 이벤트 유형",
+        "TOOLTIP_ENABLE": "이벤트 활성화",
+        "TOOLTIP_DISABLE": "이벤트 비활성화",
+        "EDIT_TOOLTIP": "수정",
+        "DELETE_TOOLTIP": "삭제"
     },
-    PRESET_DIALOG: {
-        TITLE: "투자 프리셋 관리",
-        INFO: "프리셋을 클릭하여 수정하거나, 아래에서 새 프리셋을 추가하세요.",
-        ADD_TITLE: "새 프리셋 추가",
-        EDIT_TITLE: "프리셋 수정",
-        NAME_LABEL: "프리셋 이름",
-        NAME_PLACEHOLDER: "예: 성장주 포트폴리오",
-        RETURN_LABEL: "연간 수익률 (%)",
-        DIVIDEND_LABEL: "배당 수익률 (%)",
-        SAVE_BUTTON: "저장"
+    "TOOLTIP": {
+        "PORTFOLIO_TITLE": "{0}년 포트폴리오 상세",
+        "BALANCE_LABEL": "평가액",
+        "RETURN_LABEL": "수익",
+        "DIVIDEND_LABEL": "배당",
+        "EVENT_TITLE": "이벤트",
+        "NO_DATA": "표시할 데이터가 없습니다."
     },
-    EVENT_CARD: {
-        SUBTITLE_PORTFOLIO: "전략: {0}, 비중: {1}",
-        SUBTITLE_MONTHLY: "{0} 월 정기 투자금 {1}으로 변경",
-        SUBTITLE_LUMP_IN: "{0} 일시불 입금 {1}",
-        SUBTITLE_LUMP_OUT: "{0} 일시불 출금 {1}",
-        SUBTITLE_WITHDRAWAL: "{0} 월 출금 {1}/월",
-        SUBTITLE_INCOME: "{0} 월 정기 수입 {1}/월",
-        UNKNOWN_EVENT: "알 수 없는 이벤트",
-        PILL_PORTFOLIO: "포트폴리오",
-        PILL_MONTHLY: "정기 투자",
-        PILL_LUMP: "일시불",
-        PILL_WITHDRAWAL: "출금",
-        PILL_INCOME: "기타 수입",
-        TOOLTIP_ENABLE: "시뮬레이션에 적용",
-        TOOLTIP_DISABLE: "시뮬레이션에서 제외",
-        EDIT_TOOLTIP: "수정",
-        DELETE_TOOLTIP: "삭제"
+    "FILTER": {
+        "TITLE": "결과 필터",
+        "AGE_FROM_LABEL": "시작 나이",
+        "AGE_TO_LABEL": "종료 나이"
     },
-    TOOLTIP: {
-        PORTFOLIO_TITLE: "{0}년 포트폴리오",
-        BALANCE_LABEL: "연말 평가액",
-        RETURN_LABEL: "평가 증가액",
-        DIVIDEND_LABEL: "세후 배당금",
-        NO_DATA: "데이터 없음",
-        EVENT_TITLE: "시나리오"
+    "ONBOARDING": {
+        "TITLE_STEP_1": "환영합니다!",
+        "CONTENT_STEP_1": "은퇴 시뮬레이터에 오신 것을 환영합니다. 몇 가지 간단한 단계를 통해 이 도구를 최대한 활용하는 방법을 안내해 드리겠습니다.",
+        "TITLE_STEP_2": "기본 정보 설정",
+        "CONTENT_STEP_2": "먼저, 현재 나이와 예상 은퇴 나이를 입력하세요. 이 정보는 시뮬레이션의 기준이 됩니다.",
+        "TITLE_STEP_3": "시나리오 만들기",
+        "CONTENT_STEP_3": "'이벤트 추가' 버튼을 클릭하여 투자, 입출금 등 다양한 금융 이벤트를 추가하고 자신만의 미래 시나리오를 만들어 보세요.",
+        "TITLE_STEP_4": "미래 예측하기",
+        "CONTENT_STEP_4": "시나리오를 바탕으로 연간 자산 변화를 확인하고, 차트와 상세 분석을 통해 재정적 미래를 예측하고 계획을 세워보세요.",
+        "DONE_BUTTON": "시작하기",
+        "NEXT_BUTTON": "다음"
     },
-    ONBOARDING: {
-        TITLE_STEP_1: "환영합니다!",
-        CONTENT_STEP_1: "이 시뮬레이터는 은퇴 후 필요한 현금 흐름을 만들기 위해 얼마를 모아야 하는지 계산해줍니다. 몇 가지 간단한 단계를 통해 당신의 은퇴 계획을 시뮬레이션 해보세요.",
-        TITLE_STEP_2: "기본 정보 입력",
-        CONTENT_STEP_2: "먼저, 당신의 <b class='text-primary'>현재 나이</b>와 <b class='text-primary'>목표 은퇴 나이</b>를 입력해주세요. 이 정보는 전체 시뮬레이션 기간을 설정하는 데 사용됩니다.",
-        TITLE_STEP_3: "첫 시나리오 추가",
-        CONTENT_STEP_3: "이제 당신의 인생 계획을 이벤트로 추가해봅시다. <b class='text-primary'>시나리오 추가</b> 버튼을 눌러 첫 투자 계획을 세워보세요. 예를 들어, ‘초기 투자금’ 또는 ‘월 정기 투자’를 설정할 수 있습니다.",
-        TITLE_STEP_4: "결과 확인 및 분석",
-        CONTENT_STEP_4: "시나리오를 추가하면 우측에서 연도별 자산 성장 예측 결과를 바로 확인할 수 있습니다. 궁금한 항목에 마우스를 올려 상세 설명을 확인하고, 차트 아이콘을 클릭해 자산 구성을 시각적으로 분석해보세요!",
-        PREV_BUTTON: "이전",
-        NEXT_BUTTON: "다음",
-        DONE_BUTTON: "완료"
+    "DISCLAIMER": {
+        "TITLE": "면책 조항",
+        "TEXT": "본 시뮬레이션의 결과는 사용자가 입력한 가정에 기반한 예측이며, 실제 미래 수익률을 보장하지 않습니다. 모든 투자의 최종 결정과 책임은 투자자 본인에게 있습니다. 이 정보는 투자 자문으로 간주되어서는 안 됩니다."
     },
-    COMMON: {
-        BUILTIN: "(기본)",
-        RETIRE: "은퇴 ❤️",
-        EVENT: "⭐"
+    "COMMON": {
+        "BUILTIN": "(기본)",
+        "RETIRE": "은퇴",
+        "EVENT": "이벤트"
+    },
+    "FOOTER": {
+        "COPYRIGHT": "© 2024 은퇴 시뮬레이터. 면책 조항: 본 시뮬레이션은 정보 제공 목적으로만 사용되며 투자 자문으로 간주되어서는 안 됩니다."
     }
 };
