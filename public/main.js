@@ -670,7 +670,7 @@ function buildAnnualRow(y) {
         if (y.portfolio.length > 2) {
             htmlItems[1] = `<div class="flex items-center gap-1.5">${htmlItems[1]} <span class="font-bold">...</span></div>`;
         }
-        portfolioDisplayHtml = `<div class="flex flex-col items-start gap-1">${htmlItems.join('')}</div>`;
+        portfolioDisplayHtml = `<div class="flex flex-col items-center gap-1">${htmlItems.join('')}</div>`;
     }
 
     let highlight = '';
@@ -687,7 +687,7 @@ function buildAnnualRow(y) {
 
     return `
     <tr class="annual-row ${highlight} hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group" data-year="${y.year}">
-      <td class="px-2 py-4 font-bold text-slate-900 dark:text-slate-100">
+      <td class="px-2 py-4 font-bold text-slate-900 dark:text-slate-100 text-center">
         <div class="flex flex-col">
           <span>${y.year}</span>
           <span class="text-[10px] text-slate-400">${y.age}세${ageExtra.length > 0 ? ` • ${ageExtra.join(' • ')}` : ""}</span>
@@ -699,7 +699,7 @@ function buildAnnualRow(y) {
       <td class="px-2 py-4 font-medium text-red-600 dark:text-red-400 hidden">-${fmtMoney(y.annualWithdrawal, true)}</td>
       <td class="px-2 py-4 font-medium text-sky-600 dark:text-sky-300">+${fmtMoney(y.annualCashFlow, true)}</td>
       <td class="px-2 py-4 font-black">${fmtMoney(y.endBalance, true)}</td>
-      <td class="px-2 py-4" title="${fullPortfolioTitle}">${portfolioDisplayHtml}</td>
+      <td class="px-2 py-4 text-center" title="${fullPortfolioTitle}">${portfolioDisplayHtml}</td>
     </tr>
   `;
 }
