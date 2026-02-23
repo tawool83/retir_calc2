@@ -3,7 +3,7 @@ const defaultEvents = [
     id: 'evt_1',
     age: 30,
     type: 'lump',
-    amount: 50000000,
+    amount: 5000000,
     label: '초기 투자금'
   },
   {
@@ -17,14 +17,14 @@ const defaultEvents = [
     id: 'evt_3',
     age: 30,
     type: 'portfolio',
-    presetId: 'preset_growth_40_dividend_60',
+    presetId: 'sp500',
     weight: 10
   },
    {
     id: 'evt_4',
     age: 45,
     type: 'portfolio',
-    presetId: 'preset_growth_20_dividend_80',
+    presetId: 'schd',
     weight: 10
   },
   {

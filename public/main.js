@@ -244,6 +244,7 @@ function initPresetManagement() {
         renderPresetList();
         dlg.showModal();
     });
+    $('closePresetDlg').addEventListener('click', () => dlg.close());
     $('newPresetForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const name = ($("dlgPresetName").value || "").trim();
@@ -476,38 +477,49 @@ function updateDialogFields() {
 }
 
 function initEventDialog() {
-  const dlg = $("eventDialog");
-  const typeSelect = $("dlgType");
-  let downTarget = null;
-  $("btnAddEvent").addEventListener("click", () => openEventDialog());
-  typeSelect.addEventListener('change', updateDialogFields);
-  $("dlgSave").addEventListener("click", () => {
-    const age = clamp(Number($("dlgAge").value || 0), 0, 120);
-    const type = typeSelect.value;
-    let eventData = { age, type };
-    if (type === 'portfolio') {
-        eventData.presetId = $('dlgPresetId').value;
-        eventData.weight = clamp(Number($('dlgWeight').value), 1, 10);
-    } else {
-        eventData.amount = parseMoney($("dlgAmount").value);
-        eventData.label = $('dlgLabel').value.trim();
-    }
-    if (state.editingEventId) {
-        const index = state.events.findIndex(e => e.id === state.editingEventId);
-        if (index !== -1) state.events[index] = { ...state.events[index], ...eventData };
-    } else {
-        eventData.id = uid();
-        eventData.enabled = true;
-        state.events.push(eventData);
-    }
-    state.editingEventId = null;
-    recalcAndRender();
-    saveStateDebounced();
-  });
-  dlg.addEventListener("mousedown", e => { downTarget = e.target; });
-  dlg.addEventListener("click", (e) => { if (e.target === dlg && downTarget === dlg) dlg.close(); });
-  dlg.addEventListener('close', () => { state.editingEventId = null; });
+    const dlg = $("eventDialog");
+    const form = dlg.querySelector('form');
+    const typeSelect = $("dlgType");
+    let downTarget = null;
+
+    $("btnAddEvent").addEventListener("click", () => openEventDialog());
+    typeSelect.addEventListener('change', updateDialogFields);
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        $('dlgSave').click();
+        dlg.close();
+    });
+
+    $("dlgSave").addEventListener("click", () => {
+        const age = clamp(Number($("dlgAge").value || 0), 0, 120);
+        const type = typeSelect.value;
+        let eventData = { age, type };
+        if (type === 'portfolio') {
+            eventData.presetId = $('dlgPresetId').value;
+            eventData.weight = clamp(Number($('dlgWeight').value), 1, 10);
+        } else {
+            eventData.amount = parseMoney($("dlgAmount").value);
+            eventData.label = $('dlgLabel').value.trim();
+        }
+        if (state.editingEventId) {
+            const index = state.events.findIndex(e => e.id === state.editingEventId);
+            if (index !== -1) state.events[index] = { ...state.events[index], ...eventData };
+        } else {
+            eventData.id = uid();
+            eventData.enabled = true;
+            state.events.push(eventData);
+        }
+        state.editingEventId = null;
+        recalcAndRender();
+        saveStateDebounced();
+    });
+
+    dlg.addEventListener("mousedown", e => { downTarget = e.target; });
+    dlg.addEventListener("click", (e) => { if (e.target === dlg && downTarget === dlg) dlg.close(); });
+    dlg.addEventListener('close', () => { state.editingEventId = null; });
 }
+
 
 /** =============================
  *  Simulation Core
