@@ -75,7 +75,7 @@ const STRINGS = {
         "WEIGHT_LABEL": "비중 (1-10)",
         "ICON_LABEL": "아이콘",
         "LABEL_LABEL": "레이블 (선택 사항)",
-        "LABEL_PLACEHOLDER": "예: 주택 계약금",
+        "LABEL_PLACEHOLDER": "예: 초기 투자금, 주택 계약금",
         "AMOUNT_LABEL": "금액 (월 기준)",
         "AMOUNT_PLACEHOLDER": "예: 3,000,000",
         "INFO_PORTFOLIO": "이 나이부터 적용할 투자 포트폴리오 구성을 설정합니다. 여러 개를 추가하면 가중치에 따라 자산이 배분됩니다.",

@@ -22,23 +22,30 @@ const defaultEvents = [
   },
    {
     id: 'evt_4',
-    age: 45,
+    age: 50,
     type: 'portfolio',
     presetId: 'schd',
     weight: 10
   },
   {
     id: 'evt_5',
-    age: 65,
+    age: 50,
     type: 'monthly',
     amount: 0, // 은퇴 후 납입 중단
-    label: '은퇴'
+    label: '월 투자 중지'
   },
   {
     id: 'evt_6',
-    age: 65,
+    age: 55,
     type: 'withdrawal',
-    amount: 3000000,
-    label: '은퇴 후 생활비'
+    amount: 6000000,
+    label: '매월 생활비'
+  },
+  {
+    id: 'evt_7',
+    age: 60,
+    type: 'income',
+    amount: 1000000,
+    label: '국민연금'
   }
 ];
