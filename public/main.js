@@ -896,14 +896,76 @@ function initTooltips() {
 /** =============================
  *  Observation
  *  ============================= */
+function calculateSustainableWithdrawal(retirementBalance, retirementAge, portfolio) {
+    if (retirementBalance <= 0) return 0;
+    const targetAge = 90;
+    const targetEndBalance = retirementBalance * 0.2;
+
+    const getFinalBalance = (monthlyWithdrawal) => {
+        let balance = retirementBalance;
+        for (let age = retirementAge; age < targetAge; age++) {
+            let annualWithdrawal = 0;
+            for (let m = 1; m <= 12; m++) {
+                const portfolioReturn = balance * (portfolio.annualReturnPct / 100 / 12);
+                const dividend = balance * (portfolio.dividendPct / 100 / 12) * (1 - state.dividendTaxRate);
+                balance += portfolioReturn + dividend;
+                const withdrawalAmount = Math.min(balance, monthlyWithdrawal);
+                balance -= withdrawalAmount;
+                annualWithdrawal += withdrawalAmount;
+            }
+        }
+        return balance;
+    };
+
+    let low = 0;
+    let high = retirementBalance / 12; // An initial guess
+    let mid = 0;
+
+    for(let i=0; i<100; i++) { // 100 iterations for precision
+        mid = (low + high) / 2;
+        if (mid === 0) break;
+        const finalBalance = getFinalBalance(mid);
+        if (finalBalance > targetEndBalance) {
+            low = mid;
+        } else {
+            high = mid;
+        }
+    }
+    return mid;
+}
+
 function updateObservation(results) {
   const retireRow = results.years.find(y => y.age === state.inputs.ageRetire);
   const last = results.years[results.years.length - 1];
   let msg = ``;
   if (retireRow) msg += getText('OBSERVATION.RETIRE_RESULT', state.inputs.ageRetire, retireRow.year, fmtMoney(retireRow.endBalance, true));
   if (last) msg += getText('OBSERVATION.FINAL_RESULT', state.maxAge, last.year, fmtMoney(last.endBalance, true));
-  $("observation").textContent = msg || getText('OBSERVATION.NO_RESULT');
+  $("observation").innerHTML = msg || getText('OBSERVATION.NO_RESULT');
+
+  const sustainableWithdrawalEl = $("sustainableWithdrawal");
+  if (retireRow && retireRow.endBalance > 0) {
+    const retirementPortfolioConfig = getActivePortfolio(state.inputs.ageRetire);
+    const weightedReturn = retirementPortfolioConfig.reduce((acc, p) => acc + p.percentage * (p.preset.annualReturnPct/100), 0);
+    const weightedDividend = retirementPortfolioConfig.reduce((acc, p) => acc + p.percentage * (p.preset.dividendPct/100), 0);
+    const portfolioForWithdrawal = {
+        annualReturnPct: weightedReturn * 100,
+        dividendPct: weightedDividend * 100
+    };
+
+    const sustainableMonthly = calculateSustainableWithdrawal(retireRow.endBalance, state.inputs.ageRetire, portfolioForWithdrawal);
+    const otherMonthlyIncome = state.events.filter(e => e.type === 'income' && e.age <= state.inputs.ageRetire).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
+    const totalMonthly = sustainableMonthly + otherMonthlyIncome;
+
+    if (sustainableMonthly > 0) {
+        sustainableWithdrawalEl.innerHTML = getText('OBSERVATION.SUSTAINABLE_WITHDRAWAL_DETAIL', state.inputs.ageRetire, fmtMoney(sustainableMonthly), fmtMoney(otherMonthlyIncome), fmtMoney(totalMonthly));
+    } else {
+        sustainableWithdrawalEl.innerHTML = getText('OBSERVATION.SUSTAINABLE_WITHDRAWAL_NOT_APPLICABLE');
+    }
+  } else {
+      sustainableWithdrawalEl.innerHTML = "";
+  }
 }
+
 
 /** =============================
  *  Recalc + Render

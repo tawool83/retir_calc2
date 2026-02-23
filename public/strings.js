@@ -36,7 +36,9 @@ const STRINGS = {
         "TITLE": "결과 개요",
         "RETIRE_RESULT": "은퇴 시점({0}세, {1}년)에 예상되는 총자산은 약 {2}입니다. ",
         "FINAL_RESULT": "최대 연령({0}세, {1}년)에 예상되는 총자산은 약 {2}입니다.",
-        "NO_RESULT": "결과를 표시할 데이터가 충분하지 않습니다. 설정을 확인하거나 시나리오 이벤트를 추가해 주세요."
+        "NO_RESULT": "결과를 표시할 데이터가 충분하지 않습니다. 설정을 확인하거나 시나리오 이벤트를 추가해 주세요.",
+        "SUSTAINABLE_WITHDRAWAL_DETAIL": "은퇴 시점({0}세) 자산을 기준으로 90세에 자산의 20%를 남기는 것을 목표로 할 때, 매월 약 <strong>{1}</strong> 씩 인출할 수 있습니다. 월 기타 수입 {2}을(를) 더하면, 은퇴 후 총 월 생활비는 <strong>{3}</strong>이 됩니다.",
+        "SUSTAINABLE_WITHDRAWAL_NOT_APPLICABLE": "은퇴 자산이 부족하여 90세까지 지속 가능한 월 인출액을 계산할 수 없습니다."
     },
     "TABLE": {
         "HEADER_YEAR_AGE": "연도/나이",
@@ -75,7 +77,7 @@ const STRINGS = {
         "WEIGHT_LABEL": "비중 (1-10)",
         "ICON_LABEL": "아이콘",
         "LABEL_LABEL": "레이블 (선택 사항)",
-        "LABEL_PLACEHOLDER": "예: 초기 투자금, 주택 계약금",
+        "LABEL_PLACEHOLDER": "예: 주택 계약금",
         "AMOUNT_LABEL": "금액 (월 기준)",
         "AMOUNT_PLACEHOLDER": "예: 3,000,000",
         "INFO_PORTFOLIO": "이 나이부터 적용할 투자 포트폴리오 구성을 설정합니다. 여러 개를 추가하면 가중치에 따라 자산이 배분됩니다.",
