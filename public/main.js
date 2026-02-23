@@ -283,13 +283,13 @@ function getEventSubtitle(ev, theme = 'light') {
             const preset = state.presets.find(p => p.id === ev.presetId);
             return getText('EVENT_CARD.SUBTITLE_PORTFOLIO', preset ? preset.name : '알 수 없음', ev.weight);
         case 'monthly':
-            return getText('EVENT_CARD.SUBTITLE_MONTHLY', labelPart, fmtMoney(ev.amount));
+            return getText('EVENT_CARD.SUBTITLE_MONTHLY', labelPart, fmtMoney(ev.amount, true));
         case 'lump':
-            return ev.amount >= 0 ? getText('EVENT_CARD.SUBTITLE_LUMP_IN', labelPart, fmtMoney(Math.abs(ev.amount))) : getText('EVENT_CARD.SUBTITLE_LUMP_OUT', labelPart, fmtMoney(Math.abs(ev.amount)));
+            return ev.amount >= 0 ? getText('EVENT_CARD.SUBTITLE_LUMP_IN', labelPart, fmtMoney(Math.abs(ev.amount), true)) : getText('EVENT_CARD.SUBTITLE_LUMP_OUT', labelPart, fmtMoney(Math.abs(ev.amount), true));
         case 'withdrawal':
-            return getText('EVENT_CARD.SUBTITLE_WITHDRAWAL', labelPart, fmtMoney(ev.amount));
+            return getText('EVENT_CARD.SUBTITLE_WITHDRAWAL', labelPart, fmtMoney(ev.amount, true));
         case 'income':
-            return getText('EVENT_CARD.SUBTITLE_INCOME', labelPart, fmtMoney(ev.amount));
+            return getText('EVENT_CARD.SUBTITLE_INCOME', labelPart, fmtMoney(ev.amount, true));
         default:
             return getText('EVENT_CARD.UNKNOWN_EVENT');
     }
