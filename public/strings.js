@@ -69,6 +69,7 @@ const STRINGS = {
         "ADD_BUTTON": "이벤트 추가",
         "CANCEL_BUTTON": "취소",
         "AGE_LABEL": "나이",
+        "MONTH_LABEL": "월",
         "TYPE_LABEL": "유형",
         "TYPE_PORTFOLIO": "포트폴리오 변경",
         "TYPE_MONTHLY": "월 투자",

@@ -598,15 +598,26 @@ function getActivePortfolio(age, month) {
         if (a.age !== b.age) return b.age - a.age;
         return (b.month || 1) - (a.month || 1);
     });
+
     if (!portfolioEvents.length) return [];
-    const latestAge = portfolioEvents[0].age;
-    const latestMonth = portfolioEvents[0].month || 1;
+
+    const latestEvent = portfolioEvents[0];
+    if (!latestEvent) return [];
+
+    const latestAge = latestEvent.age;
+    const latestMonth = latestEvent.month || 1;
     const activeEvents = portfolioEvents.filter(e => e.age === latestAge && (e.month || 1) === latestMonth);
     const totalWeight = activeEvents.reduce((sum, e) => sum + e.weight, 0);
+
     if (totalWeight === 0) return [];
+
     return activeEvents.map(e => {
         const preset = state.presets.find(p => p.id === e.presetId);
-        return { preset: preset || { annualReturnPct: 0, dividendPct: 0, name: 'Unknown' }, weight: e.weight, percentage: e.weight / totalWeight };
+        return { 
+            preset: preset || { annualReturnPct: 0, dividendPct: 0, name: 'Unknown' }, 
+            weight: e.weight, 
+            percentage: e.weight / totalWeight 
+        };
     });
 }
 
