@@ -103,7 +103,7 @@ const STRINGS = {
         "PILL_LUMP": "일시금",
         "PILL_WITHDRAWAL": "월 인출",
         "PILL_INCOME": "월 수입",
-        "SUBTITLE_PORTFOLIO": "'{0}' 가중치 {1}",
+        "SUBTITLE_PORTFOLIO": "'{0}' 포트폴리오 가중치 {1}",
         "SUBTITLE_MONTHLY": "{0} 매월 {1} 투자",
         "SUBTITLE_LUMP_IN": "{0} {1} 입금",
         "SUBTITLE_LUMP_OUT": "{0} {1} 출금",
