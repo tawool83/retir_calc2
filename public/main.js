@@ -333,7 +333,7 @@ function createEventCard(ev) {
             pillText = ""; borderClass = "border-slate-300"; pillBgClass = "bg-slate-300";
     }
     const pill = `<span class="px-2 py-0.5 ${pillBgClass} text-white text-[10px] font-bold rounded-full uppercase">${pillText}</span>`;
-    const monthText = `<span class="text-[10px] text-slate-400 font-bold">(${ev.month}월부터)</span>`;
+    const monthText = `<span class="text-[10px] text-slate-400 font-bold">${ev.month}월 부터</span>`;
     const node = document.createElement("div");
     node.className = `p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border-l-4 ${borderClass} relative transition-opacity`;
     if (!ev.enabled) node.classList.add('opacity-40');
@@ -888,9 +888,9 @@ function initTooltips() {
       tooltip.innerHTML = html;
       tooltip.classList.remove('hidden');
       const tooltipRect = tooltip.getBoundingClientRect();
-      let left = e.pageX + 10, top = e.pageY + 10;
-      if (left + tooltipRect.width > window.scrollX + window.innerWidth) left = e.pageX - tooltipRect.width - 10;
-      if (top + tooltipRect.height > window.scrollY + window.innerHeight) top = e.pageY - tooltipRect.height - 10;
+      let left = e.clientX + 10, top = e.clientY + 10;
+      if (left + tooltipRect.width > window.innerWidth) left = e.clientX - tooltipRect.width - 10;
+      if (top + tooltipRect.height > window.innerHeight) top = e.clientY - tooltipRect.height - 10;
       tooltip.style.left = `${left}px`;
       tooltip.style.top = `${top}px`;
     });
