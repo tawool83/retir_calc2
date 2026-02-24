@@ -653,7 +653,11 @@ function simulate() {
 
             const activeMonthly = getActiveEventAmount("monthly");
             const withdrawalMonthly = getActiveEventAmount("withdrawal");
-            const incomeMonthly = getActiveEventAmount("income");
+            
+            // '월 기타 수입'은 누적됩니다.
+            const incomeMonthly = activeEvents
+                .filter(e => e.type === 'income' && (e.age < age || (e.age === age && (e.month || 1) <= m)))
+                .reduce((sum, e) => sum + e.amount, 0);
 
             let lumpSum = activeEvents
                 .filter(e => e.type === 'lump' && e.age === age && (e.month || 1) === m)
@@ -981,7 +985,11 @@ function updateObservation(results) {
             };
 
             const sustainableMonthly = calculateSustainableWithdrawal(retireRow.endBalance, state.inputs.ageRetire, portfolioForWithdrawal);
-            const otherMonthlyIncome = state.events.filter(e => e.type === 'income' && (e.age < state.inputs.ageRetire || (e.age === state.inputs.ageRetire && (e.month || 1) <= 1))).sort((a,b) => (b.age - a.age) || ((b.month||1) - (a.month||1)))[0]?.amount ?? 0;
+            
+            const otherMonthlyIncome = state.events
+                .filter(e => e.type === 'income' && e.enabled && (e.age < state.inputs.ageRetire || (e.age === state.inputs.ageRetire && (e.month || 1) <= 1)))
+                .reduce((sum, e) => sum + e.amount, 0);
+            
             const totalMonthly = sustainableMonthly + otherMonthlyIncome;
 
             if (sustainableMonthly > 0) {
