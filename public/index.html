@@ -281,19 +281,25 @@
 <dialog id="eventDialog" class="rounded-xl p-0 w-[92vw] max-w-md bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl">
   <form method="dialog" class="p-5">
     <div class="flex items-center justify-between mb-3">
-      <h3 id="dlgEventTitle" class="text-sm font-extrabold"></h3>
-      <button value="cancel" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
-        <span class="material-symbols-outlined">close</span>
-      </button>
+        <h3 id="dlgEventTitle" class="text-sm font-extrabold"></h3>
+        <button id="dlgCloseX" type="button" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+            <span class="material-symbols-outlined">close</span>
+        </button>
     </div>
 
     <div class="space-y-3">
-      <div class="grid grid-cols-2 gap-3">
-        <label class="block">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.AGE_LABEL"></span>
-          <input id="dlgAge" type="number" min="0" max="120"
-                 class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
-        </label>
+        <div class="grid grid-cols-[2fr,1fr] gap-3">
+            <label class="block">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.AGE_LABEL"></span>
+                <input id="dlgAge" type="number" min="0" max="120" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
+            </label>
+            <label class="block">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.MONTH_LABEL"></span>
+                <select id="dlgMonth" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold">
+                    ${Array.from({length: 12}, (_, i) => `<option value="${i + 1}">${i + 1}월</option>`).join('')}
+                </select>
+            </label>
+        </div>
         <label class="block">
           <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.TYPE_LABEL"></span>
           <select id="dlgType" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold">
@@ -304,7 +310,7 @@
             <option value="income" data-i18n-key="EVENT_DIALOG.TYPE_INCOME"></option>
           </select>
         </label>
-      </div>
+      
 
       <div id="dlgFieldsPortfolio" class="hidden space-y-3 pt-2">
           <label class="block">
@@ -391,12 +397,12 @@
 </div>
 
 
-<script src="strings.js"></script>
-<script src="presets.js"></script>
-<script src="events.js"></script>
-<script src="main.js"></script>
-<script src="test-runner.js"></script>
-<script src="tests.js"></script>
+<script src="public/strings.js"></script>
+<script src="public/presets.js"></script>
+<script src="public/events.js"></script>
+<script src="public/main.js"></script>
+<script src="public/test-runner.js"></script>
+<script src="public/tests.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', (event) => {
     runTests();

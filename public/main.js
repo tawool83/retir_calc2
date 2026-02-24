@@ -1,4 +1,3 @@
-
 /** =============================
  *  Localization
  *  ============================= */
@@ -148,8 +147,8 @@ function buildSnapshot() {
 function applySnapshot(snap) {
   if (!snap || snap.version !== 2) {
     state.presets = [...defaultPresets];
-    state.events = defaultEvents.map(e => ({ ...e, id: uid(), enabled: true }));
-    return false; // Indicate that default state was loaded
+    state.events = defaultEvents.map(e => ({ ...e, id: uid(), enabled: true, month: e.month || 1 }));
+    return false;
   }
   const builtins = [...defaultPresets];
   const userPresets = Array.isArray(snap.presets) ? snap.presets.filter(p => p && !p.builtin && p.id && p.name) : [];
@@ -159,11 +158,11 @@ function applySnapshot(snap) {
   state.inputs.monthlyContribution = 0;
   state.isEventListExpanded = snap.isEventListExpanded || false;
   if (Array.isArray(snap.events)) {
-    state.events = snap.events.filter(e => e && e.type && e.age != null).map(e => ({ ...e, id: e.id || uid(), enabled: e.enabled !== false }));
+    state.events = snap.events.filter(e => e && e.type && e.age != null).map(e => ({ ...e, id: e.id || uid(), enabled: e.enabled !== false, month: e.month || 1 }));
   } else {
-    state.events = defaultEvents.map(e => ({ ...e, id: uid(), enabled: true }));
+    state.events = defaultEvents.map(e => ({ ...e, id: uid(), enabled: true, month: e.month || 1 }));
   }
-  return true; // Indicate that a snapshot was applied
+  return true;
 }
 
 /** =============================
@@ -339,7 +338,7 @@ function createEventCard(ev) {
     node.innerHTML = `
       <div class="flex justify-between items-start gap-2">
         <div class="min-w-0">
-          <div class="flex items-center gap-2 flex-wrap">${pill}</div>
+          <div class="flex items-center gap-2 flex-wrap">${pill} <span class="text-[10px] text-slate-400 font-bold">${ev.month || 1}월부터</span></div>
           <p class="text-sm text-slate-500 mt-1 flex items-center">${subtitle}</p>
         </div>
         <div class="flex items-center">
@@ -370,7 +369,10 @@ function renderEventList() {
     const wrap = $("eventList");
     wrap.innerHTML = "";
     if (typeof state.isEventListExpanded === 'undefined') state.isEventListExpanded = false;
-    const sortedEvents = [...state.events].sort((a,b) => a.age - b.age);
+    const sortedEvents = [...state.events].sort((a,b) => {
+        if (a.age !== b.age) return a.age - b.age;
+        return (a.month || 1) - (b.month || 1);
+    });
     if (sortedEvents.length === 0) {
         wrap.innerHTML = `<div class="text-[11px] text-slate-500 dark:text-slate-400">${getText('SCENARIO.NO_EVENTS')}</div>`;
         return;
@@ -453,6 +455,7 @@ function openEventDialog(eventId = null) {
         title.textContent = getText("EVENT_DIALOG.EDIT_TITLE");
         saveBtn.textContent = getText("EVENT_DIALOG.SAVE_BUTTON");
         $("dlgAge").value = eventToEdit.age;
+        $("dlgMonth").value = eventToEdit.month || 1;
         $("dlgType").value = eventToEdit.type;
         $("dlgLabel").value = eventToEdit.label || "";
         $("dlgAmount").value = (eventToEdit.amount || "").toLocaleString();
@@ -465,6 +468,7 @@ function openEventDialog(eventId = null) {
         saveBtn.textContent = getText("EVENT_DIALOG.ADD_BUTTON");
         const ageNow = state.inputs.ageNow;
         $("dlgAge").value = clamp(ageNow + 5, 0, 120);
+        $("dlgMonth").value = 1;
         $("dlgType").value = "portfolio";
         $("dlgLabel").value = "";
         $("dlgAmount").value = "";
@@ -532,11 +536,26 @@ function initEventDialog() {
     $("btnAddEvent").addEventListener("click", () => openEventDialog());
     typeSelect.addEventListener('change', updateDialogFields);
 
+    const closeButtons = ["dlgCancel", "dlgCloseX"];
+    closeButtons.forEach(id => {
+        const btn = $(id);
+        if (btn) {
+            btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dlg.close();
+            });
+        }
+    });
+
     form.addEventListener('submit', (e) => {
+        if (e.submitter && e.submitter.id !== 'dlgSave') return;
+        
         e.preventDefault();
         const age = clamp(Number($("dlgAge").value || 0), 0, 120);
+        const month = Number($("dlgMonth").value || 1);
         const type = typeSelect.value;
-        let eventData = { age, type };
+        let eventData = { age, month, type };
 
         if (type === 'portfolio') {
             eventData.presetId = $('dlgPresetId').value;
@@ -574,11 +593,15 @@ function initEventDialog() {
 /** =============================
  *  Simulation Core
  *  ============================= */
-function getActivePortfolio(age) {
-    const portfolioEvents = state.events.filter(e => e.type === 'portfolio' && e.enabled && e.age <= age).sort((a,b) => b.age - a.age);
+function getActivePortfolio(age, month) {
+    const portfolioEvents = state.events.filter(e => e.type === 'portfolio' && e.enabled && (e.age < age || (e.age === age && (e.month || 1) <= month))).sort((a,b) => {
+        if (a.age !== b.age) return b.age - a.age;
+        return (b.month || 1) - (a.month || 1);
+    });
     if (!portfolioEvents.length) return [];
     const latestAge = portfolioEvents[0].age;
-    const activeEvents = portfolioEvents.filter(e => e.age === latestAge);
+    const latestMonth = portfolioEvents[0].month || 1;
+    const activeEvents = portfolioEvents.filter(e => e.age === latestAge && (e.month || 1) === latestMonth);
     const totalWeight = activeEvents.reduce((sum, e) => sum + e.weight, 0);
     if (totalWeight === 0) return [];
     return activeEvents.map(e => {
@@ -599,15 +622,12 @@ function simulate() {
     const startYear = state.startYear;
     const activeEvents = state.events.filter(e => e.enabled);
 
-    // Determine the starting age for the simulation calculation.
-    const allEventAges = activeEvents.map(e => e.age);
-    const calculationStartAge = allEventAges.length > 0 ? Math.min(...allEventAges) : ageNow;
-
+    const calculationStartAge = ageNow;
     const years = [];
     let portfolioState = [];
     let uninvestedCash = 0;
 
-    let initialPortfolioConfig = getActivePortfolio(calculationStartAge);
+    let initialPortfolioConfig = getActivePortfolio(calculationStartAge, 1);
     if (initialPortfolioConfig.length > 0) {
         portfolioState = initialPortfolioConfig.map(p => ({ ...p, balance: 0, yearReturn: 0, yearDividend: 0 }));
     }
@@ -615,102 +635,96 @@ function simulate() {
 
     for (let age = calculationStartAge; age <= endAge; age++) {
         const year = startYear + (age - ageNow);
-        let currentPortfolioConfig = getActivePortfolio(age);
-        const currentPortfolioSignature = getPortfolioSignature(currentPortfolioConfig);
-
-        if (currentPortfolioSignature !== lastPortfolioSignature && currentPortfolioSignature !== '') {
-            const totalBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0) + uninvestedCash;
-            portfolioState = currentPortfolioConfig.map(p => ({ ...p, balance: totalBalance * p.percentage, yearReturn: 0, yearDividend: 0 }));
-            uninvestedCash = 0;
-            lastPortfolioSignature = currentPortfolioSignature;
-        }
-
         portfolioState.forEach(p => { p.yearReturn = 0; p.yearDividend = 0; });
 
-        const activeMonthly = activeEvents.filter(e => e.type === "monthly" && e.age <= age).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
-        let lumpSum = activeEvents.filter(e => e.type === 'lump' && e.age === age).reduce((sum, e) => sum + e.amount, 0);
-        if (age === ageNow) {
-            lumpSum += initialInvestment;
-        }
-        const withdrawalMonthly = activeEvents.filter(e => e.type === 'withdrawal' && e.age <= age).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
-        const incomeMonthly = activeEvents.filter(e => e.type === 'income' && e.age <= age).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
-
-        uninvestedCash += lumpSum > 0 ? lumpSum : 0;
-
-        let yContr = 0, yReturn = 0, yDiv = 0, yWithdrawal = 0;
-        let annualCashFlow = incomeMonthly * 12;
+        let yContr = 0, yReturn = 0, yDiv = 0, yWithdrawal = 0, yIncome = 0;
+        let monthlySnapshots = [];
 
         for (let m = 1; m <= 12; m++) {
-            yContr += activeMonthly;
-            uninvestedCash += activeMonthly;
+            let mReturn = 0, mDiv = 0, mWithdrawal = 0, mIncome = 0;
 
-            if (uninvestedCash > 0 && currentPortfolioConfig.length > 0) {
-                if (portfolioState.length === 0) {
-                    portfolioState = currentPortfolioConfig.map(p => ({ ...p, balance: 0, yearReturn: 0, yearDividend: 0 }));
-                }
-                const totalInvested = portfolioState.reduce((sum, p) => sum + p.balance, 0);
-                if (totalInvested > 0) {
-                    portfolioState.forEach(p => { p.balance += uninvestedCash * (p.balance / totalInvested); });
-                } else {
-                    portfolioState.forEach(p => { p.balance += uninvestedCash * p.percentage; });
-                }
+            // 1. Portfolio change check
+            let currentPortfolioConfig = getActivePortfolio(age, m);
+            const currentPortfolioSignature = getPortfolioSignature(currentPortfolioConfig);
+            if (currentPortfolioSignature !== lastPortfolioSignature && currentPortfolioSignature !== '') {
+                const totalBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0) + uninvestedCash;
+                portfolioState = currentPortfolioConfig.map(p => ({ ...p, balance: totalBalance * p.percentage, yearReturn: 0, yearDividend: 0 }));
                 uninvestedCash = 0;
+                lastPortfolioSignature = currentPortfolioSignature;
             }
 
+            // 2. Active values lookup
+            const getVal = (type) => activeEvents.filter(e => e.type === type && (e.age < age || (e.age === age && (e.month || 1) <= m))).sort((a,b) => (b.age - a.age) || ((b.month || 1) - (a.month || 1)))[0]?.amount ?? 0;
+            const activeMonthly = getVal("monthly");
+            const withdrawalMonthly = getVal("withdrawal");
+            const incomeMonthly = getVal("income");
+            mIncome = incomeMonthly;
+
+            let lumpSum = activeEvents.filter(e => e.type === 'lump' && e.age === age && (e.month || 1) === m).reduce((sum, e) => sum + e.amount, 0);
+            if (age === ageNow && m === 1) lumpSum += initialInvestment;
+
+            // 3. Cash flow apply
+            const monthlyContribution = activeMonthly + (lumpSum > 0 ? lumpSum : 0);
+            yContr += monthlyContribution;
+            uninvestedCash += monthlyContribution;
+            yIncome += mIncome;
+
+            // 4. Investment
+            if (uninvestedCash > 0) {
+                if (portfolioState.length > 0) {
+                    const totalInvested = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+                    if (totalInvested > 0) portfolioState.forEach(p => { p.balance += uninvestedCash * (p.balance / totalInvested); });
+                    else portfolioState.forEach(p => { p.balance += uninvestedCash * p.percentage; });
+                    uninvestedCash = 0;
+                } else if (currentPortfolioConfig.length > 0) {
+                    portfolioState = currentPortfolioConfig.map(p => ({ ...p, balance: uninvestedCash * p.percentage, yearReturn: 0, yearDividend: 0 }));
+                    uninvestedCash = 0;
+                }
+            }
+
+            // 5. Growth
             portfolioState.forEach(p => {
                 const r = p.balance * (p.preset.annualReturnPct / 100 / 12);
-                const d_pretax = p.balance * (p.preset.dividendPct / 100 / 12);
-                const d_posttax = d_pretax * (1 - state.dividendTaxRate);
-                p.balance += r + d_posttax;
-                p.yearReturn += r;
-                p.yearDividend += d_posttax;
-                yReturn += r;
-                yDiv += d_posttax;
+                const d = p.balance * (p.preset.dividendPct / 100 / 12) * (1 - state.dividendTaxRate);
+                p.balance += r + d; p.yearReturn += r; p.yearDividend += d;
+                mReturn += r; mDiv += d; yReturn += r; yDiv += d;
             });
 
-            if (withdrawalMonthly > 0) {
+            // 6. Withdrawal
+            const netWithdrawalNeeded = Math.max(0, withdrawalMonthly - incomeMonthly);
+            const lumpSumWithdrawal = lumpSum < 0 ? Math.abs(lumpSum) : 0;
+            const totalWithdrawalNeeded = netWithdrawalNeeded + lumpSumWithdrawal;
+
+            if (totalWithdrawalNeeded > 0) {
                 let totalDrawable = portfolioState.reduce((sum, p) => sum + p.balance, 0);
-                const drawAmount = Math.min(totalDrawable, withdrawalMonthly);
-                yWithdrawal += drawAmount;
+                const drawAmount = Math.min(totalDrawable, totalWithdrawalNeeded);
+                mWithdrawal = drawAmount; yWithdrawal += drawAmount;
                 if (drawAmount > 0) {
                     const fraction = drawAmount / totalDrawable;
                     portfolioState.forEach(p => { p.balance -= p.balance * fraction; });
                 }
             }
-        }
 
-        const lumpSumWithdrawal = lumpSum < 0 ? Math.abs(lumpSum) : 0;
-        if (lumpSumWithdrawal > 0) {
-            let totalDrawable = portfolioState.reduce((sum, p) => sum + p.balance, 0);
-            const drawAmount = Math.min(totalDrawable, lumpSumWithdrawal);
-            yWithdrawal += drawAmount;
-            if (drawAmount > 0) {
-                const fraction = drawAmount / totalDrawable;
-                portfolioState.forEach(p => { p.balance -= p.balance * fraction; });
-            }
+            monthlySnapshots.push({
+                month: m, contribution: monthlyContribution, returnEarned: mReturn,
+                dividends: mDiv, withdrawal: mWithdrawal, mIncome: mIncome,
+                cashFlow: mIncome + mWithdrawal,
+                balance: portfolioState.reduce((sum, p) => sum + p.balance, 0) + uninvestedCash
+            });
         }
-
-        annualCashFlow += yWithdrawal;
 
         const endBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0) + uninvestedCash;
         let detailedPortfolioResult = portfolioState.map(p => ({ name: p.preset.name, balance: p.balance, return: p.yearReturn, dividend: p.yearDividend }));
-        if (uninvestedCash > 0) {
-            detailedPortfolioResult.push({ name: getText('TABLE.UNINVESTED_CASH'), balance: uninvestedCash, return: 0, dividend: 0 });
-        }
+        if (uninvestedCash > 0) detailedPortfolioResult.push({ name: getText('TABLE.UNINVESTED_CASH'), balance: uninvestedCash, return: 0, dividend: 0 });
 
         years.push({
-            year, age,
-            annualContribution: yContr + (lumpSum > 0 ? lumpSum : 0),
-            annualCashFlow: annualCashFlow,
-            annualWithdrawal: yWithdrawal,
-            returnEarned: yReturn,
-            dividends: yDiv,
-            endBalance,
-            portfolio: currentPortfolioConfig,
-            detailedPortfolio: detailedPortfolioResult
+            year, age, annualContribution: yContr,
+            annualCashFlow: yIncome + yWithdrawal,
+            annualWithdrawal: yWithdrawal, returnEarned: yReturn, dividends: yDiv,
+            endBalance, portfolio: getActivePortfolio(age, 12),
+            detailedPortfolio: detailedPortfolioResult, monthlyData: monthlySnapshots
         });
     }
-
     return { years, startYear, ageNow, endAge, ageRetire };
 }
 
@@ -721,37 +735,30 @@ function buildAnnualRow(y) {
     const fullPortfolioTitle = y.portfolio.map(p => `${p.preset.name}: ${(p.percentage*100).toFixed(0)}%`).join(', ');
     let portfolioDisplayHtml;
     if (y.portfolio.length === 0) {
-        if (y.endBalance > 0) {
-            portfolioDisplayHtml = `<span class="text-xs text-amber-500">${getText('TABLE.UNINVESTED_CASH')}</span>`;
-        } else {
-            portfolioDisplayHtml = `<span class="text-xs text-slate-400">${getText('TABLE.PORTFOLIO_UNDEFINED')}</span>`;
-        }
+        portfolioDisplayHtml = y.endBalance > 0 ? `<span class="text-xs text-amber-500">${getText('TABLE.UNINVESTED_CASH')}</span>` : `<span class="text-xs text-slate-400">${getText('TABLE.PORTFOLIO_UNDEFINED')}</span>`;
     } else {
         const itemsToDisplay = y.portfolio.slice(0, 2);
         let htmlItems = itemsToDisplay.map(p => `<div class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md text-xs font-semibold text-slate-700 dark:text-slate-300">${p.preset.name}: ${(p.percentage * 100).toFixed(0)}%</div>`);
-        if (y.portfolio.length > 2) {
-            htmlItems[1] = `<div class="flex items-center gap-1.5">${htmlItems[1]} <span class="font-bold">...</span></div>`;
-        }
+        if (y.portfolio.length > 2) htmlItems[1] = `<div class="flex items-center gap-1.5">${htmlItems[1]} <span class="font-bold">...</span></div>`;
         portfolioDisplayHtml = `<div class="flex flex-col items-center gap-1">${htmlItems.join('')}</div>`;
     }
 
     let highlight = '';
     const eventsAtAge = state.events.filter(e => e.age === y.age && e.type !== 'portfolio');
-    if (y.age === state.inputs.ageRetire) {
-        highlight = "bg-emerald-50/60 dark:bg-emerald-900/10";
-    } else if (eventsAtAge.length > 0) {
-        highlight = "bg-teal-50/60 dark:bg-teal-900/20";
-    }
+    if (y.age === state.inputs.ageRetire) highlight = "bg-emerald-50/60 dark:bg-emerald-900/10";
+    else if (eventsAtAge.length > 0) highlight = "bg-teal-50/60 dark:bg-teal-900/20";
     
     let ageExtra = [];
     if (y.age === state.inputs.ageRetire) ageExtra.push('❤️');
     ageExtra.push(...eventsAtAge.map(e => e.icon || ' '));
     const ageExtraHtml = ageExtra.filter(i => i.trim()).join('');
 
-
     return `
-    <tr class="annual-row ${highlight} hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group" data-year="${y.year}">
-      <td class="px-2 py-2.5 font-bold text-slate-900 dark:text-slate-100 text-center">
+    <tr class="annual-row ${highlight} hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group cursor-pointer" data-year="${y.year}">
+      <td class="px-2 py-2.5 font-bold text-slate-900 dark:text-slate-100 text-center relative">
+        <div class="absolute left-1 top-1/2 -translate-y-1/2 text-slate-300 group-hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-sm toggle-icon">chevron_right</span>
+        </div>
         <div class="flex flex-col">
           <span>${y.year}</span>
           <span class="text-xs text-slate-400">${y.age}세 <span class="text-base ml-1">${ageExtraHtml}</span></span>
@@ -768,6 +775,43 @@ function buildAnnualRow(y) {
   `;
 }
 
+function buildMonthlyDetailRow(y) {
+    const monthlyHtml = (y.monthlyData || []).map(m => `
+        <tr class="text-xs border-b border-slate-50 dark:border-slate-800/50 last:border-0">
+            <td class="px-3 py-2 text-center font-bold text-slate-400">${m.month}월</td>
+            <td class="px-3 py-2 text-slate-500">${fmtMoney(m.contribution, true)}</td>
+            <td class="px-3 py-2 text-green-600 font-medium">+${fmtMoney(m.returnEarned, true)}</td>
+            <td class="px-3 py-2 text-blue-500 font-medium">${fmtMoney(m.dividends, true)}</td>
+            <td class="px-3 py-2 font-bold text-sky-600 dark:text-sky-300">+${fmtMoney(m.cashFlow, true)}</td>
+            <td class="px-3 py-2 font-bold text-slate-700 dark:text-slate-300 text-right">${fmtMoney(m.balance, true)}</td>
+        </tr>
+    `).join('');
+
+    return `
+    <tr class="detail-row hidden bg-slate-50/50 dark:bg-slate-900/40" data-year-detail="${y.year}">
+        <td colspan="8" class="p-0">
+            <div class="px-2 py-3 bg-slate-50/30 dark:bg-slate-900/20 border-y border-slate-100 dark:border-slate-800">
+                <div class="max-w-3xl mx-auto overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-950">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 dark:bg-slate-900 text-xs uppercase font-bold text-slate-400 border-b border-slate-100 dark:border-slate-800">
+                            <tr>
+                                <th class="px-3 py-2 text-center w-16">월</th>
+                                <th class="px-3 py-2">투자금</th>
+                                <th class="px-3 py-2">수익</th>
+                                <th class="px-3 py-2">배당금</th>
+                                <th class="px-3 py-2">순 현금흐름</th>
+                                <th class="px-3 py-2 text-right">기말 잔고</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50 dark:divide-slate-900">${monthlyHtml}</tbody>
+                    </table>
+                </div>
+            </div>
+        </td>
+    </tr>
+    `;
+}
+
 function passesFilter(y) {
   if (!state.inputs.filterEnabled) return true;
   const from = Math.min(state.inputs.filterAgeFrom, state.inputs.filterAgeTo);
@@ -776,63 +820,53 @@ function passesFilter(y) {
 }
 
 function renderAnnualTable(results) {
-  const tbody = $("annualTbody");
-  const filtered = results.years.filter(passesFilter);
-  tbody.innerHTML = filtered.map(buildAnnualRow).join("");
-  initTooltips();
+    const tbody = $("annualTbody");
+    const filtered = results.years.filter(passesFilter);
+    let html = "";
+    filtered.forEach(y => { html += buildAnnualRow(y); html += buildMonthlyDetailRow(y); });
+    tbody.innerHTML = html;
+    tbody.querySelectorAll('.annual-row').forEach(row => {
+        row.addEventListener('click', () => {
+            const year = row.dataset.year;
+            const detailRow = tbody.querySelector(`[data-year-detail="${year}"]`);
+            const icon = row.querySelector('.toggle-icon');
+            if (detailRow) {
+                const isHidden = detailRow.classList.contains('hidden');
+                detailRow.classList.toggle('hidden');
+                if (icon) { icon.textContent = isHidden ? 'expand_more' : 'chevron_right'; icon.classList.toggle('text-primary', isHidden); }
+                row.classList.toggle('bg-slate-100', isHidden); row.classList.toggle('dark:bg-slate-800', isHidden);
+            }
+        });
+    });
+    initTooltips();
 }
 
 function renderChart(results) {
   const filteredYears = results.years.filter(passesFilter);
   const labels = filteredYears.map(y => [`${String(y.year)}`, `${y.age}세`]);
-  let cumulativePrincipal = 0; // Changed from state.inputs.initialInvestment
-  const principalData = [];
-  const returnData = [];
-
+  let cumulativePrincipal = 0;
+  const principalData = [], returnData = [];
   results.years.forEach(year => {
       cumulativePrincipal += year.annualContribution - year.annualWithdrawal;
       if(passesFilter(year)){
           const principalComponent = Math.max(0, Math.min(cumulativePrincipal, year.endBalance));
           const returnComponent = Math.max(0, year.endBalance - principalComponent);
-          principalData.push(principalComponent);
-          returnData.push(returnComponent);
+          principalData.push(principalComponent); returnData.push(returnComponent);
       }
   });
-
   const ctx = $("balanceChart").getContext("2d");
   if (state.chart) state.chart.destroy();
   if (labels.length === 0) return;
-
   state.chart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
+    type: 'bar', data: { labels, datasets: [
         { label: getText('CHART.PRINCIPAL_LABEL'), data: principalData, backgroundColor: '#2563eb' },
         { label: getText('CHART.RETURN_LABEL'), data: returnData, backgroundColor: '#84cc16' }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'top' },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              let label = context.dataset.label || '';
-              if (label) label += ': ';
-              if (context.parsed.y !== null) label += fmtMoney(context.parsed.y, true);
-              return label;
-            },
-            footer: function(tooltipItems) {
-                let sum = 0;
-                tooltipItems.forEach(function(tooltipItem) { sum += tooltipItem.parsed.y; });
-                return getText('CHART.TOTAL_LABEL', fmtMoney(sum, true));
-            }
-          }
-        }
-      },
-      scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: (value) => fmtMoney(value, true) } } }
+      ]},
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' }, tooltip: { callbacks: {
+            label: (context) => (context.dataset.label || '') + ': ' + fmtMoney(context.parsed.y, true),
+            footer: (items) => getText('CHART.TOTAL_LABEL', fmtMoney(items.reduce((s, i) => s + i.parsed.y, 0), true))
+          }}},
+      scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: (v) => fmtMoney(v, true) } } }
     }
   });
 }
@@ -860,44 +894,32 @@ function initTooltips() {
                 <div class="text-slate-400">${getText('TOOLTIP.RETURN_LABEL')}</div>
                 <div class="text-green-400">+${fmtMoney(p.return)}</div>
                 <div class="text-slate-400">${getText('TOOLTIP.DIVIDEND_LABEL')}</div>
-                <div class="text-blue-400">+${fmtMoney(p.dividend)}</div>
-                ` : ''}
-            </div>
-          `}).join('');
-      } else {
-          html += `<div class="text-slate-400">${getText('TOOLTIP.NO_DATA')}</div>`;
-      }
+                <div class="text-blue-400">+${fmtMoney(p.dividend)}</div>` : ''}
+            </div>`}).join('');
+      } else html += `<div class="text-slate-400">${getText('TOOLTIP.NO_DATA')}</div>`;
       const eventsAtAge = state.events.filter(e => e.age === yearData.age);
-        if (eventsAtAge.length > 0) {
-            html += `<div class="font-bold mt-3 mb-2 text-base border-t border-slate-700 pt-2">${getText('TOOLTIP.EVENT_TITLE')}</div>`;
-            html += eventsAtAge.map(ev => `<p class="text-xs text-slate-300 mb-1 ${!ev.enabled ? 'line-through' : ''}">${getEventSubtitle(ev, 'dark')}</p>`).join('');
-        }
-      tooltip.innerHTML = html;
-      tooltip.classList.remove('hidden');
-      const tooltipRect = tooltip.getBoundingClientRect();
-      let left = e.pageX + 10, top = e.pageY + 10;
-      if (left + tooltipRect.width > window.scrollX + window.innerWidth) left = e.pageX - tooltipRect.width - 10;
-      if (top + tooltipRect.height > window.scrollY + window.innerHeight) top = e.pageY - tooltipRect.height - 10;
-      tooltip.style.left = `${left}px`;
-      tooltip.style.top = `${top}px`;
+      if (eventsAtAge.length > 0) {
+          html += `<div class="font-bold mt-3 mb-2 text-base border-t border-slate-700 pt-2">${getText('TOOLTIP.EVENT_TITLE')}</div>`;
+          html += eventsAtAge.map(ev => `<p class="text-xs text-slate-300 mb-1 ${!ev.enabled ? 'line-through' : ''}">${ev.month}월: ${getEventSubtitle(ev, 'dark')}</p>`).join('');
+      }
+      tooltip.innerHTML = html; tooltip.classList.remove('hidden');
+      const rect = tooltip.getBoundingClientRect();
+      let left = e.clientX + 10, top = e.clientY + 10;
+      if (left + rect.width > window.innerWidth) left = e.clientX - rect.width - 10;
+      if (top + rect.height > window.innerHeight) top = e.clientY - rect.height - 10;
+      tooltip.style.left = `${left}px`; tooltip.style.top = `${top}px`;
     });
     row.addEventListener('mouseleave', () => { tooltip.classList.add('hidden'); });
   });
 
   const headerTooltips = {
-      'th-year-age': getText('TABLE.TOOLTIP_YEAR_AGE'),
-      'th-contribution': getText('TABLE.TOOLTIP_ANNUAL_CONTRIBUTION'),
-      'th-return': getText('TABLE.TOOLTIP_RETURN'),
-      'th-dividend': getText('TABLE.TOOLTIP_DIVIDEND'),
-      'th-withdrawal': getText('TABLE.TOOLTIP_WITHDRAWAL'),
-      'th-cash-flow': getText('TABLE.TOOLTIP_CASH_FLOW'),
-      'th-balance': getText('TABLE.TOOLTIP_BALANCE'),
-      'th-portfolio': getText('TABLE.TOOLTIP_PORTFOLIO')
+      'th-year-age': getText('TABLE.TOOLTIP_YEAR_AGE'), 'th-contribution': getText('TABLE.TOOLTIP_ANNUAL_CONTRIBUTION'),
+      'th-return': getText('TABLE.TOOLTIP_RETURN'), 'th-dividend': getText('TABLE.TOOLTIP_DIVIDEND'),
+      'th-withdrawal': getText('TABLE.TOOLTIP_WITHDRAWAL'), 'th-cash-flow': getText('TABLE.TOOLTIP_CASH_FLOW'),
+      'th-balance': getText('TABLE.TOOLTIP_BALANCE'), 'th-portfolio': getText('TABLE.TOOLTIP_PORTFOLIO')
   };
-
   Object.entries(headerTooltips).forEach(([id, text]) => {
-      const th = $(id);
-      if (!th) return;
+      const th = $(id); if (!th) return;
       const tooltip = th.querySelector('.header-tooltip');
       if (tooltip) {
         tooltip.innerHTML = text;
@@ -912,38 +934,23 @@ function initTooltips() {
  *  ============================= */
 function calculateSustainableWithdrawal(retirementBalance, retirementAge, portfolio) {
     if (retirementBalance <= 0) return 0;
-    const targetAge = 90;
-    const targetEndBalance = retirementBalance * 0.2;
-
+    const targetAge = 90, targetEndBalance = retirementBalance * 0.2;
     const getFinalBalance = (monthlyWithdrawal) => {
         let balance = retirementBalance;
         for (let age = retirementAge; age < targetAge; age++) {
-            let annualWithdrawal = 0;
             for (let m = 1; m <= 12; m++) {
-                const portfolioReturn = balance * (portfolio.annualReturnPct / 100 / 12);
-                const dividend = balance * (portfolio.dividendPct / 100 / 12) * (1 - state.dividendTaxRate);
-                balance += portfolioReturn + dividend;
-                const withdrawalAmount = Math.min(balance, monthlyWithdrawal);
-                balance -= withdrawalAmount;
-                annualWithdrawal += withdrawalAmount;
+                const r = balance * (portfolio.annualReturnPct / 100 / 12);
+                const d = balance * (portfolio.dividendPct / 100 / 12) * (1 - state.dividendTaxRate);
+                balance += r + d;
+                balance -= Math.min(balance, monthlyWithdrawal);
             }
         }
         return balance;
     };
-
-    let low = 0;
-    let high = retirementBalance / 12; // An initial guess
-    let mid = 0;
-
-    for(let i=0; i<100; i++) { // 100 iterations for precision
-        mid = (low + high) / 2;
-        if (mid === 0) break;
-        const finalBalance = getFinalBalance(mid);
-        if (finalBalance > targetEndBalance) {
-            low = mid;
-        } else {
-            high = mid;
-        }
+    let low = 0, high = retirementBalance / 12, mid = 0;
+    for(let i=0; i<100; i++) {
+        mid = (low + high) / 2; if (mid === 0) break;
+        if (getFinalBalance(mid) > targetEndBalance) low = mid; else high = mid;
     }
     return mid;
 }
@@ -955,43 +962,27 @@ function updateObservation(results) {
   if (retireRow) msg += getText('OBSERVATION.RETIRE_RESULT', state.inputs.ageRetire, retireRow.year, fmtMoney(retireRow.endBalance, true));
   if (last) msg += getText('OBSERVATION.FINAL_RESULT', state.maxAge, last.year, fmtMoney(last.endBalance, true));
   $("observation").innerHTML = msg || getText('OBSERVATION.NO_RESULT');
-
   const sustainableWithdrawalEl = $("sustainableWithdrawal");
   if (retireRow && retireRow.endBalance > 0) {
-    const retirementPortfolioConfig = getActivePortfolio(state.inputs.ageRetire);
-    const weightedReturn = retirementPortfolioConfig.reduce((acc, p) => acc + p.percentage * (p.preset.annualReturnPct/100), 0);
-    const weightedDividend = retirementPortfolioConfig.reduce((acc, p) => acc + p.percentage * (p.preset.dividendPct/100), 0);
+    const retirementPortfolioConfig = getActivePortfolio(state.inputs.ageRetire, 1);
     const portfolioForWithdrawal = {
-        annualReturnPct: weightedReturn * 100,
-        dividendPct: weightedDividend * 100
+        annualReturnPct: retirementPortfolioConfig.reduce((acc, p) => acc + p.percentage * (p.preset.annualReturnPct), 0),
+        dividendPct: retirementPortfolioConfig.reduce((acc, p) => acc + p.percentage * (p.preset.dividendPct), 0)
     };
-
     const sustainableMonthly = calculateSustainableWithdrawal(retireRow.endBalance, state.inputs.ageRetire, portfolioForWithdrawal);
-    const otherMonthlyIncome = state.events.filter(e => e.type === 'income' && e.age <= state.inputs.ageRetire).sort((a,b) => b.age - a.age)[0]?.amount ?? 0;
-    const totalMonthly = sustainableMonthly + otherMonthlyIncome;
-
-    if (sustainableMonthly > 0) {
-        sustainableWithdrawalEl.innerHTML = getText('OBSERVATION.SUSTAINABLE_WITHDRAWAL_DETAIL', state.inputs.ageRetire, fmtMoney(sustainableMonthly), fmtMoney(otherMonthlyIncome), fmtMoney(totalMonthly));
-    } else {
-        sustainableWithdrawalEl.innerHTML = getText('OBSERVATION.SUSTAINABLE_WITHDRAWAL_NOT_APPLICABLE');
-    }
-  } else {
-      sustainableWithdrawalEl.innerHTML = "";
-  }
+    const otherMonthlyIncome = state.events.filter(e => e.type === 'income' && (e.age < state.inputs.ageRetire || (e.age === state.inputs.ageRetire && (e.month || 1) <= 1))).sort((a,b) => (b.age - a.age) || ((b.month||1) - (a.month||1)))[0]?.amount ?? 0;
+    if (sustainableMonthly > 0) sustainableWithdrawalEl.innerHTML = getText('OBSERVATION.SUSTAINABLE_WITHDRAWAL_DETAIL', state.inputs.ageRetire, fmtMoney(sustainableMonthly), fmtMoney(otherMonthlyIncome), fmtMoney(sustainableMonthly + otherMonthlyIncome));
+    else sustainableWithdrawalEl.innerHTML = getText('OBSERVATION.SUSTAINABLE_WITHDRAWAL_NOT_APPLICABLE');
+  } else sustainableWithdrawalEl.innerHTML = "";
 }
-
 
 /** =============================
  *  Recalc + Render
  *  ============================= */
 function recalcAndRender() {
-  const results = simulate();
-  state.results = results;
+  const results = simulate(); state.results = results;
   $("rangeLabel").textContent = getText('RESULTS.RANGE_LABEL', results.startYear, results.ageNow, results.endAge, results.endAge);
-  renderAnnualTable(results);
-  updateObservation(results);
-  renderEventList();
-  updateFilterButton();
+  renderAnnualTable(results); updateObservation(results); renderEventList(); updateFilterButton();
   if (!$("chartPanel").classList.contains("hidden")) renderChart(state.results);
   runTests();
 }
@@ -1000,36 +991,27 @@ function recalcAndRender() {
  *  Inputs init
  *  ============================= */
 function initInputs() {
-  const inputsToWatch = ["ageNow", "ageRetire"];
-  inputsToWatch.forEach(id => {
-      const el = $(id);
-      if (!el) return;
+  ["ageNow", "ageRetire"].forEach(id => {
+      const el = $(id); if (!el) return;
       el.addEventListener("input", () => { recalcAndRender(); saveStateDebounced(); });
       if(el.type !== 'text') el.addEventListener("change", () => { recalcAndRender(); saveStateDebounced(); });
       el.addEventListener("blur", () => { syncUiToStateFromInputs(); saveStateDebounced(); });
   });
-    const filterPanel = $('filterPanel');
-    const btnToggleFilter = $('btnToggleFilter');
-    btnToggleFilter.addEventListener('click', (e) => { e.stopPropagation(); filterPanel.classList.toggle('hidden'); });
-    document.addEventListener('click', (e) => { if (!filterPanel.contains(e.target) && !btnToggleFilter.contains(e.target)) filterPanel.classList.add('hidden'); });
-    const filterInputs = ["filterEnabled", "filterAgeFrom", "filterAgeTo"];
-    filterInputs.forEach(id => {
-        const el = $(id);
-        if (!el) return;
-        el.addEventListener("input", () => { recalcAndRender(); saveStateDebounced(); });
-        if(el.type !== 'text') el.addEventListener("change", () => { recalcAndRender(); saveStateDebounced(); });
-        el.addEventListener("blur", () => { syncUiToStateFromInputs(); saveStateDebounced(); });
-    });
+  const filterPanel = $('filterPanel'), btnToggleFilter = $('btnToggleFilter');
+  btnToggleFilter.addEventListener('click', (e) => { e.stopPropagation(); filterPanel.classList.toggle('hidden'); });
+  document.addEventListener('click', (e) => { if (!filterPanel.contains(e.target) && !btnToggleFilter.contains(e.target)) filterPanel.classList.add('hidden'); });
+  ["filterEnabled", "filterAgeFrom", "filterAgeTo"].forEach(id => {
+      const el = $(id); if (!el) return;
+      el.addEventListener("input", () => { recalcAndRender(); saveStateDebounced(); });
+      if(el.type !== 'text') el.addEventListener("change", () => { recalcAndRender(); saveStateDebounced(); });
+      el.addEventListener("blur", () => { syncUiToStateFromInputs(); saveStateDebounced(); });
+  });
   $("btnToggleChart").addEventListener("click", () => {
     $("chartPanel").classList.toggle("hidden");
     if (!$("chartPanel").classList.contains("hidden")) renderChart(state.results || simulate());
   });
   $("btnResetAll").addEventListener("click", () => {
-    if (confirm(getText('CONFIG.RESET_CONFIRM'))) {
-      resetSavedState();
-      window.location.hash = "";
-      location.reload();
-    }
+    if (confirm(getText('CONFIG.RESET_CONFIRM'))) { resetSavedState(); window.location.hash = ""; location.reload(); }
   });
   $('btnShare').addEventListener('click', async () => {
     const snapshot = buildSnapshot();
@@ -1038,11 +1020,8 @@ function initInputs() {
       const compressed = pako.deflate(jsonString, { level: 9 });
       const encoded = btoa(String.fromCharCode.apply(null, compressed));
       const url = `${window.location.origin}${window.location.pathname}#${encodeURIComponent(encoded)}`;
-      await navigator.clipboard.writeText(url);
-      alert(getText('CONFIG.SHARE_SUCCESS'));
-    } catch (e) {
-      console.error("Failed to create shareable URL", e);
-    }
+      await navigator.clipboard.writeText(url); alert(getText('CONFIG.SHARE_SUCCESS'));
+    } catch (e) { console.error("Failed to create shareable URL", e); }
   });
 }
 
@@ -1051,13 +1030,7 @@ function initInputs() {
  *  ============================= */
 function initOnboarding() {
     if (localStorage.getItem('onboardingCompleted') === 'true') return;
-    const guide = $('onboarding-guide');
-    const titleEl = $('onboarding-title');
-    const contentEl = $('onboarding-content');
-    const dotsEl = $('onboarding-dots');
-    const prevBtn = $('onboarding-prev');
-    const nextBtn = $('onboarding-next');
-    const closeBtn = $('close-onboarding');
+    const guide = $('onboarding-guide'), titleEl = $('onboarding-title'), contentEl = $('onboarding-content'), dotsEl = $('onboarding-dots'), prevBtn = $('onboarding-prev'), nextBtn = $('onboarding-next'), closeBtn = $('close-onboarding');
     let currentStep = 0, highlightedElement = null;
     const steps = [
         { titleKey: 'ONBOARDING.TITLE_STEP_1', contentKey: 'ONBOARDING.CONTENT_STEP_1', highlightTarget: null },
@@ -1071,8 +1044,7 @@ function initOnboarding() {
         contentEl.innerHTML = getText(step.contentKey);
         dotsEl.innerHTML = '';
         for (let i = 0; i < steps.length; i++) {
-            const dot = document.createElement('div');
-            dot.className = 'onboarding-dot';
+            const dot = document.createElement('div'); dot.className = 'onboarding-dot';
             if (i === stepIndex) dot.classList.add('active');
             dotsEl.appendChild(dot);
         }
@@ -1092,8 +1064,7 @@ function initOnboarding() {
     nextBtn.addEventListener('click', () => { (currentStep < steps.length - 1) ? renderStep(++currentStep) : completeOnboarding(); });
     prevBtn.addEventListener('click', () => { if (currentStep > 0) renderStep(--currentStep); });
     closeBtn.addEventListener('click', completeOnboarding);
-    guide.classList.remove('hidden');
-    renderStep(0);
+    guide.classList.remove('hidden'); renderStep(0);
 }
 
 /** =============================
@@ -1107,24 +1078,11 @@ function loadPakoAndBoot() {
             applyLocalization();
             const fromUrl = loadStateFromSource('url');
             const loadedFromUrl = applySnapshot(fromUrl);
-
-            if (!loadedFromUrl) {
-                const fromLocal = loadStateFromSource('local');
-                applySnapshot(fromLocal);
-            }
-
-            syncStateToUi();
-            initPresetManagement();
-            initEventDialog();
-            initInputs();
-            recalcAndRender();
-
-            if (!loadedFromUrl) {
-                initOnboarding();
-            }
+            if (!loadedFromUrl) { const fromLocal = loadStateFromSource('local'); applySnapshot(fromLocal); }
+            syncStateToUi(); initPresetManagement(); initEventDialog(); initInputs(); recalcAndRender();
+            if (!loadedFromUrl) initOnboarding();
         })();
     };
     document.head.appendChild(script);
 }
-
 loadPakoAndBoot();
