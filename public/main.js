@@ -333,7 +333,7 @@ function createEventCard(ev) {
             pillText = ""; borderClass = "border-slate-300"; pillBgClass = "bg-slate-300";
     }
     const pill = `<span class="px-2 py-0.5 ${pillBgClass} text-white text-[10px] font-bold rounded-full uppercase">${pillText}</span>`;
-    const monthText = ev.month > 1 ? `<span class="text-[10px] text-slate-400 font-bold">${ev.month}월부터</span>` : '';
+    const monthText = `<span class="text-[10px] text-slate-400 font-bold">(${ev.month}월부터)</span>`;
     const node = document.createElement("div");
     node.className = `p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border-l-4 ${borderClass} relative transition-opacity`;
     if (!ev.enabled) node.classList.add('opacity-40');
@@ -523,7 +523,7 @@ function updateDialogFields() {
         case 'income': infoKey = 'INFO_INCOME'; break;
         default: infoKey = '';
     }
-    infoEl.textContent = infoKey ? getText('EVENT_DIALOG.' + infoKey) : '';
+    infoEl.innerHTML = infoKey ? getText('EVENT_DIALOG.' + infoKey) : '';
 }
 
 function initEventDialog() {
@@ -533,6 +533,7 @@ function initEventDialog() {
     let downTarget = null;
 
     $("btnAddEvent").addEventListener("click", () => openEventDialog());
+    $("dlgCloseX").addEventListener("click", () => dlg.close());
     typeSelect.addEventListener('change', updateDialogFields);
 
     form.addEventListener('submit', (e) => {
@@ -690,9 +691,8 @@ function simulate() {
                 yDiv += d;
             });
             
-            const netWithdrawalNeeded = Math.max(0, withdrawalMonthly - incomeMonthly);
             const lumpSumWithdrawal = lumpSum < 0 ? Math.abs(lumpSum) : 0;
-            const totalWithdrawalForMonth = netWithdrawalNeeded + lumpSumWithdrawal;
+            const totalWithdrawalForMonth = withdrawalMonthly + lumpSumWithdrawal;
 
             if (totalWithdrawalForMonth > 0) {
                 let totalDrawable = portfolioState.reduce((sum, p) => sum + p.balance, 0);
@@ -714,7 +714,7 @@ function simulate() {
         years.push({
             year, age,
             annualContribution: yContr,
-            annualCashFlow: yIncome + yWithdrawal, // This is now correct based on user feedback
+            annualCashFlow: yIncome + yWithdrawal,
             annualWithdrawal: yWithdrawal,
             returnEarned: yReturn,
             dividends: yDiv,
