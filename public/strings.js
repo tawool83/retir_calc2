@@ -10,8 +10,8 @@ const STRINGS = {
         "AGE_RETIRE_LABEL": "파이어족 나이",
         "RESET_BUTTON": "모두 초기화",
         "RESET_CONFIRM": "정말로 모든 설정과 시나리오를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-        "SHARE_BUTTON": "시나리오 공유",
-        "SHARE_SUCCESS": "URL이 복사되었습니다!"
+        "SHARE_BUTTON": "시나리오",
+        "SHARE_SUCCESS": "시나리오 정보를 담은 URL이 복사되었습니다! 새로운 브라우저에서 주소창에 붙여넣기 후 새로고침 해보세요"
     },
     "SCENARIO": {
         "TITLE": "시나리오",
