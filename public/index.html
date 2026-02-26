@@ -13,20 +13,22 @@
         extend: {
           colors: {
             "primary": "#2563eb",
-            "sidebar-dark": "#11182777",
-            "sidebar-light": "#1f293777",
+            "sidebar-dark": "#111827",
+            "sidebar-light": "#1f2937",
           },
         },
       },
     }
   </script>
   <style>
+    /* Base styles for desktop */
     body {
       margin: 0;
       font-family: 'Manrope', sans-serif;
       background-color: #f8fafc;
-      /* Adjusted padding for floating sidebar */
-      padding-left: calc(5rem + 2rem); /* w-20 + left-4*2 */
+      /* Default padding for desktop sidebar */
+      padding-left: calc(5rem + 2rem);
+      transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     #sidebar {
@@ -61,7 +63,7 @@
     }
     
     .nav-item:hover {
-      background-color: #1f293742; /* slate-800 */
+      background-color: #1f2937; /* slate-800 */
       color: #e5e7eb; /* slate-200 */
     }
     
@@ -80,11 +82,74 @@
       height: 100%;
       border: none;
     }
+    
+    /* Responsive styles for mobile (screens <= 768px) */
+    @media screen and (max-width: 768px) {
+      body {
+        /* Remove side padding and add top padding for the horizontal bar */
+        padding-left: 0;
+        padding-top: 5rem; /* Height of the top nav bar */
+      }
+
+      #sidebar {
+        /* Transform sidebar into a fixed top bar */
+        width: 100%;
+        height: 5rem;
+        top: 0;
+        left: 0;
+        bottom: auto;
+        
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+
+        padding: 0 1rem;
+        gap: 1rem;
+        
+        border-radius: 0;
+        border-r: none;
+        border-b: 1px solid #374151; /* slate-700 */
+      }
+      
+      /* Disable the hover-to-expand effect on mobile */
+      #sidebar:hover {
+          width: 100%;
+      }
+
+      #nav-links {
+        flex-direction: row;
+        flex: 1;
+        justify-content: flex-start;
+        gap: 0.5rem;
+        padding: 0;
+        width: auto;
+      }
+
+      /* Hide text labels on mobile to save space */
+      .nav-item .text {
+        display: none;
+      }
+      
+      /* Make nav items icon-only circles/squares */
+      .nav-item {
+          width: 3rem;   /* size-12 */
+          height: 3rem;
+          justify-content: center;
+          padding: 0;
+          gap: 0;
+      }
+
+      /* Adjust settings container */
+      #settings-container {
+        width: auto;
+        padding: 0;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <!-- Floating, Expandable Sidebar -->
+  <!-- Sidebar (Desktop) / Topbar (Mobile) -->
   <nav id="sidebar" class="w-20 hover:w-60 bg-sidebar-dark border-r border-slate-800 flex flex-col items-center py-8 gap-10 fixed h-[calc(100%-2rem)] top-4 left-4 z-50 rounded-2xl">
     <!-- Logo -->
     <a href="#" class="size-12 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0">
@@ -95,7 +160,7 @@
     <div id="nav-links" class="flex flex-col gap-4 flex-1 w-full px-4">
       <a href="retir-calc.html" target="content-frame" class="nav-item active rounded-xl" title="Calculator">
         <span class="icon material-symbols-outlined">calculate</span>
-        <span class="text font-semibold">파이어족</span>
+        <span class="text font-semibold">계산기</span>
       </a>
       <a href="about.html" target="content-frame" class="nav-item rounded-xl" title="About / Info">
         <span class="icon material-symbols-outlined">info</span>
@@ -104,7 +169,7 @@
     </div>
     
     <!-- Settings -->
-    <div class="flex flex-col gap-4 w-full px-4">
+    <div id="settings-container" class="flex flex-col gap-4 w-full px-4">
       <button class="nav-item rounded-xl">
         <span class="icon material-symbols-outlined text-[20px]">settings</span>
         <span class="text font-semibold">설정</span>
@@ -119,15 +184,10 @@
 
   <script>
     const navLinksContainer = document.getElementById('nav-links');
-    const iframe = document.querySelector('iframe[name="content-frame"]');
     
     navLinksContainer.addEventListener('click', (e) => {
       const link = e.target.closest('a');
       if (!link) return;
-
-      // Prevent default behavior if you want to handle navigation fully in JS,
-      // but targeting iframe with href works well.
-      // e.preventDefault(); 
       
       navLinksContainer.querySelectorAll('a').forEach(l => {
         l.classList.remove('active');
