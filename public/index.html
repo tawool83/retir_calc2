@@ -7,83 +7,42 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#2563eb",
+            "sidebar-dark": "#111827",
+          },
+        },
+      },
+    }
+  </script>
   <style>
     body {
-      display: flex;
-      height: 100vh;
       margin: 0;
       font-family: 'Manrope', sans-serif;
       background-color: #f8fafc;
+      padding-left: 80px; /* w-20 = 5rem = 80px */
     }
-    #sidebar {
-      position: absolute;
-      left: 1rem;
-      top: 1rem;
-      bottom: 1rem;
-      width: 72px; /* 아이콘 넓이 */
-      background-color: #ffffff;
-      border-radius: 1rem;
-      padding: 24px 12px;
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      transition: width 0.3s ease;
-      overflow: hidden;
-      z-index: 10;
-      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    }
-    #sidebar:hover {
-      width: 260px;
-    }
-    #sidebar h1 {
-        font-size: 1.5rem;
-        font-weight: 800;
-        letter-spacing: -0.025em;
-        color: #1e293b;
-        margin-bottom: 2rem;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        white-space: nowrap;
-    }
-    #sidebar h1 .app-icon {
-        min-width: 48px;
-        display: grid;
-        place-items: center;
-    }
-    #sidebar a {
-      color: #334155;
-      text-decoration: none;
-      padding: 12px 16px;
-      border-radius: 0.5rem;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 600;
-      transition: background-color 0.2s, color 0.2s;
-      white-space: nowrap;
-    }
-    #sidebar a:hover {
-      background-color: #f1f5f9;
-    }
-    #sidebar a.active {
+    
+    .sidebar-item-active {
       background-color: #2563eb;
       color: white;
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      box-shadow: 0 4px 14px -4px rgba(37, 99, 235, 0.5);
     }
-    #sidebar a .material-symbols-outlined {
-        font-variation-settings: 'wght' 400;
-        min-width: 24px;
+    .sidebar-item-inactive {
+      color: #94a3b8; /* slate-400 */
     }
-    #sidebar a.active .material-symbols-outlined {
-        font-variation-settings: 'wght' 600;
+    .sidebar-item-inactive:hover {
+      background-color: #1f2937; /* slate-800 */
+      color: #e5e7eb; /* slate-200 */
     }
+
     #content {
-      flex-grow: 1;
+      width: 100%;
       height: 100vh;
-      overflow: hidden;
-      margin-left: 96px; /* 사이드바 넓이 + 여백 */
     }
     iframe {
       width: 100%;
@@ -94,32 +53,48 @@
 </head>
 <body>
 
-  <div id="sidebar">
-    <h1 class="text-2xl font-bold mb-8">
-        <span class="app-icon">💰</span>
-        <span>Dashboard</span>
-    </h1>
-    <a href="retir-calc.html" target="content-frame" class="active">
-      <span class="material-symbols-outlined">calculate</span>
-      <span>계산기</span>
-    </a>
-    <a href="about.html" target="content-frame">
-      <span class="material-symbols-outlined">info</span>
-      <span>소개</span>
-    </a>
-  </div>
+  <nav class="w-20 bg-sidebar-dark border-r border-slate-800 flex flex-col items-center py-8 gap-10 fixed h-screen z-50">
+    <div class="size-12 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+      <span class="material-symbols-outlined text-white text-3xl">account_balance_wallet</span>
+    </div>
+    <div id="nav-buttons" class="flex flex-col gap-4 flex-1">
+      <button data-url="retir-calc.html" class="sidebar-item-active size-12 rounded-xl flex items-center justify-center transition-all" title="Calculator">
+        <span class="material-symbols-outlined">calculate</span>
+      </button>
+      <button data-url="about.html" class="sidebar-item-inactive size-12 rounded-xl flex items-center justify-center transition-all" title="About / Info">
+        <span class="material-symbols-outlined">info</span>
+      </button>
+    </div>
+    <div class="flex flex-col gap-4">
+      <button class="sidebar-item-inactive size-12 rounded-xl flex items-center justify-center transition-all">
+        <span class="material-symbols-outlined text-[20px]">settings</span>
+      </button>
+    </div>
+  </nav>
 
   <main id="content">
     <iframe name="content-frame" src="retir-calc.html"></iframe>
   </main>
 
   <script>
-    const links = document.querySelectorAll('#sidebar a');
-    links.forEach(link => {
-      link.addEventListener('click', function() {
-        links.forEach(l => l.classList.remove('active'));
-        this.classList.add('active');
+    const navButtonsContainer = document.getElementById('nav-buttons');
+    const iframe = document.querySelector('iframe[name="content-frame"]');
+    
+    navButtonsContainer.addEventListener('click', (e) => {
+      const button = e.target.closest('button');
+      if (!button || !button.dataset.url) return;
+
+      const url = button.dataset.url;
+      
+      iframe.src = url;
+
+      navButtonsContainer.querySelectorAll('button').forEach(btn => {
+        btn.classList.remove('sidebar-item-active');
+        btn.classList.add('sidebar-item-inactive');
       });
+      
+      button.classList.remove('sidebar-item-inactive');
+      button.classList.add('sidebar-item-active');
     });
   </script>
 
