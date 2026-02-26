@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시장 동향 - 은퇴 시뮬레이터</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2563eb",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#0f172a",
+                    },
+                    fontFamily: { "display": ["Manrope", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Manrope', sans-serif; }
+        .kpi-value { font-size: 1.125rem; font-weight: 700; }
+        .kpi-label { font-size: 0.75rem; color: #64748b; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen font-display">
+
+<main class="w-full max-w-6xl mx-auto px-4 lg:px-10 py-10">
+    
+    <!-- Header and Search -->
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">시장 동향 분석</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">관심 있는 주식의 심볼을 검색하여 상세 정보와 가격 추이를 확인하세요.</p>
+        </div>
+        <div class="relative w-full md:w-72">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+            <input id="symbolSearch" type="text" placeholder="예: AAPL, MSFT, 005930.KS" 
+                   class="w-full bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-700 rounded-lg py-2.5 pl-10 pr-4 focus:ring-primary focus:border-primary text-sm font-semibold">
+        </div>
+    </div>
+
+    <!-- Loading and Error States -->
+    <div id="loadingState" class="hidden text-center py-20">
+        <p class="text-primary font-semibold">데이터를 불러오는 중입니다...</p>
+    </div>
+    <div id="errorState" class="hidden text-center py-20 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+        <p id="errorMessage" class="text-red-600 dark:text-red-400 font-semibold"></p>
+    </div>
+    <div id="welcomeState" class="text-center py-20 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg">
+        <span class="material-symbols-outlined text-4xl text-slate-400">monitoring</span>
+        <p class="mt-4 font-bold text-slate-600 dark:text-slate-300">주식 심볼을 검색하여 분석을 시작하세요.</p>
+        <p class="text-sm text-slate-500 mt-1">위 검색창에 'VOO', 'QQQ' 등을 입력해 보세요.</p>
+    </div>
+
+    <!-- Data Display -->
+    <div id="dataContainer" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left: Company Info -->
+        <div class="lg:col-span-1 bg-white dark:bg-slate-900/70 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div id="companyHeader" class="flex items-start gap-4 mb-6">
+                <img id="companyLogo" src="" alt="Company Logo" class="h-12 w-12 rounded-md object-contain bg-white p-1 hidden">
+                <div>
+                    <h2 id="companyName" class="text-xl font-bold"></h2>
+                    <p id="companySymbol" class="text-sm font-semibold text-primary"></p>
+                    <p id="companyExchange" class="text-xs text-slate-500"></p>
+                </div>
+            </div>
+            <p id="companyDescription" class="text-xs leading-relaxed text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-slate-800 pt-4"></p>
+        </div>
+
+        <!-- Right: Chart and KPIs -->
+        <div class="lg:col-span-2 flex flex-col gap-6">
+            <div class="bg-white dark:bg-slate-900/70 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <canvas id="priceChart"></canvas>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="bg-white dark:bg-slate-900/70 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-center shadow-sm"><p id="marketCap" class="kpi-value"></p><p class="kpi-label">시가총액</p></div>
+                <div class="bg-white dark:bg-slate-900/70 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-center shadow-sm"><p id="peRatio" class="kpi-value"></p><p class="kpi-label">PER</p></div>
+                <div class="bg-white dark:bg-slate-900/70 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-center shadow-sm"><p id="dividendYield" class="kpi-value"></p><p class="kpi-label">배당수익률</p></div>
+                <div class="bg-white dark:bg-slate-900/70 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-center shadow-sm"><p id="52WeekHigh" class="kpi-value"></p><p class="kpi-label">52주 최고가</p></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="alphavantage.js"></script>
+<script src="market.js"></script>
+
+</body>
+</html>
