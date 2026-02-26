@@ -16,13 +16,24 @@
       background-color: #f8fafc;
     }
     #sidebar {
-      width: 260px;
+      position: absolute;
+      left: 1rem;
+      top: 1rem;
+      bottom: 1rem;
+      width: 72px; /* 아이콘 넓이 */
       background-color: #ffffff;
-      border-right: 1px solid #e2e8f0;
-      padding: 24px;
+      border-radius: 1rem;
+      padding: 24px 12px;
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
+      transition: width 0.3s ease;
+      overflow: hidden;
+      z-index: 10;
+      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+    #sidebar:hover {
+      width: 260px;
     }
     #sidebar h1 {
         font-size: 1.5rem;
@@ -30,6 +41,15 @@
         letter-spacing: -0.025em;
         color: #1e293b;
         margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        white-space: nowrap;
+    }
+    #sidebar h1 .app-icon {
+        min-width: 48px;
+        display: grid;
+        place-items: center;
     }
     #sidebar a {
       color: #334155;
@@ -42,6 +62,7 @@
       gap: 12px;
       font-weight: 600;
       transition: background-color 0.2s, color 0.2s;
+      white-space: nowrap;
     }
     #sidebar a:hover {
       background-color: #f1f5f9;
@@ -53,6 +74,7 @@
     }
     #sidebar a .material-symbols-outlined {
         font-variation-settings: 'wght' 400;
+        min-width: 24px;
     }
     #sidebar a.active .material-symbols-outlined {
         font-variation-settings: 'wght' 600;
@@ -61,6 +83,7 @@
       flex-grow: 1;
       height: 100vh;
       overflow: hidden;
+      margin-left: 96px; /* 사이드바 넓이 + 여백 */
     }
     iframe {
       width: 100%;
@@ -72,14 +95,17 @@
 <body>
 
   <div id="sidebar">
-    <h1 class="text-2xl font-bold mb-8">Dashboard</h1>
+    <h1 class="text-2xl font-bold mb-8">
+        <span class="app-icon">💰</span>
+        <span>Dashboard</span>
+    </h1>
     <a href="retir-calc.html" target="content-frame" class="active">
       <span class="material-symbols-outlined">calculate</span>
-      계산기
+      <span>계산기</span>
     </a>
     <a href="about.html" target="content-frame">
       <span class="material-symbols-outlined">info</span>
-      소개
+      <span>소개</span>
     </a>
   </div>
 

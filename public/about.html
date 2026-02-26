@@ -32,66 +32,38 @@
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen font-display">
 
-<div class="flex">
-    <!-- Left Navigation -->
-    <aside class="w-60 bg-white dark:bg-slate-900/50 border-r border-slate-200 dark:border-slate-800 flex-shrink-0 h-screen sticky top-0">
-        <div class="p-6">
-            <a href="index.html" class="flex items-center gap-2" data-i18n-key="[title]NAV.GOTO_SIMULATOR">
-                <span class="text-3xl">💰</span>
-                <h1 class="text-lg font-bold" data-i18n-key="APP_TITLE_SHORT"></h1>
-            </a>
+<div class="flex-grow">
+    <main class="w-full max-w-4xl mx-auto px-4 lg:px-10 py-10">
+        <div class="bg-white dark:bg-slate-900/50 p-8 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100" data-i18n-key="ABOUT_PAGE.TITLE">은퇴 계산기 소개</h1>
+            <p class="text-slate-500 text-sm mt-2 mb-8" data-i18n-key="ABOUT_PAGE.SUBTITLE">이 계산기는 여러분의 재정적 미래를 계획하는 데 도움을 주는 도구입니다.</p>
+            
+            <div class="prose prose-slate dark:prose-invert max-w-none text-sm leading-relaxed">
+                <p data-i18n-key="ABOUT_PAGE.INTRO">은퇴 계산기는 사용자가 자신의 재정 상황을 입력하고, 은퇴 후의 재정 상태를 시뮬레이션할 수 있도록 돕는 강력한 도구입니다. 현재 나이, 은퇴 목표 나이, 그리고 예상되는 다양한 재정 이벤트를 입력하여 미래를 예측해 보세요.</p>
+
+                <h2 data-i18n-key="ABOUT_PAGE.FEATURES_TITLE">주요 기능</h2>
+                <ul class="space-y-3">
+                    <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_1_TITLE">상세한 재정 계획:</strong> 연간 기여금, 투자 수익률, 배당금 등 다양한 변수를 설정하여 상세한 재정 계획을 수립할 수 있습니다.</li>
+                    <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_2_TITLE">시나리오 기반 분석:</strong> 다양한 재정 시나리오를 추가하여 특정 이벤트가 은퇴 계획에 미치는 영향을 분석할 수 있습니다.</li>
+                    <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_3_TITLE">시각적 데이터:</strong> 차트와 표를 통해 재정 데이터를 시각적으로 확인하여 직관적인 이해를 돕습니다.</li>
+                    <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_4_TITLE">포트폴리오 관리:</strong> 여러 투자 포트폴리오를 설정하고, 각 포트폴리오의 성과를 추적할 수 있습니다.</li>
+                    <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_5_TITLE">다국어 지원:</strong> 다양한 언어를 지원하여 전 세계 사용자들이 쉽게 이용할 수 있습니다.</li>
+                </ul>
+
+                <h2 data-i18n-key="ABOUT_PAGE.DISCLAIMER_TITLE">면책 조항</h2>
+                <p data-i18n-key="DISCLAIMER.TEXT">본 시뮬레이터는 정보 제공 목적으로만 사용되어야 하며, 재정적 조언으로 간주되어서는 안 됩니다. 모든 투자는 위험을 수반하며, 과거의 성과가 미래의 결과를 보장하지는 않습니다. 재정적 결정을 내리기 전에 반드시 전문가와 상담하시기 바랍니다.</p>
+            </div>
         </div>
-        <nav class="px-3">
-            <ul class="space-y-2">
-                <li>
-                    <a href="index.html" id="nav-simulator" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
-                        <span class="material-symbols-outlined">calculate</span>
-                        <span data-i18n-key="NAV.SIMULATOR"></span>
-                    </a>
-                </li>
-                <li>
-                    <a href="about.html" id="nav-about" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold">
-                        <span class="material-symbols-outlined">info</span>
-                        <span data-i18n-key="NAV.ABOUT"></span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </aside>
+    </main>
 
-    <div class="flex-grow">
-        <main class="w-full max-w-4xl mx-auto px-4 lg:px-10 py-10">
-            <div class="bg-white dark:bg-slate-900/50 p-8 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100" data-i18n-key="ABOUT_PAGE.TITLE"></h1>
-                <p class="text-slate-500 text-sm mt-2 mb-8" data-i18n-key="ABOUT_PAGE.SUBTITLE"></p>
-                
-                <div class="prose prose-slate dark:prose-invert max-w-none text-sm leading-relaxed">
-                    <p data-i18n-key="ABOUT_PAGE.INTRO"></p>
-
-                    <h2 data-i18n-key="ABOUT_PAGE.FEATURES_TITLE"></h2>
-                    <ul class="space-y-3">
-                        <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_1_TITLE"></strong> <span data-i18n-key="ABOUT_PAGE.FEATURE_1_DESC"></span></li>
-                        <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_2_TITLE"></strong> <span data-i18n-key="ABOUT_PAGE.FEATURE_2_DESC"></span></li>
-                        <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_3_TITLE"></strong> <span data-i18n-key="ABOUT_PAGE.FEATURE_3_DESC"></span></li>
-                        <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_4_TITLE"></strong> <span data-i18n-key="ABOUT_PAGE.FEATURE_4_DESC"></span></li>
-                        <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_5_TITLE"></strong> <span data-i18n-key="ABOUT_PAGE.FEATURE_5_DESC"></span></li>
-                    </ul>
-
-                    <h2 data-i18n-key="ABOUT_PAGE.DISCLAIMER_TITLE"></h2>
-                    <p data-i18n-key="DISCLAIMER.TEXT"></p>
-                </div>
-            </div>
-        </main>
-
-        <footer class="mt-12 py-10 border-t border-slate-200 dark:border-slate-800">
-          <div class="max-w-6xl mx-auto px-10 flex flex-col md:flex-row items-center justify-between gap-6 text-slate-500 text-[11px] font-medium">
-            <div class="flex items-center gap-4">
-              <span class="material-symbols-outlined text-primary text-sm">verified_user</span>
-              <p data-i18n-key="FOOTER.COPYRIGHT"></p>
-            </div>
-          </div>
-        </footer>
-    </div>
+    <footer class="mt-12 py-10 border-t border-slate-200 dark:border-slate-800">
+      <div class="max-w-6xl mx-auto px-10 flex flex-col md:flex-row items-center justify-between gap-6 text-slate-500 text-[11px] font-medium">
+        <div class="flex items-center gap-4">
+          <span class="material-symbols-outlined text-primary text-sm">verified_user</span>
+          <p data-i18n-key="FOOTER.COPYRIGHT">© 2024 은퇴 계산기. 모든 권리 보유.</p>
+        </div>
+      </div>
+    </footer>
 </div>
 
 <script src="strings.js"></script>
