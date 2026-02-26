@@ -27,7 +27,8 @@
   </script>
   <style type="text/tailwindcss">
     @layer base { body { font-family: 'Manrope', sans-serif; } }
-    .prose h2 { margin-top: 2em; }
+    .prose h2 { margin-top: 2.5em; margin-bottom: 1.25em; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; }
+    .prose h3 { margin-top: 2em; }
   </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen font-display">
@@ -43,12 +44,22 @@
 
                 <h2 data-i18n-key="ABOUT_PAGE.FEATURES_TITLE">주요 기능</h2>
                 <ul class="space-y-3">
-                    <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_1_TITLE">상세한 재정 계획:</strong> 연간 기여금, 투자 수익률, 배당금 등 다양한 변수를 설정하여 상세한 재정 계획을 수립할 수 있습니다.</li>
-                    <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_2_TITLE">시나리오 기반 분석:</strong> 다양한 재정 시나리오를 추가하여 특정 이벤트가 은퇴 계획에 미치는 영향을 분석할 수 있습니다.</li>
-                    <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_3_TITLE">시각적 데이터:</strong> 차트와 표를 통해 재정 데이터를 시각적으로 확인하여 직관적인 이해를 돕습니다.</li>
-                    <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_4_TITLE">포트폴리오 관리:</strong> 여러 투자 포트폴리오를 설정하고, 각 포트폴리오의 성과를 추적할 수 있습니다.</li>
-                    <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_5_TITLE">다국어 지원:</strong> 다양한 언어를 지원하여 전 세계 사용자들이 쉽게 이용할 수 있습니다.</li>
+                    <li><strong>상세한 재정 계획:</strong> 연간 기여금, 투자 수익률, 배당금 등 다양한 변수를 설정하여 상세한 재정 계획을 수립할 수 있습니다.</li>
+                    <li><strong>시나리오 기반 분석:</strong> 다양한 재정 시나리오를 추가하여 특정 이벤트가 은퇴 계획에 미치는 영향을 분석할 수 있습니다.</li>
+                    <li><strong>시각적 데이터:</strong> 차트와 표를 통해 재정 데이터를 시각적으로 확인하여 직관적인 이해를 돕습니다.</li>
+                    <li><strong>포트폴리오 관리:</strong> 여러 투자 포트폴리오를 설정하고, 각 포트폴리오의 성과를 추적할 수 있습니다.</li>
+                    <li><strong>다국어 지원:</strong> 다양한 언어를 지원하여 전 세계 사용자들이 쉽게 이용할 수 있습니다.</li>
                 </ul>
+
+                <h2 id="compound-interest">장기 투자와 복리의 힘</h2>
+                <p>알베르트 아인슈타인은 "복리는 세계 8대 불가사의"라고 말했습니다. 복리는 원금뿐만 아니라 누적된 이자에도 이자가 붙는 원리를 말합니다. 이는 시간이 지남에 따라 자산을 기하급수적으로 성장시키는 강력한 힘을 가지고 있습니다.</p>
+                <p>장기 투자는 복리 효과를 극대화하는 가장 확실한 방법입니다. 일찍 투자를 시작하고 꾸준히 유지한다면, 작은 금액이라도 시간이 지나면서 큰 자산으로 불어날 수 있습니다. 아래 그래프는 매년 1,000만원을 추가로 저축하면서 연 7%의 수익률로 투자했을 때, 복리 투자가 단순 저축이나 단리 투자에 비해 얼마나 큰 차이를 만들어내는지 보여줍니다.</p>
+
+                <div class="my-8 bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4 border border-slate-200 dark:border-slate-800">
+                    <canvas id="compoundInterestChart"></canvas>
+                </div>
+                
+                <p>그래프에서 볼 수 있듯이, 복리 곡선은 시간이 흐를수록 가파르게 상승합니다. 이것이 바로 '돈이 돈을 벌게 하는' 복리의 마법입니다. 이 시뮬레이터는 이러한 복리 효과를 계산에 반영하여 여러분의 장기적인 재정 목표 달성을 돕습니다.</p>
 
                 <h2 data-i18n-key="ABOUT_PAGE.DISCLAIMER_TITLE">면책 조항</h2>
                 <p data-i18n-key="DISCLAIMER.TEXT">본 시뮬레이터는 정보 제공 목적으로만 사용되어야 하며, 재정적 조언으로 간주되어서는 안 됩니다. 모든 투자는 위험을 수반하며, 과거의 성과가 미래의 결과를 보장하지는 않습니다. 재정적 결정을 내리기 전에 반드시 전문가와 상담하시기 바랍니다.</p>
@@ -66,8 +77,112 @@
     </footer>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="strings.js"></script>
 <script src="main.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const ctx = document.getElementById('compoundInterestChart').getContext('2d');
+    
+    const years = 30;
+    const initialInvestment = 0;
+    const annualContribution = 10000000;
+    const interestRate = 0.07; // 7%
+
+    const labels = Array.from({ length: years + 1 }, (_, i) => `${i}년`);
+    const compoundData = [];
+    const simpleData = [];
+    const savingsData = [];
+
+    let compoundBalance = initialInvestment;
+    let simpleBalance = initialInvestment;
+    let savingsBalance = initialInvestment;
+    let simpleTotalInterest = 0;
+
+    for (let i = 0; i <= years; i++) {
+      compoundData.push(compoundBalance);
+      simpleData.push(simpleBalance);
+      savingsData.push(savingsBalance);
+      
+      // Add annual contribution at the end of the year
+      compoundBalance += annualContribution;
+      savingsBalance += annualContribution;
+      
+      // Calculate next year's balance
+      compoundBalance *= (1 + interestRate);
+
+      // Simple interest is calculated on the principal only
+      simpleTotalInterest += (initialInvestment + (i * annualContribution)) * interestRate;
+      simpleBalance = initialInvestment + ((i + 1) * annualContribution) + simpleTotalInterest;
+    }
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '복리 투자',
+            data: compoundData,
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            fill: true,
+            tension: 0.3,
+          },
+          {
+            label: '단리 투자',
+            data: simpleData,
+            borderColor: '#16a34a',
+            backgroundColor: 'rgba(22, 163, 74, 0.1)',
+            fill: false,
+            borderDash: [5, 5],
+            tension: 0.3,
+          },
+          {
+            label: '단순 저축 (원금)',
+            data: savingsData,
+            borderColor: '#94a3b8',
+            backgroundColor: 'rgba(148, 163, 184, 0.1)',
+            fill: false,
+            tension: 0.3,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                if (context.parsed.y !== null) {
+                  label += new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(context.parsed.y);
+                }
+                return label;
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            ticks: {
+              callback: function(value, index, ticks) {
+                 return (value / 100000000) + '억';
+              }
+            }
+          }
+        }
+      }
+    });
+  });
+</script>
 
 </body>
 </html>
