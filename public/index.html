@@ -14,6 +14,7 @@
           colors: {
             "primary": "#2563eb",
             "sidebar-dark": "#111827",
+            "sidebar-light": "#1f2937",
           },
         },
       },
@@ -24,22 +25,52 @@
       margin: 0;
       font-family: 'Manrope', sans-serif;
       background-color: #f8fafc;
-      padding-left: 80px; /* w-20 = 5rem = 80px */
+      /* Adjusted padding for floating sidebar */
+      padding-left: calc(5rem + 2rem); /* w-20 + left-4*2 */
     }
     
-    .sidebar-item-active {
+    #sidebar {
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+
+    .nav-item .text {
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+      white-space: nowrap;
+    }
+
+    #sidebar:hover .text {
+      opacity: 1;
+    }
+
+    .nav-item {
+      color: #94a3b8; /* slate-400 */
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 1rem; /* 16px */
+      height: 3rem; /* 48px */
+      padding: 0 1rem; /* 16px */
+    }
+    
+    .nav-item .icon {
+       min-width: 2rem; /* 32px */
+       display: grid;
+       place-items: center;
+    }
+    
+    .nav-item:hover {
+      background-color: #1f2937; /* slate-800 */
+      color: #e5e7eb; /* slate-200 */
+    }
+    
+    .nav-item.active {
       background-color: #2563eb;
       color: white;
       box-shadow: 0 4px 14px -4px rgba(37, 99, 235, 0.5);
     }
-    .sidebar-item-inactive {
-      color: #94a3b8; /* slate-400 */
-    }
-    .sidebar-item-inactive:hover {
-      background-color: #1f2937; /* slate-800 */
-      color: #e5e7eb; /* slate-200 */
-    }
-
+    
     #content {
       width: 100%;
       height: 100vh;
@@ -53,48 +84,56 @@
 </head>
 <body>
 
-  <nav class="w-20 bg-sidebar-dark border-r border-slate-800 flex flex-col items-center py-8 gap-10 fixed h-screen z-50">
-    <div class="size-12 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+  <!-- Floating, Expandable Sidebar -->
+  <nav id="sidebar" class="w-20 hover:w-60 bg-sidebar-dark border-r border-slate-800 flex flex-col items-center py-8 gap-10 fixed h-[calc(100%-2rem)] top-4 left-4 z-50 rounded-2xl">
+    <!-- Logo -->
+    <a href="#" class="size-12 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0">
       <span class="material-symbols-outlined text-white text-3xl">account_balance_wallet</span>
+    </a>
+    
+    <!-- Navigation Links -->
+    <div id="nav-links" class="flex flex-col gap-4 flex-1 w-full px-4">
+      <a href="retir-calc.html" target="content-frame" class="nav-item active rounded-xl" title="Calculator">
+        <span class="icon material-symbols-outlined">calculate</span>
+        <span class="text font-semibold">계산기</span>
+      </a>
+      <a href="about.html" target="content-frame" class="nav-item rounded-xl" title="About / Info">
+        <span class="icon material-symbols-outlined">info</span>
+        <span class="text font-semibold">소개</span>
+      </a>
     </div>
-    <div id="nav-buttons" class="flex flex-col gap-4 flex-1">
-      <button data-url="retir-calc.html" class="sidebar-item-active size-12 rounded-xl flex items-center justify-center transition-all" title="Calculator">
-        <span class="material-symbols-outlined">calculate</span>
-      </button>
-      <button data-url="about.html" class="sidebar-item-inactive size-12 rounded-xl flex items-center justify-center transition-all" title="About / Info">
-        <span class="material-symbols-outlined">info</span>
-      </button>
-    </div>
-    <div class="flex flex-col gap-4">
-      <button class="sidebar-item-inactive size-12 rounded-xl flex items-center justify-center transition-all">
-        <span class="material-symbols-outlined text-[20px]">settings</span>
+    
+    <!-- Settings -->
+    <div class="flex flex-col gap-4 w-full px-4">
+      <button class="nav-item rounded-xl">
+        <span class="icon material-symbols-outlined text-[20px]">settings</span>
+        <span class="text font-semibold">설정</span>
       </button>
     </div>
   </nav>
 
+  <!-- Main Content -->
   <main id="content">
     <iframe name="content-frame" src="retir-calc.html"></iframe>
   </main>
 
   <script>
-    const navButtonsContainer = document.getElementById('nav-buttons');
+    const navLinksContainer = document.getElementById('nav-links');
     const iframe = document.querySelector('iframe[name="content-frame"]');
     
-    navButtonsContainer.addEventListener('click', (e) => {
-      const button = e.target.closest('button');
-      if (!button || !button.dataset.url) return;
+    navLinksContainer.addEventListener('click', (e) => {
+      const link = e.target.closest('a');
+      if (!link) return;
 
-      const url = button.dataset.url;
+      // Prevent default behavior if you want to handle navigation fully in JS,
+      // but targeting iframe with href works well.
+      // e.preventDefault(); 
       
-      iframe.src = url;
-
-      navButtonsContainer.querySelectorAll('button').forEach(btn => {
-        btn.classList.remove('sidebar-item-active');
-        btn.classList.add('sidebar-item-inactive');
+      navLinksContainer.querySelectorAll('a').forEach(l => {
+        l.classList.remove('active');
       });
       
-      button.classList.remove('sidebar-item-inactive');
-      button.classList.add('sidebar-item-active');
+      link.classList.add('active');
     });
   </script>
 
