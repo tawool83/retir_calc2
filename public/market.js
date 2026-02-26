@@ -26,26 +26,24 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingState.classList.remove('hidden');
 
         try {
+            // Changed to call getTimeSeriesMonthly
             const [overview, timeSeries] = await Promise.all([
                 getCompanyOverview(symbol),
-                getTimeSeriesDaily(symbol)
+                getTimeSeriesMonthly(symbol)
             ]);
 
             loadingState.classList.add('hidden');
 
-            // Crucially, we only need the timeSeries to proceed with the chart.
             if (!timeSeries) {
-                throw new Error("가격 데이터를 불러오는 데 실패했습니다. API 요청 제한에 도달했거나 유효하지 않은 심볼일 수 있습니다.");
+                throw new Error("월별 가격 데이터를 불러오는 데 실패했습니다. API 요청 제한에 도달했거나 유효하지 않은 심볼일 수 있습니다.");
             }
             
-            // If overview is missing, we can still show basic info and the chart.
             if (overview) {
                 displayCompanyInfo(overview);
                 displayKPIs(overview);
             } else {
-                // Handle missing overview data gracefully
                 displayCompanyInfo({ Symbol: symbol, Name: symbol, AssetType: 'ETF/Stock', Exchange: 'N/A', Description: '상세 정보를 사용할 수 없습니다.' });
-                displayKPIs({}); // Clear or hide KPI values
+                displayKPIs({}); 
             }
             
             displayChart(timeSeries, symbol);
@@ -68,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayChart(timeSeries, symbol) {
         const ctx = document.getElementById('priceChart').getContext('2d');
         const dates = Object.keys(timeSeries).reverse();
-        const prices = dates.map(date => parseFloat(timeSeries[date]['4. close']));
+        const prices = dates.map(date => parseFloat(timeSeries[date]['4. close'])); // Using adjusted close
 
         if (chart) {
             chart.destroy();
@@ -79,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
             data: {
                 labels: dates,
                 datasets: [{
-                    label: `${symbol} 종가`,
+                    label: `${symbol} 월별 종가`,
                     data: prices,
                     borderColor: '#2563eb',
                     backgroundColor: 'rgba(37, 99, 235, 0.1)',
@@ -93,7 +91,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 maintainAspectRatio: false,
                 scales: {
                     x: {
-                        ticks: { display: false },
+                        ticks: { 
+                            maxTicksLimit: 12, // Show roughly 12 dates (yearly labels)
+                            callback: function(val, index) {
+                                const label = this.getLabelForValue(val);
+                                // Show label only for January or the first month available
+                                return label.substring(5, 7) === '01' || index === 0 ? label.substring(0, 4) : '';
+                            },
+                            autoSkip: false,
+                            color: document.documentElement.classList.contains('dark') ? '#94a3b8' : '#64748b'
+                         },
                         grid: { display: false }
                     },
                     y: {
@@ -107,7 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        callbacks: {
+                         callbacks: {
+                            title: (context) => context[0].label, // Show full date in tooltip
                             label: (context) => `종가: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y)}`
                         }
                     }
