@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let chart = null;
 
-    // Debounce function to limit API calls
     let debounceTimer;
     symbolSearch.addEventListener('input', (e) => {
         clearTimeout(debounceTimer);
@@ -17,11 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (symbol) {
                 fetchAndDisplayData(symbol);
             }
-        }, 1000); // Wait for 1 second of no typing
+        }, 1000);
     });
 
     async function fetchAndDisplayData(symbol) {
-        // Reset UI
         dataContainer.classList.add('hidden');
         welcomeState.classList.add('hidden');
         errorState.classList.add('hidden');
@@ -35,14 +33,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
             loadingState.classList.add('hidden');
 
-            if (!overview || !timeSeries) {
-                throw new Error("데이터를 불러오는 데 실패했습니다. API 요청 제한에 도달했거나 유효하지 않은 심볼일 수 있습니다.");
+            // Crucially, we only need the timeSeries to proceed with the chart.
+            if (!timeSeries) {
+                throw new Error("가격 데이터를 불러오는 데 실패했습니다. API 요청 제한에 도달했거나 유효하지 않은 심볼일 수 있습니다.");
             }
-
-            displayCompanyInfo(overview);
-            displayChart(timeSeries, overview.Symbol);
-            displayKPIs(overview);
-
+            
+            // If overview is missing, we can still show basic info and the chart.
+            if (overview) {
+                displayCompanyInfo(overview);
+                displayKPIs(overview);
+            } else {
+                // Handle missing overview data gracefully
+                displayCompanyInfo({ Symbol: symbol, Name: symbol, AssetType: 'ETF/Stock', Exchange: 'N/A', Description: '상세 정보를 사용할 수 없습니다.' });
+                displayKPIs({}); // Clear or hide KPI values
+            }
+            
+            displayChart(timeSeries, symbol);
             dataContainer.classList.remove('hidden');
 
         } catch (error) {
@@ -57,9 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('companySymbol').textContent = data.Symbol || 'N/A';
         document.getElementById('companyExchange').textContent = `${data.AssetType} | ${data.Exchange}`;
         document.getElementById('companyDescription').textContent = data.Description || '설명이 제공되지 않았습니다.';
-        
-        // You might need a logo service for this
-        // document.getElementById('companyLogo').src = `URL_TO_LOGO_API/${data.Symbol}`;
     }
 
     function displayChart(timeSeries, symbol) {
@@ -94,9 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         grid: { display: false }
                     },
                     y: {
-                        ticks: { 
+                        ticks: {
                             callback: (value) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value),
-                            color: document.documentElement.classList.contains('dark') ? '#94a3b8' : '#64748b' 
+                            color: document.documentElement.classList.contains('dark') ? '#94a3b8' : '#64748b'
                         },
                         grid: { color: document.documentElement.classList.contains('dark') ? '#334155' : '#e2e8f0' }
                     }
@@ -104,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                         callbacks: {
+                        callbacks: {
                             label: (context) => `종가: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y)}`
                         }
                     }
@@ -115,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displayKPIs(data) {
         const formatNumber = (num) => {
-            if (num === undefined || num === null || num === 'None') return 'N/A';
+            if (!num || num === 'None') return 'N/A';
             const number = parseFloat(num);
             if (number > 1_000_000_000_000) return `${(number / 1_000_000_000_000).toFixed(2)}T`;
             if (number > 1_000_000_000) return `${(number / 1_000_000_000).toFixed(2)}B`;
@@ -124,8 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         document.getElementById('marketCap').textContent = formatNumber(data.MarketCapitalization);
-        document.getElementById('peRatio').textContent = data.PERatio !== 'None' ? parseFloat(data.PERatio).toFixed(2) : 'N/A';
-        document.getElementById('dividendYield').textContent = data.DividendYield !== 'None' ? `${(parseFloat(data.DividendYield) * 100).toFixed(2)}%` : 'N/A';
-        document.getElementById('52WeekHigh').textContent = data["52WeekHigh"] ? `$${parseFloat(data["52WeekHigh"]).toFixed(2)}` : 'N/A';
+        document.getElementById('peRatio').textContent = data.PERatio && data.PERatio !== 'None' ? parseFloat(data.PERatio).toFixed(2) : 'N/A';
+        document.getElementById('dividendYield').textContent = data.DividendYield && data.DividendYield !== 'None' ? `${(parseFloat(data.DividendYield) * 100).toFixed(2)}%` : 'N/A';
+        document.getElementById('52WeekHigh').textContent = data['52WeekHigh'] ? `$${parseFloat(data['52WeekHigh']).toFixed(2)}` : 'N/A';
     }
 });
