@@ -1,5 +1,6 @@
 const API_KEY = "03158JFBWW7S5CEU";
--- https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY_ADJUSTED&symbol=VOO&apikey=03158JFBWW7S5CEU
+// https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY_ADJUSTED&symbol=VOO&apikey=03158JFBWW7S5CEU
+
 async function getCompanyOverview(symbol) {
     const url = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${API_KEY}`;
     try {
