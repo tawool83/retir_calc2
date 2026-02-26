@@ -1,395 +1,101 @@
 <!DOCTYPE html>
-<html class="light" lang="ko">
+<html lang="ko">
 <head>
-  <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title data-i18n-key="APP_TITLE"></title>
-  <link rel="icon" type="image/svg+xml"
-  href="data:image/svg+xml,
-  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-    <text y='.9em' font-size='90'>💰</text>
-  </svg>">
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>은퇴 계산기</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700&display=swap" rel="stylesheet"/>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1495690643673642"
-     crossorigin="anonymous"></script>
-  <!-- Chart -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-  <script id="tailwind-config">
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "primary": "#2563eb",
-            "secondary": "#1e40af",
-            "background-light": "#f8fafc",
-            "background-dark": "#0f172a",
-          },
-          fontFamily: { "display": ["Manrope", "sans-serif"] },
-          borderRadius: {
-            "DEFAULT": "0.375rem",
-            "lg": "0.5rem",
-            "xl": "0.75rem",
-            "full": "9999px"
-          },
-        },
-      },
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      display: flex;
+      height: 100vh;
+      margin: 0;
+      font-family: 'Manrope', sans-serif;
+      background-color: #f8fafc;
     }
-  </script>
-
-  <style type="text/tailwindcss">
-    @layer base { body { font-family: 'Manrope', sans-serif; } }
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 8px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #2563eb; }
-    .table-scroll-area { max-height: 700px; overflow-y: auto; }
-    dialog::backdrop { background: rgba(0,0,0,.35); }
-    .onboarding-highlight { z-index: 50; position: relative; box-shadow: 0 0 0 4px theme('colors.primary'); transition: box-shadow 0.3s ease-in-out; border-radius: 0.75rem;}
-    .selected-icon { background-color: #e0e7ff; border-radius: 50%; box-shadow: 0 0 0 2px #2563eb; }
+    #sidebar {
+      width: 260px;
+      background-color: #ffffff;
+      border-right: 1px solid #e2e8f0;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    #sidebar h1 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        color: #1e293b;
+        margin-bottom: 2rem;
+    }
+    #sidebar a {
+      color: #334155;
+      text-decoration: none;
+      padding: 12px 16px;
+      border-radius: 0.5rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    #sidebar a:hover {
+      background-color: #f1f5f9;
+    }
+    #sidebar a.active {
+      background-color: #2563eb;
+      color: white;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+    #sidebar a .material-symbols-outlined {
+        font-variation-settings: 'wght' 400;
+    }
+    #sidebar a.active .material-symbols-outlined {
+        font-variation-settings: 'wght' 600;
+    }
+    #content {
+      flex-grow: 1;
+      height: 100vh;
+      overflow: hidden;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
   </style>
 </head>
+<body>
 
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen font-display">
-
-<div class="flex justify-center gap-x-8 px-4 lg:px-6">
-    <div class="w-full max-w-6xl">
-        <!-- <div id="test-results" class="py-3 mb-4 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-sm"></div> -->
-        <main class="py-5">
-          <!-- Header -->
-          <div class="mb-4 flex items-center justify-between">
-            <div>
-                <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100" data-i18n-key="HEADER.TITLE"></h1>
-                <p class="text-slate-500 text-sm mt-1" data-i18n-key="HEADER.SUBTITLE"></p>
-            </div>            
-          </div>
-
-          <div class="flex flex-col lg:flex-row gap-3">
-
-            <!-- Left -->
-            <aside class="w-full lg:w-[440px] flex flex-col gap-3">
-
-              <!-- Config -->
-              <div id="config-section" class="bg-white dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div class="flex items-center justify-between mb-6">
-                  <h2 class="text-lg font-bold flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">tune</span>
-                    <span data-i18n-key="CONFIG.TITLE"></span>
-                  </h2>
-                  <div class="flex items-center gap-2">
-                     <button id="btnShare" class="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-primary transition-colors px-3 py-2 rounded-lg">
-                        <span class="material-symbols-outlined text-sm">share</span> <span data-i18n-key="CONFIG.SHARE_BUTTON"></span>
-                      </button>
-                      <button id="btnResetAll" class="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-red-500 transition-colors px-3 py-2 rounded-lg">
-                        <span class="material-symbols-outlined text-sm">delete_sweep</span> <span data-i18n-key="CONFIG.RESET_BUTTON"></span>
-                      </button>
-                  </div>
-                </div>
-
-                <div class="space-y-4">
-                  <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-1.5">
-                      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n-key="CONFIG.AGE_NOW_LABEL"></label>
-                      <input id="ageNow" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2.5 px-4 focus:ring-primary focus:border-primary text-sm font-semibold"
-                             type="number" min="0" max="120" value="30"/>
-                    </div>
-                    <div class="space-y-1.5">
-                      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n-key="CONFIG.AGE_RETIRE_LABEL"></label>
-                      <input id="ageRetire" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2.5 px-4 focus:ring-primary focus:border-primary text-sm font-semibold"
-                             type="number" min="0" max="120" value="65"/>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Events -->
-              <div id="events-section" class="bg-white dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                  <h2 class="text-lg font-bold flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">event_note</span>
-                    <span data-i18n-key="SCENARIO.TITLE"></span>
-                  </h2>
-                   <div class="flex items-center gap-2">
-                    <button id="btnAddPreset" class="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors px-3 py-2 rounded-lg shadow-sm">
-                      <span class="material-symbols-outlined text-sm">fact_check</span> <span data-i18n-key="SCENARIO.PRESET_BUTTON"></span>
-                    </button>
-                    <button id="btnAddEvent" class="flex items-center gap-1.5 text-xs font-bold text-white bg-primary hover:bg-secondary transition-colors px-3 py-2 rounded-lg shadow-md shadow-primary/20">
-                      <span class="material-symbols-outlined text-sm">add_circle</span> <span data-i18n-key="SCENARIO.ADD_BUTTON"></span>
-                    </button>
-                  </div>
-                </div>
-                <p class="text-xs text-slate-400 mb-6" data-i18n-key="SCENARIO.SUPPORTED_ITEMS"></p>
-
-                <div id="eventList" class="mt-6"></div>
-
-              </div>
-
-            </aside>
-
-            <!-- Right -->
-            <section class="flex-1 flex flex-col gap-3">
-
-              <!-- Observation -->
-              <div class="bg-primary/5 border border-primary/20 p-5 rounded-xl flex items-start gap-4">
-                <div class="bg-primary text-white p-2.5 rounded-lg shadow-sm">
-                  <span class="material-symbols-outlined block">lightbulb</span>
-                </div>
-                <div>
-                  <h4 class="text-sm font-bold text-slate-900 dark:text-white" data-i18n-key="OBSERVATION.TITLE"></h4>
-                  <p id="observation" class="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed"></p>
-                  <p id="sustainableWithdrawal" class="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-relaxed"></p>
-                </div>
-              </div>
-
-              <!-- Table Card -->
-              <div class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col h-full overflow-hidden">
-                <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-900 z-20">
-                  <div>
-                    <h2 class="text-lg font-bold" data-i18n-key="RESULTS.TITLE"></h2>
-                    <p id="rangeLabel" class="text-xs text-slate-500 mt-0.5"></p>
-                  </div>
-                  <div class="flex gap-2 items-center relative">
-                    <button id="btnToggleFilter" class="size-10 flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 rounded-lg shadow-sm hover:bg-primary hover:text-white transition-all hover:scale-105 active:scale-95 group" data-i18n-key="[title]RESULTS.FILTER_TOOLTIP">
-                        <span class="material-symbols-outlined">filter_list</span>
-                    </button>
-                    <div id="filterPanel" class="hidden absolute top-full right-0 mt-2 z-30 bg-white dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg w-64">
-                         <div class="flex items-center justify-between mb-3">
-                             <h4 class="text-sm font-bold" data-i18n-key="FILTER.TITLE"></h4>
-                             <label class="flex items-center cursor-pointer">
-                                <input type="checkbox" id="filterEnabled" class="sr-only peer">
-                                <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
-                             </label>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label for="filterAgeFrom" class="block mb-1 text-xs font-medium text-slate-500" data-i18n-key="FILTER.AGE_FROM_LABEL"></label>
-                                <input type="number" id="filterAgeFrom" class="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-md py-1.5 px-2 text-sm w-full font-semibold">
-                            </div>
-                            <div>
-                                <label for="filterAgeTo" class="block mb-1 text-xs font-medium text-slate-500" data-i18n-key="FILTER.AGE_TO_LABEL"></label>
-                                <input type="number" id="filterAgeTo" class="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-md py-1.5 px-2 text-sm w-full font-semibold">
-                            </div>
-                        </div>
-                    </div>
-
-                    <button id="btnToggleChart" class="size-10 flex items-center justify-center bg-primary text-white rounded-lg shadow-lg shadow-primary/20 hover:bg-secondary transition-all hover:scale-105 active:scale-95 group" data-i18n-key="[title]RESULTS.CHART_TOOLTIP">
-                      <span class="material-symbols-outlined">bar_chart</span>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Chart Panel -->
-                <div id="chartPanel" class="hidden border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 p-4">
-                  <div class="flex items-center justify-between mb-2">
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500" data-i18n-key="CHART.TITLE"></p>
-                  </div>
-                  <div class="bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 p-3">
-                    <canvas id="balanceChart" height="360"></canvas>
-                  </div>
-                </div>
-
-                <div class="table-scroll-area custom-scrollbar overflow-x-auto flex-1">
-                  <table class="w-full text-left text-sm">
-                    <thead class="sticky top-0 bg-slate-50 dark:bg-slate-800 z-10 shadow-sm">
-                        <tr class="text-slate-500 font-bold uppercase text-xs tracking-wider">
-                            <th id="th-year-age" class="px-2 py-2.5 w-24 relative group text-center">
-                                <span data-i18n-key="TABLE.HEADER_YEAR_AGE"></span>
-                                <div class="header-tooltip hidden absolute bottom-full mb-2 w-48 bg-slate-800 text-white text-xs rounded-lg p-2 z-20" data-i18n-key="TABLE.TOOLTIP_YEAR_AGE"></div>
-                            </th>
-                            <th id="th-contribution" class="px-2 py-2.5 relative group">
-                                <span data-i18n-key="TABLE.HEADER_ANNUAL_CONTRIBUTION"></span>
-                                <div class="header-tooltip hidden absolute bottom-full mb-2 w-48 bg-slate-800 text-white text-xs rounded-lg p-2 z-20" data-i18n-key="TABLE.TOOLTIP_ANNUAL_CONTRIBUTION"></div>
-                            </th>
-                            <th id="th-return" class="px-2 py-2.5 relative group">
-                                <span data-i18n-key="TABLE.HEADER_RETURN"></span>
-                                <div class="header-tooltip hidden absolute bottom-full mb-2 w-48 bg-slate-800 text-white text-xs rounded-lg p-2 z-20" data-i18n-key="TABLE.TOOLTIP_RETURN"></div>
-                            </th>
-                            <th id="th-dividend" class="px-2 py-2.5 relative group">
-                                <span data-i18n-key="TABLE.HEADER_DIVIDEND"></span>
-                                <div class="header-tooltip hidden absolute bottom-full mb-2 w-48 bg-slate-800 text-white text-xs rounded-lg p-2 z-20" data-i18n-key="TABLE.TOOLTIP_DIVIDEND"></div>
-                            </th>
-                            <th id="th-withdrawal" class="px-2 py-2.5 relative group hidden">
-                                <span data-i18n-key="TABLE.HEADER_WITHDRAWAL"></span>
-                                <div class="header-tooltip hidden absolute bottom-full mb-2 w-48 bg-slate-800 text-white text-xs rounded-lg p-2 z-20" data-i18n-key="TABLE.TOOLTIP_WITHDRAWAL"></div>
-                            </th>
-                            <th id="th-balance" class="px-2 py-2.5 relative group">
-                                <span data-i18n-key="TABLE.HEADER_BALANCE"></span>
-                                <div class="header-tooltip hidden absolute bottom-full mb-2 w-48 bg-slate-800 text-white text-xs rounded-lg p-2 z-20" data-i18n-key="TABLE.TOOLTIP_BALANCE"></div>
-                            </th>
-                            <th id="th-portfolio" class="px-2 py-2.5 relative group text-center">
-                                <span data-i18n-key="TABLE.HEADER_PORTFOLIO"></span>
-                                <div class="header-tooltip hidden absolute bottom-full mb-2 w-48 bg-slate-800 text-white text-xs rounded-lg p-2 z-20" data-i18n-key="TABLE.TOOLTIP_PORTFOLIO"></div>
-                            </th>
-                            <th id="th-cash-flow" class="px-2 py-2.5 relative group">
-                                <span data-i18n-key="TABLE.HEADER_CASH_FLOW"></span>
-                                <div class="header-tooltip hidden absolute bottom-full mb-2 w-48 bg-slate-800 text-white text-xs rounded-lg p-2 z-20" data-i18n-key="TABLE.TOOLTIP_CASH_FLOW"></div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="annualTbody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
-                  </table>
-                </div>
-              </div>
-
-            </section>
-          </div>
-        </main>
-    </div>
-</div>
-
-<footer class="mt-12 py-10 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-  <div class="max-w-6xl mx-auto px-10 flex flex-col md:flex-row items-center justify-between gap-6 text-slate-500 text-[11px] font-medium">
-    <div class="flex items-center gap-4">
-      <span class="material-symbols-outlined text-primary text-sm">verified_user</span>
-      <p data-i18n-key="FOOTER.COPYRIGHT"></p>
-    </div>
+  <div id="sidebar">
+    <h1 class="text-2xl font-bold mb-8">Dashboard</h1>
+    <a href="retir-calc.html" target="content-frame" class="active">
+      <span class="material-symbols-outlined">calculate</span>
+      계산기
+    </a>
+    <a href="about.html" target="content-frame">
+      <span class="material-symbols-outlined">info</span>
+      소개
+    </a>
   </div>
-</footer>
 
-<!-- Add Event Dialog -->
-<dialog id="eventDialog" class="rounded-xl p-0 w-[92vw] max-w-md bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl">
-  <form method="dialog" class="p-5">
-    <div class="flex items-center justify-between mb-3">
-      <h3 id="dlgEventTitle" class="text-sm font-extrabold"></h3>
-        <button id="dlgCloseX" type="button" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
-            <span class="material-symbols-outlined">close</span>
-        </button>
-    </div>
+  <main id="content">
+    <iframe name="content-frame" src="retir-calc.html"></iframe>
+  </main>
 
-    <div class="space-y-3">
-        <div class="grid grid-cols-[2fr,1fr] gap-3">
-            <label class="block">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.AGE_LABEL"></span>
-              <input id="dlgAge" type="number" min="0" max="120" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
-            </label>
-            <label class="block">
-                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.MONTH_LABEL"></span>
-                <select id="dlgMonth" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold">
-                    <option value="1">1월</option>
-                    <option value="2">2월</option>
-                    <option value="3">3월</option>
-                    <option value="4">4월</option>
-                    <option value="5">5월</option>
-                    <option value="6">6월</option>
-                    <option value="7">7월</option>
-                    <option value="8">8월</option>
-                    <option value="9">9월</option>
-                    <option value="10">10월</option>
-                    <option value="11">11월</option>
-                    <option value="12">12월</option>
-                </select>
-            </label>
-        </div>
-        <label class="block">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.TYPE_LABEL"></span>
-          <select id="dlgType" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold">
-            <option value="portfolio" data-i18n-key="EVENT_DIALOG.TYPE_PORTFOLIO"></option>
-            <option value="monthly" data-i18n-key="EVENT_DIALOG.TYPE_MONTHLY"></option>
-            <option value="lump" data-i18n-key="EVENT_DIALOG.TYPE_LUMP"></option>
-            <option value="withdrawal" data-i18n-key="EVENT_DIALOG.TYPE_WITHDRAWAL"></option>
-            <option value="income" data-i18n-key="EVENT_DIALOG.TYPE_INCOME"></option>
-          </select>
-        </label>
-      
+  <script>
+    const links = document.querySelectorAll('#sidebar a');
+    links.forEach(link => {
+      link.addEventListener('click', function() {
+        links.forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  </script>
 
-      <div id="dlgFieldsPortfolio" class="hidden space-y-3 pt-2">
-          <label class="block">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.PRESET_LABEL"></span>
-            <select id="dlgPresetId" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"></select>
-          </label>
-          <label class="block">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.WEIGHT_LABEL"></span>
-            <input id="dlgWeight" type="number" min="1" max="10" value="10" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold"/>
-          </label>
-      </div>
-
-      <div id="dlgFieldsMonetary" class="hidden space-y-3 pt-2">
-        <div class="block">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.ICON_LABEL"></span>
-            <div id="dlgIcons" class="mt-1 flex gap-2 flex-wrap"></div>
-        </div>
-         <label class="block">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.LABEL_LABEL"></span>
-          <input id="dlgLabel" type="text" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold" data-i18n-key="[placeholder]EVENT_DIALOG.LABEL_PLACEHOLDER"/>
-        </label>
-        <label class="block">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n-key="EVENT_DIALOG.AMOUNT_LABEL"></span>
-          <input id="dlgAmount" type="text" class="mt-1 w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold" data-i18n-key="[placeholder]EVENT_DIALOG.AMOUNT_PLACEHOLDER"/>
-        </label>
-      </div>
-
-      <div id="dlgInfo" class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed pt-1"></div>
-    </div>
-
-    <div class="mt-5 flex gap-2 justify-end">
-      <button id="dlgCancel" value="cancel" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700" data-i18n-key="EVENT_DIALOG.CANCEL_BUTTON"></button>
-      <button id="dlgSave" value="ok" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary"></button>
-    </div>
-  </form>
-</dialog>
-
-<!-- Presets Dialog -->
-<dialog id="presetDialog" class="rounded-xl p-0 w-[92vw] max-w-md bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl">
-    <div class="p-5">
-        <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-extrabold" data-i18n-key="PRESET_DIALOG.TITLE"></h3>
-            <button id="closePresetDlg" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-        </div>
-        <p class="text-xs text-slate-400 mb-4" data-i18n-key="PRESET_DIALOG.INFO"></p>
-        <div id="presetList" class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-2"></div>
-    </div>
-    <form id="newPresetForm" class="p-5 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-        <h4 id="dlgPresetTitle" class="text-xs font-bold uppercase tracking-wider mb-3"></h4>
-        <div class="space-y-3">
-            <input id="dlgPresetName" type="text" class="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold" data-i18n-key="[placeholder]PRESET_DIALOG.NAME_PLACEHOLDER"/>
-            <div class="grid grid-cols-2 gap-3">
-                <input id="dlgPresetReturn" type="number" step="0.1" class="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold" placeholder="수익률(%)"/>
-                <input id="dlgPresetDiv" type="number" step="0.1" class="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold" placeholder="배당률(%)"/>
-            </div>
-        </div>
-        <div class="mt-4 text-right">
-            <button type="submit" id="dlgPresetSave" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary" data-i18n-key="PRESET_DIALOG.SAVE_BUTTON"></button>
-        </div>
-    </form>
-</dialog>
-
-<!-- Portfolio Tooltip -->
-<div id="portfolioTooltip" class="hidden fixed z-50 bg-slate-900 text-white p-4 rounded-xl shadow-lg w-72 text-sm"></div>
-
-<!-- Onboarding Guide -->
-<div id="onboarding-guide" class="hidden fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-sm relative">
-        <button id="close-onboarding" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><span class="material-symbols-outlined">close</span></button>
-        <div class="p-6">
-            <h2 id="onboarding-title" class="text-lg font-bold mb-2 text-slate-900 dark:text-slate-100"></h2>
-            <p id="onboarding-content" class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed"></p>
-        </div>
-        <div class="px-6 pb-6 flex justify-between items-center">
-            <div id="onboarding-dots" class="flex gap-1.5"></div>
-            <div class="flex gap-2">
-                <button id="onboarding-prev" class="onboarding-btn"></button>
-                <button id="onboarding-next" class="onboarding-btn bg-primary text-white"></button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<script src="strings.js"></script>
-<script src="presets.js"></script>
-<script src="events.js"></script>
-<script src="main.js"></script>
-<script src="test-runner.js"></script>
-<script src="tests.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', (event) => {
-    runTests();
-  });
-</script>
 </body>
 </html>

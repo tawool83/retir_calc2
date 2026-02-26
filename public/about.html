@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html class="light" lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>소개 - 은퇴 시뮬레이터</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700&display=swap" rel="stylesheet"/>
+  
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#2563eb",
+            "secondary": "#1e40af",
+            "background-light": "#f8fafc",
+            "background-dark": "#0f172a",
+          },
+          fontFamily: { "display": ["Manrope", "sans-serif"] },
+        },
+      },
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer base { body { font-family: 'Manrope', sans-serif; } }
+    .prose h2 { margin-top: 2em; }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen font-display">
+
+<div class="flex">
+    <!-- Left Navigation -->
+    <aside class="w-60 bg-white dark:bg-slate-900/50 border-r border-slate-200 dark:border-slate-800 flex-shrink-0 h-screen sticky top-0">
+        <div class="p-6">
+            <a href="index.html" class="flex items-center gap-2" data-i18n-key="[title]NAV.GOTO_SIMULATOR">
+                <span class="text-3xl">💰</span>
+                <h1 class="text-lg font-bold" data-i18n-key="APP_TITLE_SHORT"></h1>
+            </a>
+        </div>
+        <nav class="px-3">
+            <ul class="space-y-2">
+                <li>
+                    <a href="index.html" id="nav-simulator" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <span class="material-symbols-outlined">calculate</span>
+                        <span data-i18n-key="NAV.SIMULATOR"></span>
+                    </a>
+                </li>
+                <li>
+                    <a href="about.html" id="nav-about" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold">
+                        <span class="material-symbols-outlined">info</span>
+                        <span data-i18n-key="NAV.ABOUT"></span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <div class="flex-grow">
+        <main class="w-full max-w-4xl mx-auto px-4 lg:px-10 py-10">
+            <div class="bg-white dark:bg-slate-900/50 p-8 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100" data-i18n-key="ABOUT_PAGE.TITLE"></h1>
+                <p class="text-slate-500 text-sm mt-2 mb-8" data-i18n-key="ABOUT_PAGE.SUBTITLE"></p>
+                
+                <div class="prose prose-slate dark:prose-invert max-w-none text-sm leading-relaxed">
+                    <p data-i18n-key="ABOUT_PAGE.INTRO"></p>
+
+                    <h2 data-i18n-key="ABOUT_PAGE.FEATURES_TITLE"></h2>
+                    <ul class="space-y-3">
+                        <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_1_TITLE"></strong> <span data-i18n-key="ABOUT_PAGE.FEATURE_1_DESC"></span></li>
+                        <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_2_TITLE"></strong> <span data-i18n-key="ABOUT_PAGE.FEATURE_2_DESC"></span></li>
+                        <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_3_TITLE"></strong> <span data-i18n-key="ABOUT_PAGE.FEATURE_3_DESC"></span></li>
+                        <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_4_TITLE"></strong> <span data-i18n-key="ABOUT_PAGE.FEATURE_4_DESC"></span></li>
+                        <li><strong data-i18n-key="ABOUT_PAGE.FEATURE_5_TITLE"></strong> <span data-i18n-key="ABOUT_PAGE.FEATURE_5_DESC"></span></li>
+                    </ul>
+
+                    <h2 data-i18n-key="ABOUT_PAGE.DISCLAIMER_TITLE"></h2>
+                    <p data-i18n-key="DISCLAIMER.TEXT"></p>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mt-12 py-10 border-t border-slate-200 dark:border-slate-800">
+          <div class="max-w-6xl mx-auto px-10 flex flex-col md:flex-row items-center justify-between gap-6 text-slate-500 text-[11px] font-medium">
+            <div class="flex items-center gap-4">
+              <span class="material-symbols-outlined text-primary text-sm">verified_user</span>
+              <p data-i18n-key="FOOTER.COPYRIGHT"></p>
+            </div>
+          </div>
+        </footer>
+    </div>
+</div>
+
+<script src="strings.js"></script>
+<script src="main.js"></script>
+
+</body>
+</html>
