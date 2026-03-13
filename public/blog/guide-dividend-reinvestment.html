@@ -5,65 +5,146 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ETF 배당금 재투자의 마법: 복리 효과 극대화하기 - 은퇴 시뮬레이터</title>
     <meta name="description" content="워렌 버핏이 '세계 8대 불가사의'라고 칭한 복리의 힘을 ETF 배당금 재투자를 통해 어떻게 극대화할 수 있는지 구체적인 원리와 방법을 알아봅니다.">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="/style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { primary: '#2563eb' }, fontFamily: { display: ['Manrope', 'sans-serif'] } } }
+        }
+    </script>
+    <style>
+        body { font-family: 'Manrope', sans-serif; }
+        .article-body h2 { font-size: 1.375rem; font-weight: 800; color: #0f172a; margin-top: 2.75rem; margin-bottom: 0.875rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0; }
+        .article-body h3 { font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-top: 1.75rem; margin-bottom: 0.6rem; }
+        .article-body p { font-size: 1.0rem; line-height: 1.875; color: #374151; margin-bottom: 1.1rem; }
+        .article-body ul, .article-body ol { margin: 0.75rem 0 1.25rem 0; padding-left: 1.5rem; }
+        .article-body li { font-size: 1.0rem; line-height: 1.8; color: #374151; margin-bottom: 0.5rem; }
+        .article-body ul > li { list-style-type: disc; }
+        .article-body ol > li { list-style-type: decimal; }
+        .article-body strong { font-weight: 700; color: #111827; }
+        .callout { background: #eff6ff; border-left: 4px solid #2563eb; border-radius: 0.625rem; padding: 1.125rem 1.375rem; margin: 1.5rem 0; }
+        .callout h4 { font-size: 0.9375rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.625rem; }
+        .callout ul { padding-left: 1.25rem; margin: 0; }
+        .callout li { color: #1e40af; font-size: 0.9375rem; }
+        .quote { border-left: 4px solid #2563eb; padding: 0.875rem 1.25rem; margin: 1.5rem 0; background: #f8fafc; border-radius: 0 0.5rem 0.5rem 0; }
+        .quote p { font-style: italic; color: #1e293b; margin: 0; font-size: 1.05rem; line-height: 1.7; }
+        .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.25rem 0; }
+        .compare-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.625rem; padding: 1rem 1.125rem; }
+        .compare-card h5 { font-size: 0.875rem; font-weight: 700; color: #2563eb; margin-bottom: 0.5rem; }
+        .compare-card p { font-size: 0.9rem; color: #374151; margin: 0; line-height: 1.6; }
+        @media (max-width: 640px) { .compare-grid { grid-template-columns: 1fr; } }
+    </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 leading-relaxed">
-    <div class="max-w-3xl mx-auto p-4 md:p-8">
-        <article class="prose dark:prose-invert lg:prose-xl max-w-none">
-            <header class="mb-12">
-                <a href="/blog.html" class="text-primary hover:underline text-sm font-semibold">← 가이드 목록으로 돌아가기</a>
-                <h1 class="mt-4 text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">ETF 배당금 재투자의 마법: 복리 효과 극대화하기</h1>
-                <p class="mt-4 text-lg text-slate-500 dark:text-slate-400">눈덩이처럼 불어나는 복리의 마법, 그 핵심인 배당금 재투자 전략의 원리를 이해하고 ETF를 활용한 자동화 방법을 알아봅니다. 워렌 버핏이 '세계 8대 불가사의'라고 칭한 힘을 당신의 것으로 만드세요.</p>
-            </header>
+<body class="bg-slate-50 text-slate-800">
+
+    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow-sm">
+        <div class="max-w-3xl mx-auto px-4 h-14 flex items-center gap-2 text-sm font-semibold">
+            <a href="/index.html" class="text-slate-500 hover:text-primary transition-colors">홈</a>
+            <span class="text-slate-300">/</span>
+            <a href="/blog.html" class="text-slate-500 hover:text-primary transition-colors">가이드</a>
+            <span class="text-slate-300">/</span>
+            <span class="text-slate-700 truncate">배당금 재투자의 마법</span>
+        </div>
+    </nav>
+
+    <main class="max-w-3xl mx-auto px-4 py-12">
+
+        <header class="mb-10">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="px-3 py-1 bg-violet-600 text-white text-xs font-bold rounded-full uppercase tracking-wider">복리 & 배당</span>
+                <span class="text-sm text-slate-400">읽는 시간: 약 6분</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                ETF 배당금 재투자의 마법:<br>복리 효과 극대화하기
+            </h1>
+            <p class="mt-4 text-lg text-slate-500 leading-relaxed">
+                눈덩이처럼 불어나는 복리의 마법, 그 핵심인 배당금 재투자 전략의 원리를 이해하고 ETF를 활용한 자동화 방법을 알아봅니다.
+            </p>
+        </header>
+
+        <div class="article-body bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-10">
 
             <section>
-                <h2>1. 단리와 복리: 투자의 출발점</h2>
-                <p>투자의 세계에는 두 가지 이자 계산 방식이 있습니다: 단리(Simple Interest)와 복리(Compound Interest)입니다. 이 둘의 차이를 이해하는 것이 자산 증식의 첫걸음입니다.</p>
+                <h2>1. 단리 vs 복리: 투자의 출발점</h2>
+                <p>투자의 세계에는 두 가지 이자 계산 방식이 있습니다. 이 둘의 차이를 이해하는 것이 자산 증식의 첫걸음입니다.</p>
                 <ul>
-                    <li><strong>단리:</strong> 원금에 대해서만 이자가 붙는 방식입니다. 100만 원을 연 10% 단리 상품에 투자하면, 매년 10만 원의 이자만 받게 됩니다. 10년 후에도 원금은 그대로 100만 원, 이자 수익은 100만 원입니다.</li>
-                    <li><strong>복리:</strong> 원금뿐만 아니라, 그동안 발생한 '이자'에 대해서도 '이자'가 붙는 방식입니다. 100만 원을 연 10% 복리 상품에 투자하면, 첫 해에는 10만 원의 이자를 받지만, 두 번째 해에는 원금 100만 원과 첫 해 이자 10만 원을 합친 110만 원에 대한 10%, 즉 11만 원의 이자를 받게 됩니다.</li>
+                    <li><strong>단리:</strong> 원금에 대해서만 이자가 붙습니다. 100만원을 연 10% 단리 상품에 투자하면, 10년 후 원금 100만원 + 이자 100만원 = 200만원이 됩니다.</li>
+                    <li><strong>복리:</strong> 원금뿐 아니라 발생한 이자에도 이자가 붙습니다. 100만원을 연 10% 복리로 투자하면, 10년 후 약 259만원, 30년 후 약 1,745만원이 됩니다.</li>
                 </ul>
-                <p>금액이 작고 기간이 짧을 때는 그 차이가 미미해 보이지만, 시간이 흐를수록 복리의 효과는 기하급수적으로 커집니다. 이것이 바로 아인슈타인이 복리를 '인류의 가장 위대한 발명'이라고 부른 이유이며, 워렌 버핏이 '작은 눈덩이를 아주 긴 언덕에서 굴리는 것'에 비유한 이유입니다.</p>
+                <p>금액이 작고 기간이 짧을 때는 차이가 미미해 보이지만, 시간이 흐를수록 복리의 효과는 기하급수적으로 커집니다.</p>
+
+                <div class="quote">
+                    <p>"복리는 세계 8대 불가사의다. 이것을 이해하는 자는 그것을 얻고, 이해하지 못하는 자는 그것을 지불한다." — 알베르트 아인슈타인</p>
+                </div>
             </section>
 
             <section>
                 <h2>2. 배당금 재투자: 복리 효과의 핵심 엔진</h2>
-                <p>주식 투자에서 복리의 마법을 실현하는 가장 직접적인 방법은 바로 **배당금 재투자**입니다. 배당금이란 기업이 벌어들인 이익의 일부를 주주들에게 현금으로 나누어주는 것입니다. 이 배당금을 생활비로 사용하지 않고, 그 돈으로 다시 해당 기업의 주식이나 다른 투자 자산을 사는 행위를 '배당금 재투자'라고 합니다.</p>
-                <blockquote class="border-l-4 border-primary pl-4 italic">
-                    <p>배당금 재투자는 마치 거위가 황금알을 낳고, 그 황금알이 다시 자라 새로운 거위가 되어 더 많은 황금알을 낳는 시스템을 만드는 것과 같습니다.</p>
-                </blockquote>
-                <p>예를 들어, S&P 500 지수를 추종하는 ETF에 투자했다고 가정해 봅시다. 이 ETF는 1년에 약 1~2%의 배당금을 지급합니다. 이 배당금을 받아서 바로 같은 ETF를 추가로 매수하면, 당신이 보유한 ETF의 총 수량은 늘어납니다. 그러면 다음 분기, 혹은 다음 해에는 더 많아진 수량을 기준으로 배당금을 받게 되고, 그 돈으로 또 더 많은 ETF를 살 수 있습니다. 이 과정이 수십 년간 반복되면서 자산은 눈덩이처럼 불어나는 것입니다.</p>
-            </section>
+                <p>주식 투자에서 복리의 마법을 실현하는 가장 직접적인 방법은 바로 <strong>배당금 재투자</strong>입니다. 기업이 이익의 일부를 주주에게 현금으로 나눠주는 것이 배당금인데, 이 배당금을 생활비로 사용하지 않고 다시 투자 자산을 매수하는 행위가 배당금 재투자입니다.</p>
 
-            <section>
-                <h2>3. ETF를 활용한 간편한 배당금 재투자 방법</h2>
-                <p>개별 주식의 배당금을 받아서 일일이 재투자하는 것은 번거로울 수 있습니다. 하지만 ETF(상장지수펀드)를 활용하면 이 과정을 훨씬 쉽게, 거의 자동으로 만들 수 있습니다.</p>
-                <div class="p-4 bg-blue-50 dark:bg-slate-800 rounded-lg">
-                    <h4 class="font-bold">ETF 배당금 재투자 유형</h4>
-                    <ul class="mt-2">
-                        <li><strong>TR (Total Return) ETF:</strong> '토탈 리턴' 또는 '총수익'이라고 표시된 ETF는 투자자에게 배당금을 현금으로 지급하지 않고, 그 배당금을 자동으로 해당 ETF에 재투자하여 펀드의 순자산가치(NAV), 즉 가격 자체에 반영합니다. 투자자 입장에서는 아무것도 신경 쓸 필요 없이 자동으로 복리 효과를 누릴 수 있어 가장 편리한 방법입니다. 세금 측면에서도 배당소득세가 즉시 과세되지 않고 매도 시점까지 이연되는 장점이 있습니다.</li>
-                        <li><strong>분배금 지급 (PR, Price Return) ETF:</strong> 'PR' 또는 배당금을 정기적으로 지급하는 대부분의 일반적인 ETF입니다. 배당금이 현금으로 계좌에 입금되면, 투자자가 직접 그 돈을 사용하여 원하는 ETF나 주식을 추가로 매수해야 합니다. TR ETF보다 번거롭지만, 입금된 배당금을 다른 자산에 투자하는 등 유연하게 활용할 수 있는 장점이 있습니다. 은퇴 후 현금 흐름이 필요한 투자자에게 더 적합할 수 있습니다.</li>
-                    </ul>
+                <div class="quote">
+                    <p>배당금 재투자는 마치 황금알을 낳는 거위가 있고, 그 황금알이 자라 새로운 거위가 되어 더 많은 황금알을 낳는 시스템을 만드는 것과 같습니다.</p>
                 </div>
-                <p class="mt-4">장기적인 자산 증식이 목표인 젊은 투자자라면, 신경 쓸 필요 없이 자동으로 복리 효과를 극대화해주는 **TR ETF**가 매우 효율적인 선택입니다.</p>
+
+                <p>예를 들어, S&P 500 ETF에 투자했다고 가정해 봅시다. 연 1~2%의 배당금을 받아 같은 ETF를 추가 매수하면 보유 수량이 늘어나고, 다음 분기에는 더 많은 수량 기준으로 배당금을 받습니다. 이 과정이 수십 년간 반복되면서 자산은 눈덩이처럼 불어납니다.</p>
             </section>
 
             <section>
-                <h2>4. 시뮬레이터를 통한 복리 효과 확인하기</h2>
-                <p>저희 은퇴 시뮬레이터는 이러한 배당금과 복리 효과를 매우 정교하게 계산합니다. 시뮬레이션 설정 시 입력하는 '포트폴리오'의 기대 수익률과 배당률에 따라, 매년 발생하는 배당금이 자산에 어떻게 재투자되고, 그것이 장기적으로 총자산을 얼마나 크게 변화시키는지 직접 눈으로 확인할 수 있습니다.</p>
-                <p>예를 들어, 똑같은 연평균 7%의 수익률을 가진 두 개의 포트폴리오를 비교해 보세요.</p>
-                 <ol>
-                    <li>A 포트폴리오: 수익률 7%, 배당률 0%</li>
-                    <li>B 포트폴리오: 수익률 5%, 배당률 2%</li>
-                 </ol>
-                <p>단기적으로는 큰 차이가 없어 보이지만, 시뮬레이션 기간을 30년, 40년으로 늘려보면 배당금이 꾸준히 재투자되는 B 포트폴리오의 자산이 훨씬 더 안정적으로, 그리고 더 크게 성장하는 것을 발견할 수 있을 것입니다. 이것이 바로 긴 시간과 꾸준함이 만들어내는 복리의 진정한 힘입니다.</p>
+                <h2>3. ETF 유형별 배당 처리 방식</h2>
+                <p>ETF를 활용하면 배당금 재투자를 훨씬 쉽게, 거의 자동으로 만들 수 있습니다.</p>
+
+                <div class="compare-grid">
+                    <div class="compare-card">
+                        <h5>✅ TR (Total Return) ETF</h5>
+                        <p>배당금을 현금으로 지급하지 않고 자동으로 ETF에 재투자합니다. 투자자는 아무것도 신경 쓸 필요 없이 복리 효과를 누립니다. 배당소득세 이연 효과도 있습니다.</p>
+                    </div>
+                    <div class="compare-card">
+                        <h5>💰 분배형 (PR) ETF</h5>
+                        <p>배당금이 현금으로 계좌에 입금됩니다. 투자자가 직접 재투자해야 하는 번거로움이 있지만, 은퇴 후 현금 흐름이 필요한 경우에 더 적합합니다.</p>
+                    </div>
+                </div>
+
+                <p>장기적인 자산 증식이 목표인 젊은 투자자라면, 자동으로 복리 효과를 극대화해주는 <strong>TR ETF</strong>가 매우 효율적인 선택입니다. 은퇴 후 현금 흐름이 필요하다면 분배형 ETF를 활용하는 것도 좋은 전략입니다.</p>
             </section>
 
-            <footer class="mt-12 pt-6 border-t border-slate-200 dark:border-slate-700">
-                <p class="text-center text-sm text-slate-500">복리의 힘을 직접 경험하고 싶으신가요? 지금 <a href="/index.html" class="text-primary hover:underline">은퇴 시뮬레이터</a>에서 당신의 장기 투자 계획을 세워보세요.</p>
-            </footer>
-        </article>
-    </div>
+            <section>
+                <h2>4. 시뮬레이터로 복리 효과 직접 확인하기</h2>
+                <p>저희 은퇴 시뮬레이터는 배당금과 복리 효과를 정밀하게 계산합니다. 포트폴리오의 기대 수익률과 배당률에 따라 매년 발생하는 배당금이 어떻게 재투자되고, 장기적으로 총자산을 얼마나 변화시키는지 확인할 수 있습니다.</p>
+
+                <div class="callout">
+                    <h4>📊 시뮬레이션 비교 예시</h4>
+                    <ul>
+                        <li style="margin-bottom:0.4rem;"><strong>A 포트폴리오:</strong> 연 수익률 7%, 배당률 0%</li>
+                        <li><strong>B 포트폴리오:</strong> 연 수익률 5%, 배당률 2%</li>
+                    </ul>
+                    <p style="margin-top:0.75rem; color:#1e3a8a; font-size:0.9375rem;">두 포트폴리오는 합산 수익률이 동일(7%)하지만, 시뮬레이션 기간을 30~40년으로 늘릴수록 배당이 꾸준히 재투자되는 B 포트폴리오의 자산이 더 안정적으로 성장하는 것을 확인할 수 있습니다.</p>
+                </div>
+
+                <p>시뮬레이터에서 포트폴리오를 설정하고 기간을 길게 설정해보세요. 작은 배당률 차이가 수십 년 후 얼마나 큰 자산 차이를 만드는지 직접 눈으로 확인할 수 있습니다. 이것이 바로 긴 시간과 꾸준함이 만들어내는 복리의 진정한 힘입니다.</p>
+            </section>
+
+        </div>
+
+        <div class="mt-8 p-6 bg-primary rounded-2xl text-center text-white">
+            <p class="font-bold text-lg">복리의 힘을 직접 경험하고 싶으신가요?</p>
+            <p class="text-blue-100 text-sm mt-1 mb-4">지금 시뮬레이터에서 당신의 장기 투자 계획을 세워보세요.</p>
+            <a href="/index.html" class="inline-block px-6 py-2.5 bg-white text-primary font-bold rounded-full text-sm hover:bg-blue-50 transition-colors">시뮬레이터 시작하기 →</a>
+        </div>
+
+        <div class="mt-8">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">관련 가이드</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <a href="guide-asset-allocation.html" class="block p-4 bg-white rounded-xl border border-slate-200 hover:border-primary hover:shadow-md transition-all">
+                    <p class="text-xs text-primary font-bold mb-1">투자 전략</p>
+                    <p class="font-bold text-slate-900 text-sm">자산 배분 101: 포트폴리오 다각화</p>
+                </a>
+                <a href="guide-4-percent-rule.html" class="block p-4 bg-white rounded-xl border border-slate-200 hover:border-primary hover:shadow-md transition-all">
+                    <p class="text-xs text-primary font-bold mb-1">인출 전략</p>
+                    <p class="font-bold text-slate-900 text-sm">'4% 룰'이란 무엇인가?</p>
+                </a>
+            </div>
+        </div>
+
+    </main>
 </body>
 </html>

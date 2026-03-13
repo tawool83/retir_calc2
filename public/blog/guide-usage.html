@@ -5,66 +5,146 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>은퇴 시뮬레이터 사용법 완전 가이드 - 은퇴 시뮬레이터</title>
     <meta name="description" content="은퇴 시뮬레이터의 기본 설정부터 시나리오 이벤트 활용, 결과 분석까지 모든 기능을 단계별로 상세히 안내합니다.">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="/style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { primary: '#2563eb' }, fontFamily: { display: ['Manrope', 'sans-serif'] } } }
+        }
+    </script>
+    <style>
+        body { font-family: 'Manrope', sans-serif; }
+        .article-body h2 { font-size: 1.375rem; font-weight: 800; color: #0f172a; margin-top: 2.75rem; margin-bottom: 0.875rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0; }
+        .article-body h3 { font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-top: 1.75rem; margin-bottom: 0.6rem; }
+        .article-body p { font-size: 1.0rem; line-height: 1.875; color: #374151; margin-bottom: 1.1rem; }
+        .article-body ul, .article-body ol { margin: 0.75rem 0 1.25rem 0; padding-left: 1.5rem; }
+        .article-body li { font-size: 1.0rem; line-height: 1.8; color: #374151; margin-bottom: 0.5rem; }
+        .article-body ul > li { list-style-type: disc; }
+        .article-body ol > li { list-style-type: decimal; }
+        .article-body strong { font-weight: 700; color: #111827; }
+        .callout { background: #eff6ff; border-left: 4px solid #2563eb; border-radius: 0.625rem; padding: 1.125rem 1.375rem; margin: 1.5rem 0; }
+        .callout h4 { font-size: 0.9375rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.625rem; }
+        .callout ul { padding-left: 1.25rem; margin: 0; }
+        .callout li { color: #1e40af; font-size: 0.9375rem; }
+    </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 leading-relaxed">
-    <div class="max-w-3xl mx-auto p-4 md:p-8">
-        <article class="prose dark:prose-invert lg:prose-xl max-w-none">
-            <header class="mb-12">
-                <a href="/blog.html" class="text-primary hover:underline text-sm font-semibold">← 가이드 목록으로 돌아가기</a>
-                <h1 class="mt-4 text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">은퇴 시뮬레이터 사용법 완전 가이드</h1>
-                <p class="mt-4 text-lg text-slate-500 dark:text-slate-400">시뮬레이터의 모든 기능을 200% 활용하여 당신의 미래를 구체적으로 그려보는 방법을 단계별로 안내합니다.</p>
-            </header>
+<body class="bg-slate-50 text-slate-800">
+
+    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow-sm">
+        <div class="max-w-3xl mx-auto px-4 h-14 flex items-center gap-2 text-sm font-semibold">
+            <a href="/index.html" class="text-slate-500 hover:text-primary transition-colors">홈</a>
+            <span class="text-slate-300">/</span>
+            <a href="/blog.html" class="text-slate-500 hover:text-primary transition-colors">가이드</a>
+            <span class="text-slate-300">/</span>
+            <span class="text-slate-700 truncate">사용법 완전 가이드</span>
+        </div>
+    </nav>
+
+    <main class="max-w-3xl mx-auto px-4 py-12">
+
+        <header class="mb-10">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="px-3 py-1 bg-primary text-white text-xs font-bold rounded-full uppercase tracking-wider">사용 가이드</span>
+                <span class="text-sm text-slate-400">읽는 시간: 약 5분</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                은퇴 시뮬레이터<br>사용법 완전 가이드
+            </h1>
+            <p class="mt-4 text-lg text-slate-500 leading-relaxed">
+                시뮬레이터의 모든 기능을 200% 활용하여 당신의 미래를 구체적으로 그려보는 방법을 단계별로 안내합니다.
+            </p>
+        </header>
+
+        <div class="article-body bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-10">
 
             <section>
-                <h2>1. 시작하며: 무엇을 할 수 있나요?</h2>
-                <p>본 은퇴 시뮬레이터는 단순히 '언제 은퇴할 수 있을까?'라는 질문에 답하는 것을 넘어, 당신의 인생 전체에 걸친 재정적 여정을 시뮬레이션하도록 설계되었습니다. 정기적인 저축과 투자뿐만 아니라, 주택 구매, 유학, 갑작스러운 목돈 지출이나 보너스 같은 다양한 '이벤트'를 설정하여 미래 자산 변화를 매우 구체적으로 예측할 수 있습니다. 이를 통해 막연했던 은퇴 계획을 현실적이고 실행 가능한 목표로 전환하는 강력한 도구가 될 것입니다.</p>
+                <h2>무엇을 할 수 있나요?</h2>
+                <p>본 은퇴 시뮬레이터는 단순히 '언제 은퇴할 수 있을까?'라는 질문에 답하는 것을 넘어, 당신의 인생 전체에 걸친 재정적 여정을 시뮬레이션하도록 설계되었습니다.</p>
+                <p>정기적인 저축과 투자뿐만 아니라, 주택 구매·유학·갑작스러운 목돈 지출이나 보너스 같은 다양한 '이벤트'를 설정하여 미래 자산 변화를 매우 구체적으로 예측할 수 있습니다. 이를 통해 막연했던 은퇴 계획을 현실적이고 실행 가능한 목표로 전환하는 강력한 도구가 될 것입니다.</p>
             </section>
 
             <section>
-                <h2>2. 첫 단추: 기본 정보 입력하기</h2>
-                <p>시뮬레이션의 가장 기본이 되는 정보는 '기본 정보' 섹션에서 설정합니다.</p>
+                <h2>1단계: 기본 정보 입력하기</h2>
+                <p>시뮬레이션의 기본이 되는 정보는 상단 '기본 정보' 섹션에서 설정합니다.</p>
                 <ul>
-                    <li><strong>현재 나이:</strong> 시뮬레이션이 시작되는 당신의 현재 나이입니다.</li>
-                    <li><strong>은퇴 목표 나이:</strong> 더 이상 근로소득 없이 자산 소득만으로 생활하기 시작하고 싶은 나이입니다. 이 나이를 기점으로 시뮬레이터는 '월 정기 인출' 이벤트를 활성화하여 생활비 사용을 시작합니다.</li>
+                    <li><strong>현재 나이:</strong> 시뮬레이션이 시작되는 현재 나이입니다.</li>
+                    <li><strong>은퇴 목표 나이:</strong> 근로소득 없이 자산 소득만으로 생활하기 시작하고 싶은 나이입니다. 결과 테이블에서 해당 시점이 강조 표시됩니다.</li>
                 </ul>
-                <p>이 두 가지 정보만 정확히 입력해도 시뮬레이션의 큰 그림이 그려집니다. 처음에는 예상치를 입력하고, 나중에 언제든지 수정하며 다양한 시나리오를 테스트해볼 수 있습니다.</p>
+                <p>처음에는 예상치를 입력하고, 이후 언제든지 수정하며 다양한 시나리오를 테스트해볼 수 있습니다.</p>
             </section>
 
             <section>
-                <h2>3. 시뮬레이션의 핵심: 시나리오 이벤트 활용하기</h2>
-                <p>본 시뮬레이터의 가장 강력한 기능은 바로 '시나리오'입니다. '시나리오 추가' 버튼을 눌러 당신의 인생에서 발생할 수 있는 다양한 재정적 이벤트를 시간 순서대로 추가할 수 있습니다. 각 이벤트는 특정 나이와 월에 발생하도록 설정할 수 있어 정밀한 계획이 가능합니다.</p>
-                <div class="p-4 bg-blue-50 dark:bg-slate-800 rounded-lg">
-                    <h4 class="font-bold">주요 이벤트 유형</h4>
-                    <ul class="mt-2">
-                        <li><strong>포트폴리오 변경:</strong> 나이에 따라 투자 전략을 바꿀 수 있습니다. 예를 들어, 20-30대에는 공격적인 성장주 위주로, 50대 이후부터는 안정적인 배당주나 채권 비중을 높이는 식으로 설정할 수 있습니다.</li>
-                        <li><strong>월 정기 기여금:</strong> 매월 저축하거나 투자하는 금액입니다. 승진으로 인한 소득 증가나, 자녀 출산으로 인한 지출 증가 등을 반영하여 특정 시점에 이 금액을 변경할 수 있습니다.</li>
-                        <li><strong>일시불 (입금/출금):</strong> 주택 구매를 위한 계약금 지출, 퇴직금 수령, 상속 등 인생의 특정 시점에 발생하는 큰 규모의 현금 흐름을 모델링합니다. 출금은 마이너스 금액으로 입력합니다.</li>
-                        <li><strong>월 정기 인출:</strong> 은퇴 후 매월 필요한 생활비를 설정합니다. 시뮬레이터는 이 금액을 기준으로 포트폴리오에서 자산을 자동으로 인출합니다. 물가상승률을 고려하여 인출액을 점진적으로 늘리는 시나리오도 설정 가능합니다.</li>
-                        <li><strong>월 정기 기타 수입:</strong> 국민연금, 개인연금, 부동산 월세 등 투자 자산 외에서 발생하는 고정적인 월 수입을 의미합니다. 이 수입은 은퇴 후 '월 정기 인출' 필요 금액을 우선적으로 충당하여, 실제 포트폴리오에서 인출해야 하는 금액을 줄여주는 역할을 합니다.</li>
+                <h2>2단계: 시나리오 이벤트 추가하기</h2>
+                <p>본 시뮬레이터의 핵심 기능은 바로 '시나리오'입니다. <strong>+ 이벤트 추가</strong> 버튼을 눌러 인생에서 발생할 재정적 이벤트를 시간 순서대로 추가할 수 있습니다. 각 이벤트는 특정 나이와 월에 발생하도록 설정할 수 있어 정밀한 계획이 가능합니다.</p>
+
+                <div class="callout">
+                    <h4>📋 이벤트 유형 안내</h4>
+                    <ul>
+                        <li style="margin-bottom:0.6rem;"><strong>포트폴리오 변경:</strong> 나이에 따라 투자 전략을 바꿀 수 있습니다. 20~30대에는 성장주 위주로, 50대 이후부터는 배당주나 채권 비중을 높이는 식으로 설정하세요.</li>
+                        <li style="margin-bottom:0.6rem;"><strong>월 정기 기여금:</strong> 매월 저축하거나 투자하는 금액입니다. 승진이나 자녀 출산 등 삶의 변화를 반영하여 특정 시점에 금액을 변경할 수 있습니다.</li>
+                        <li style="margin-bottom:0.6rem;"><strong>일시불 입출금:</strong> 주택 계약금 지출, 퇴직금 수령, 상속 등 인생의 특정 시점에 발생하는 큰 규모의 현금 흐름을 모델링합니다. 출금은 마이너스 금액으로 입력합니다.</li>
+                        <li style="margin-bottom:0.6rem;"><strong>월 정기 인출:</strong> 은퇴 후 매월 필요한 생활비를 설정합니다. 시뮬레이터는 배당금으로 우선 충당하고, 부족한 부분만 자산을 매도하여 충당합니다.</li>
+                        <li><strong>월 정기 기타 수입:</strong> 국민연금, 개인연금, 부동산 월세 등 투자 자산 외 고정 수입입니다. 이 수입이 '월 정기 인출'을 우선 충당하여 실제 자산 매도 규모를 줄여줍니다.</li>
                     </ul>
                 </div>
+
+                <h3>실제 활용 예시</h3>
+                <p>아래와 같이 실제 인생 계획을 이벤트로 표현할 수 있습니다.</p>
+                <ol>
+                    <li>30세: 포트폴리오 설정 + 월 100만원 기여금 시작</li>
+                    <li>38세: 일시불 출금 -5,000만원 (주택 계약금)</li>
+                    <li>55세: 포트폴리오 변경 (배당주 중심 전환)</li>
+                    <li>60세: 월 정기 인출 300만원 시작 (조기 은퇴)</li>
+                    <li>65세: 월 정기 기타 수입 80만원 시작 (국민연금)</li>
+                </ol>
             </section>
 
             <section>
-                <h2>4. 결과 분석하고 계획 수정하기</h2>
-                <p>모든 정보를 입력하고 나면, 시뮬레이터는 '결과' 섹션에 연도별 상세 데이터를 테이블과 차트로 보여줍니다. 각 항목의 의미는 다음과 같습니다.</p>
-                 <ul>
+                <h2>3단계: 결과 분석하기</h2>
+                <p>모든 정보를 입력하면 연도별 상세 데이터가 테이블과 차트로 표시됩니다. 각 항목의 의미는 다음과 같습니다.</p>
+                <ul>
                     <li><strong>연간 투자 원금:</strong> 해당 연도에 추가로 투입된 원금의 합계입니다.</li>
-                    <li><strong>수익/손실:</strong> 투자 자산의 가격 변동으로 인한 평가 차익 또는 차손입니다.</li>
-                    <li><strong>배당금:</strong> 보유 자산에서 발생한 세후 배당금 총액입니다.</li>
-                    <li><strong>양도소득세:</strong> 자산을 매도하여 이익이 발생했을 때 내는 세금입니다. 시뮬레이터는 연간 250만원의 기본 공제를 적용하여 현실적으로 계산합니다.</li>
-                    <li><strong>총 자산:</strong> 해당 연도 말 기준, 당신의 총자산 평가액입니다. 이 숫자가 0이 되지 않고 möglichst lange 유지되는 것이 중요합니다.</li>
-                    <li><strong>순 현금 흐름:</strong> 해당 연도에 당신이 실제로 생활비 등으로 사용할 수 있었던 현금의 총액입니다. (월 정기 기타 수입 + 포트폴리오 인출액)</li>
+                    <li><strong>수익:</strong> 투자 자산의 가격 상승으로 인한 평가 차익입니다.</li>
+                    <li><strong>배당금:</strong> 보유 자산에서 발생한 세후 배당금 총액(배당소득세 15.4% 차감 후)입니다.</li>
+                    <li><strong>양도소득세:</strong> 자산 매도 시 발생하는 세금입니다. 연간 250만원 기본 공제 후 초과분의 22%가 과세됩니다.</li>
+                    <li><strong>총 자산:</strong> 해당 연도 말 기준 총자산 평가액입니다. 이 숫자가 가능한 한 오래 유지되는 것이 목표입니다.</li>
+                    <li><strong>순 현금 흐름:</strong> 해당 연도에 실제로 사용 가능한 현금 총액입니다. (기타 수입 + 포트폴리오 인출액)</li>
                 </ul>
-                <p>만약 특정 연도에 자산이 너무 급격히 줄어들거나, 은퇴 후 예상보다 빨리 자산이 고갈된다면 다시 '시나리오' 섹션으로 돌아가세요. 은퇴 시점을 늦추거나, 월 정기 기여금을 늘리거나, 은퇴 후 생활비를 줄이는 등 다양한 변수를 조정하며 당신만의 최적의 은퇴 계획을 찾아보세요. 이 과정 자체가 재정적 미래를 통제하는 첫걸음입니다.</p>
+                <p>자산이 너무 빨리 감소하거나 고갈된다면, 다시 시나리오 섹션으로 돌아가 은퇴 시점을 늦추거나, 기여금을 늘리거나, 생활비를 조정해보세요. 이 반복적인 조정 과정 자체가 재정적 미래를 통제하는 첫걸음입니다.</p>
             </section>
 
-            <footer class="mt-12 pt-6 border-t border-slate-200 dark:border-slate-700">
-                <p class="text-center text-sm text-slate-500">이 글이 도움이 되셨나요? 지금 바로 <a href="/index.html" class="text-primary hover:underline">시뮬레이터로 돌아가</a> 당신의 계획을 세워보세요.</p>
-            </footer>
-        </article>
-    </div>
+            <section>
+                <h2>유용한 부가 기능</h2>
+                <ul>
+                    <li><strong>공유:</strong> 현재 설정을 URL에 압축 저장합니다. 링크를 공유하거나 북마크하면 언제든 동일한 시뮬레이션을 불러올 수 있습니다.</li>
+                    <li><strong>필터:</strong> 특정 나이 구간의 결과만 테이블에 표시합니다. 은퇴 전후 구간을 집중 분석할 때 유용합니다.</li>
+                    <li><strong>차트:</strong> 원금과 수익이 누적되는 과정을 막대 차트로 시각적으로 확인합니다.</li>
+                    <li><strong>이벤트 활성화/비활성화:</strong> 이벤트 카드의 👁 아이콘을 눌러 특정 이벤트를 일시적으로 켜고 끌 수 있습니다. 이벤트 하나가 자산에 미치는 영향을 즉시 비교할 수 있습니다.</li>
+                </ul>
+            </section>
+
+        </div>
+
+        <div class="mt-8 p-6 bg-primary rounded-2xl text-center text-white">
+            <p class="font-bold text-lg">이 가이드가 도움이 되셨나요?</p>
+            <p class="text-blue-100 text-sm mt-1 mb-4">지금 바로 시뮬레이터에서 당신의 은퇴 계획을 세워보세요.</p>
+            <a href="/index.html" class="inline-block px-6 py-2.5 bg-white text-primary font-bold rounded-full text-sm hover:bg-blue-50 transition-colors">시뮬레이터 시작하기 →</a>
+        </div>
+
+        <div class="mt-8">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">관련 가이드</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <a href="guide-4-percent-rule.html" class="block p-4 bg-white rounded-xl border border-slate-200 hover:border-primary hover:shadow-md transition-all">
+                    <p class="text-xs text-primary font-bold mb-1">인출 전략</p>
+                    <p class="font-bold text-slate-900 text-sm">'4% 룰'이란 무엇인가?</p>
+                </a>
+                <a href="guide-fire-korea.html" class="block p-4 bg-white rounded-xl border border-slate-200 hover:border-primary hover:shadow-md transition-all">
+                    <p class="text-xs text-primary font-bold mb-1">FIRE</p>
+                    <p class="font-bold text-slate-900 text-sm">한국인을 위한 FIRE 계획</p>
+                </a>
+            </div>
+        </div>
+
+    </main>
 </body>
 </html>
