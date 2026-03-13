@@ -633,6 +633,8 @@ function simulate() {
     for (let age = calculationStartAge; age <= endAge; age++) {
         const year = startYear + (age - ageNow);
         let yContr = 0, yReturn = 0, yDiv = 0, yWithdrawal = 0, yIncome = 0;
+        let yRealizedGain = 0;   // 연간 실현 매매차익 누적
+        let yCapitalGainTax = 0; // 연간 양도소득세 누적
         portfolioState.forEach(p => { p.yearReturn = 0; p.yearDividend = 0; });
 
         for (let m = 1; m <= 12; m++) {
@@ -654,7 +656,6 @@ function simulate() {
             const activeMonthly = getActiveEventAmount("monthly");
             const withdrawalMonthly = getActiveEventAmount("withdrawal");
             
-            // '월 기타 수입'은 누적됩니다.
             const incomeMonthly = activeEvents
                 .filter(e => e.type === 'income' && (e.age < age || (e.age === age && (e.month || 1) <= m)))
                 .reduce((sum, e) => sum + e.amount, 0);
@@ -704,8 +705,32 @@ function simulate() {
                 yWithdrawal += drawAmount;
                 if (drawAmount > 0) {
                     const fraction = drawAmount / totalDrawable;
-                    portfolioState.forEach(p => { p.balance -= p.balance * fraction; });
+                    portfolioState.forEach(p => {
+                        const withdrawn = p.balance * fraction;
+                        // 매입 원가 대비 차익 추정 (단순화: 수익률 기반)
+                        // 해당 포트폴리오의 누적 수익 비율로 차익 추정
+                        const totalPortfolioBalance = portfolioState.reduce((s, pp) => s + pp.balance, 0);
+                        const gainRatio = totalPortfolioBalance > 0
+                            ? Math.max(0, (p.yearReturn + p.yearDividend) / totalPortfolioBalance)
+                            : 0;
+                        const estimatedGain = withdrawn * gainRatio;
+                        yRealizedGain += estimatedGain;
+                        p.balance -= withdrawn;
+                    });
                 }
+            }
+        }
+
+        // 양도소득세 계산 (연간 합산)
+        // 한국 해외주식 양도세: 연간 실현 차익 250만원 초과분에 22%
+        const CAPITAL_GAIN_EXEMPTION = 2500000; // 250만원
+        if (yRealizedGain > CAPITAL_GAIN_EXEMPTION) {
+            yCapitalGainTax = (yRealizedGain - CAPITAL_GAIN_EXEMPTION) * 0.22;
+            // 세금만큼 포트폴리오에서 추가 차감
+            const taxTotalDrawable = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+            if (taxTotalDrawable > 0) {
+                const taxFraction = Math.min(yCapitalGainTax, taxTotalDrawable) / taxTotalDrawable;
+                portfolioState.forEach(p => { p.balance -= p.balance * taxFraction; });
             }
         }
 
@@ -722,6 +747,8 @@ function simulate() {
             annualWithdrawal: yWithdrawal,
             returnEarned: yReturn,
             dividends: yDiv,
+            capitalGainTax: yCapitalGainTax,
+            realizedGain: yRealizedGain,
             endBalance,
             portfolio: getActivePortfolio(age, 12),
             detailedPortfolio: detailedPortfolioResult
@@ -777,6 +804,9 @@ function buildAnnualRow(y) {
       <td class="px-2 py-2.5 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.annualContribution, true)}</td>
       <td class="px-2 py-2.5 font-bold text-primary">+${fmtMoney(y.returnEarned, true)}</td>
       <td class="px-2 py-2.5 font-medium text-slate-600 dark:text-slate-400">${fmtMoney(y.dividends, true)}</td>
+      <td class="px-2 py-2.5 font-medium text-orange-500 dark:text-orange-400">
+        ${y.capitalGainTax > 0 ? `-${fmtMoney(y.capitalGainTax, true)}` : '-'}
+      </td>
       <td class="px-2 py-2.5 font-medium text-red-600 dark:text-red-400 hidden">-${fmtMoney(y.annualWithdrawal, true)}</td>
       <td class="px-2 py-2.5 font-black">${fmtMoney(y.endBalance, true)}</td>
       <td class="px-2 py-2.5 text-center" title="${fullPortfolioTitle}">${portfolioDisplayHtml}</td>
@@ -802,12 +832,12 @@ function renderAnnualTable(results) {
 function renderChart(results) {
   const filteredYears = results.years.filter(passesFilter);
   const labels = filteredYears.map(y => [`${String(y.year)}`, `${y.age}세`]);
-  let cumulativePrincipal = 0; // Changed from state.inputs.initialInvestment
+  let cumulativePrincipal = 0;
   const principalData = [];
   const returnData = [];
 
   results.years.forEach(year => {
-      cumulativePrincipal += year.annualContribution - year.annualWithdrawal;
+      cumulativePrincipal += year.annualContribution - year.annualWithdrawal - year.capitalGainTax;
       if(passesFilter(year)){
           const principalComponent = Math.max(0, Math.min(cumulativePrincipal, year.endBalance));
           const returnComponent = Math.max(0, year.endBalance - principalComponent);
@@ -909,7 +939,8 @@ function initTooltips() {
       'th-withdrawal': getText('TABLE.TOOLTIP_WITHDRAWAL'),
       'th-cash-flow': getText('TABLE.TOOLTIP_CASH_FLOW'),
       'th-balance': getText('TABLE.TOOLTIP_BALANCE'),
-      'th-portfolio': getText('TABLE.TOOLTIP_PORTFOLIO')
+      'th-portfolio': getText('TABLE.TOOLTIP_PORTFOLIO'),
+      'th-capital-gain-tax': getText('TABLE.TOOLTIP_CAPITAL_GAIN_TAX')
   };
 
   Object.entries(headerTooltips).forEach(([id, text]) => {
@@ -971,6 +1002,12 @@ function updateObservation(results) {
     let msg = ``;
     if (retireRow) msg += getText('OBSERVATION.RETIRE_RESULT', state.inputs.ageRetire, retireRow.year, fmtMoney(retireRow.endBalance, true));
     if (last) msg += getText('OBSERVATION.FINAL_RESULT', state.maxAge, last.year, fmtMoney(last.endBalance, true));
+
+    const firstTaxYear = results.years.find(y => y.capitalGainTax > 0);
+    if (firstTaxYear) {
+        msg += " " + getText('OBSERVATION.TAX_WARNING', firstTaxYear.year, fmtMoney(firstTaxYear.capitalGainTax, true));
+    }
+
     $("observation").innerHTML = msg || getText('OBSERVATION.NO_RESULT');
 
     const sustainableWithdrawalEl = $("sustainableWithdrawal");

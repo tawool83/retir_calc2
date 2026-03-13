@@ -40,13 +40,15 @@ const STRINGS = {
         "FINAL_RESULT": "최대 연령({0}세, {1}년)에 예상되는 총자산은 약 {2}입니다.",
         "NO_RESULT": "결과를 표시할 데이터가 충분하지 않습니다. 설정을 확인하거나 시나리오 이벤트를 추가해 주세요.",
         "SUSTAINABLE_WITHDRAWAL_DETAIL": "은퇴 시점({0}세) 자산을 기준으로 90세에 자산의 20%를 남기는 것을 목표로 할 때, 매월 약 <strong>{1}</strong> 씩 인출할 수 있습니다. 월 기타 수입 {2}을(를) 더하면, 은퇴 후 총 월 생활비는 <strong>{3}</strong>이 됩니다.",
-        "SUSTAINABLE_WITHDRAWAL_NOT_APPLICABLE": "은퇴 자산이 부족하여 90세까지 지속 가능한 월 인출액을 계산할 수 없습니다."
+        "SUSTAINABLE_WITHDRAWAL_NOT_APPLICABLE": "은퇴 자산이 부족하여 90세까지 지속 가능한 월 인출액을 계산할 수 없습니다.",
+        "TAX_WARNING": "※ 양도소득세({0}년 추정 {1})가 자동 반영되었습니다."
     },
     "TABLE": {
         "HEADER_YEAR_AGE": "연도/나이",
         "HEADER_ANNUAL_CONTRIBUTION": "연간 투자",
         "HEADER_RETURN": "평가수익",
         "HEADER_DIVIDEND": "배당금",
+        "HEADER_CAPITAL_GAIN_TAX": "양도세",
         "HEADER_WITHDRAWAL": "연간 인출",
         "HEADER_BALANCE": "연말 잔고",
         "HEADER_PORTFOLIO": "포트폴리오",
@@ -55,6 +57,7 @@ const STRINGS = {
         "TOOLTIP_ANNUAL_CONTRIBUTION": "해당 연도에 투자된 총금액 (월 투자금 + 일시금).",
         "TOOLTIP_RETURN": "포트폴리오의 가격 변동으로 인한 연간 수익입니다.",
         "TOOLTIP_DIVIDEND": "세금(15.4%)을 제외하고 받은 총 연간 배당금입니다.",
+        "TOOLTIP_CAPITAL_GAIN_TAX": "해외주식 연간 실현 차익 250만원 초과분에 부과되는 양도소득세(22%)입니다.",
         "TOOLTIP_WITHDRAWAL": "생활비 또는 기타 목적으로 포트폴리오에서 인출된 총금액입니다.",
         "TOOLTIP_CASH_FLOW": "연간 인출액과 투자와 무관한 기타 수입(예: 연금)을 합산한 순 현금 흐름입니다.",
         "TOOLTIP_BALANCE": "연말 기준 포트폴리오의 총 평가액입니다.",
