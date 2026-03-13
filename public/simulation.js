@@ -123,16 +123,17 @@ function simulate() {
                 uninvestedCash = 0;
             }
 
+            let monthlyDividends = 0;
             portfolioState.forEach(p => {
                 const r = p.balance * (p.preset.annualReturnPct / 100 / 12);
                 const d = p.balance * (p.preset.dividendPct / 100 / 12) * (1 - state.dividendTaxRate);
-                p.balance += r + d;
-                // 배당금은 이미 15.4% 과세된 금액이므로 재투자 시 취득원가에 포함.
-                // 이렇게 해야 (balance - costBasis)가 순수 매매차익(가격상승분)만 반영됨.
-                p.costBasis += d;
+                p.balance += r;
                 p.yearReturn += r;
-                p.yearDividend += d;
                 yReturn += r;
+                
+                // 배당금은 재투자되지 않고, 인출에 우선 사용되기 위해 별도로 처리
+                monthlyDividends += d;
+                p.yearDividend += d;
                 yDiv += d;
             });
             
@@ -140,11 +141,14 @@ function simulate() {
             const totalWithdrawalForMonth = withdrawalMonthly + lumpSumWithdrawal;
 
             if (totalWithdrawalForMonth > 0) {
-                let totalDrawable = portfolioState.reduce((sum, p) => sum + p.balance, 0);
-                const drawAmount = Math.min(totalDrawable, totalWithdrawalForMonth);
-                yWithdrawal += drawAmount;
-                if (drawAmount > 0) {
-                    const fraction = drawAmount / totalDrawable;
+                let totalDrawableBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+                const actualTotalWithdrawal = Math.min(totalDrawableBalance + monthlyDividends, totalWithdrawalForMonth);
+                yWithdrawal += actualTotalWithdrawal;
+                
+                const saleAmount = Math.max(0, actualTotalWithdrawal - monthlyDividends);
+
+                if (saleAmount > 0) {
+                    const fraction = saleAmount / totalDrawableBalance;
                     portfolioState.forEach(p => {
                         const withdrawn = p.balance * fraction;
                         const gainRatio = p.balance > 0 ? Math.max(0, (p.balance - p.costBasis) / p.balance) : 0;
@@ -154,6 +158,24 @@ function simulate() {
                         p.balance -= withdrawn;
                         p.costBasis -= p.costBasis * fraction;
                     });
+                }
+                
+                // 배당금으로 충당하고 남은 금액 재투자
+                const reinvestment = Math.max(0, monthlyDividends - actualTotalWithdrawal);
+                if (reinvestment > 0) {
+                     if (totalDrawableBalance > 0) {
+                        portfolioState.forEach(p => {
+                            const reinvestAmount = reinvestment * (p.balance / totalDrawableBalance);
+                            p.balance += reinvestAmount;
+                            p.costBasis += reinvestAmount;
+                        });
+                    } else if (portfolioState.length > 0) {
+                         portfolioState.forEach(p => {
+                            const reinvestAmount = reinvestment * p.percentage;
+                            p.balance += reinvestAmount;
+                            p.costBasis += reinvestAmount;
+                        });
+                    }
                 }
             }
         }
@@ -172,9 +194,9 @@ function simulate() {
         }
 
         const endBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0) + uninvestedCash;
-        let detailedPortfolioResult = portfolioState.map(p => ({ name: p.preset.name, balance: p.balance, return: p.yearReturn, dividend: p.yearDividend }));
+        let detailedPortfolioResult = portfolioState.map(p => ({ name: p.preset.name, balance: p.balance, return: p.yearReturn, dividend: p.yearDividend, costBasis: p.costBasis }));
         if (uninvestedCash > 0) {
-            detailedPortfolioResult.push({ name: getText('TABLE.UNINVESTED_CASH'), balance: uninvestedCash, return: 0, dividend: 0 });
+            detailedPortfolioResult.push({ name: getText('TABLE.UNINVESTED_CASH'), balance: uninvestedCash, return: 0, dividend: 0, costBasis: uninvestedCash });
         }
 
         years.push({
