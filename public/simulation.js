@@ -108,6 +108,7 @@ function simulate() {
                 uninvestedCash = 0;
             }
 
+            let monthlyDividendsEarned = 0;
             portfolioState.forEach(p => {
                 const r = p.balance * (p.preset.annualReturnPct / 100 / 12);
                 const d = p.balance * (p.preset.dividendPct / 100 / 12) * (1 - state.dividendTaxRate);
@@ -116,6 +117,7 @@ function simulate() {
                 p.yearDividend += d;
                 yReturn += r;
                 yDiv += d;
+                monthlyDividendsEarned += d;
             });
 
             const lumpSumWithdrawal = lumpSum < 0 ? Math.abs(lumpSum) : 0;
@@ -126,19 +128,23 @@ function simulate() {
                 const drawAmount = Math.min(totalDrawable, totalWithdrawalForMonth);
                 yWithdrawal += drawAmount;
                 if (drawAmount > 0) {
-                    const fraction = drawAmount / totalDrawable;
-                    portfolioState.forEach(p => {
-                        const withdrawn = p.balance * fraction;
-                        // 매입 원가 대비 차익 추정 (단순화: 수익률 기반)
-                        // 해당 포트폴리오의 누적 수익 비율로 차익 추정
-                        const totalPortfolioBalance = portfolioState.reduce((s, pp) => s + pp.balance, 0);
-                        const gainRatio = totalPortfolioBalance > 0
-                            ? Math.max(0, (p.yearReturn + p.yearDividend) / totalPortfolioBalance)
-                            : 0;
-                        const estimatedGain = withdrawn * gainRatio;
-                        yRealizedGain += estimatedGain;
-                        p.balance -= withdrawn;
-                    });
+                    // 배당금 범위 내 인출은 주식 매도가 아니므로 양도세 없음.
+                    // 배당금을 초과하는 인출분만 실제 매도로 간주.
+                    const salePortion = Math.max(0, drawAmount - monthlyDividendsEarned);
+                    if (salePortion > 0) {
+                        const saleFraction = salePortion / totalDrawable;
+                        portfolioState.forEach(p => {
+                            const sold = p.balance * saleFraction;
+                            // 양도소득세는 매매차익(yearReturn)에만 적용 (배당은 이미 과세됨)
+                            const gainRatio = totalDrawable > 0
+                                ? Math.max(0, p.yearReturn / totalDrawable)
+                                : 0;
+                            yRealizedGain += sold * gainRatio;
+                        });
+                    }
+                    // 실제 잔고 차감은 전체 인출액 기준
+                    const drawFraction = drawAmount / totalDrawable;
+                    portfolioState.forEach(p => { p.balance -= p.balance * drawFraction; });
                 }
             }
         }
