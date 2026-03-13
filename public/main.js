@@ -110,3 +110,5 @@ function loadPakoAndBoot() {
     };
     document.head.appendChild(script);
 }
+
+loadPakoAndBoot();
