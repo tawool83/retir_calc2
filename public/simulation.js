@@ -14,16 +14,16 @@ function getActivePortfolio(age, month) {
     const latestAge = portfolioEvents[0].age;
     const latestMonth = portfolioEvents[0].month || 1;
     const activeEvents = portfolioEvents.filter(e => e.age === latestAge && (e.month || 1) === latestMonth);
-
+    
     const totalWeight = activeEvents.reduce((sum, e) => sum + e.weight, 0);
     if (totalWeight === 0) return [];
 
     return activeEvents.map(e => {
         const preset = state.presets.find(p => p.id === e.presetId);
-        return {
-            preset: preset || { annualReturnPct: 0, dividendPct: 0, name: 'Unknown' },
-            weight: e.weight,
-            percentage: e.weight / totalWeight
+        return { 
+            preset: preset || { annualReturnPct: 0, dividendPct: 0, name: 'Unknown' }, 
+            weight: e.weight, 
+            percentage: e.weight / totalWeight 
         };
     });
 }
@@ -48,15 +48,15 @@ function simulate() {
 
     let initialPortfolioConfig = getActivePortfolio(calculationStartAge, 1);
     if (initialPortfolioConfig.length > 0) {
-        portfolioState = initialPortfolioConfig.map(p => ({ ...p, balance: 0, yearReturn: 0, yearDividend: 0 }));
+        portfolioState = initialPortfolioConfig.map(p => ({ ...p, balance: 0, costBasis: 0, yearReturn: 0, yearDividend: 0 }));
     }
     let lastPortfolioSignature = getPortfolioSignature(initialPortfolioConfig);
 
     for (let age = calculationStartAge; age <= endAge; age++) {
         const year = startYear + (age - ageNow);
         let yContr = 0, yReturn = 0, yDiv = 0, yWithdrawal = 0, yIncome = 0;
-        let yRealizedGain = 0;   // 연간 실현 매매차익 누적
-        let yCapitalGainTax = 0; // 연간 양도소득세 누적
+        let yRealizedGain = 0;
+        let yCapitalGainTax = 0;
         portfolioState.forEach(p => { p.yearReturn = 0; p.yearDividend = 0; });
 
         for (let m = 1; m <= 12; m++) {
@@ -65,11 +65,18 @@ function simulate() {
 
             if (currentPortfolioSignature !== lastPortfolioSignature && currentPortfolioSignature !== '') {
                 const totalBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0) + uninvestedCash;
-                portfolioState = currentPortfolioConfig.map(p => ({ ...p, balance: totalBalance * p.percentage, yearReturn: p.yearReturn, yearDividend: p.yearDividend }));
+                const totalCostBasis = portfolioState.reduce((sum, p) => sum + p.costBasis, 0);
+                portfolioState = currentPortfolioConfig.map(p => ({
+                    ...p, 
+                    balance: totalBalance * p.percentage, 
+                    costBasis: totalCostBasis * p.percentage, 
+                    yearReturn: 0, 
+                    yearDividend: 0 
+                }));
                 uninvestedCash = 0;
                 lastPortfolioSignature = currentPortfolioSignature;
             }
-
+            
             const getActiveEventAmount = (type) => activeEvents
                 .filter(e => e.type === type && (e.age < age || (e.age === age && (e.month || 1) <= m)))
                 .sort((a,b) => (b.age - a.age) || ((b.month || 1) - (a.month || 1)))
@@ -77,7 +84,7 @@ function simulate() {
 
             const activeMonthly = getActiveEventAmount("monthly");
             const withdrawalMonthly = getActiveEventAmount("withdrawal");
-
+            
             const incomeMonthly = activeEvents
                 .filter(e => e.type === 'income' && (e.age < age || (e.age === age && (e.month || 1) <= m)))
                 .reduce((sum, e) => sum + e.amount, 0);
@@ -85,7 +92,7 @@ function simulate() {
             let lumpSum = activeEvents
                 .filter(e => e.type === 'lump' && e.age === age && (e.month || 1) === m)
                 .reduce((sum, e) => sum + e.amount, 0);
-
+            
             if (age === ageNow && m === 1) {
                 lumpSum += initialInvestment;
             }
@@ -96,30 +103,39 @@ function simulate() {
             uninvestedCash += monthContribution;
 
             if (uninvestedCash > 0 && currentPortfolioConfig.length > 0) {
-                 if (portfolioState.length === 0) {
-                    portfolioState = currentPortfolioConfig.map(p => ({ ...p, balance: 0, yearReturn: 0, yearDividend: 0 }));
+                if (portfolioState.length === 0) {
+                    portfolioState = currentPortfolioConfig.map(p => ({ ...p, balance: 0, costBasis: 0, yearReturn: 0, yearDividend: 0 }));
                 }
                 const totalInvested = portfolioState.reduce((sum, p) => sum + p.balance, 0);
                 if (totalInvested > 0) {
-                    portfolioState.forEach(p => { p.balance += uninvestedCash * (p.balance / totalInvested); });
+                    portfolioState.forEach(p => {
+                        const investmentAmount = uninvestedCash * (p.balance / totalInvested);
+                        p.balance += investmentAmount;
+                        p.costBasis += investmentAmount;
+                    });
                 } else {
-                    portfolioState.forEach(p => { p.balance += uninvestedCash * p.percentage; });
+                    portfolioState.forEach(p => {
+                        const investmentAmount = uninvestedCash * p.percentage;
+                        p.balance += investmentAmount;
+                        p.costBasis += investmentAmount;
+                    });
                 }
                 uninvestedCash = 0;
             }
 
-            let monthlyDividendsEarned = 0;
             portfolioState.forEach(p => {
                 const r = p.balance * (p.preset.annualReturnPct / 100 / 12);
                 const d = p.balance * (p.preset.dividendPct / 100 / 12) * (1 - state.dividendTaxRate);
                 p.balance += r + d;
+                // 배당금은 이미 15.4% 과세된 금액이므로 재투자 시 취득원가에 포함.
+                // 이렇게 해야 (balance - costBasis)가 순수 매매차익(가격상승분)만 반영됨.
+                p.costBasis += d;
                 p.yearReturn += r;
                 p.yearDividend += d;
                 yReturn += r;
                 yDiv += d;
-                monthlyDividendsEarned += d;
             });
-
+            
             const lumpSumWithdrawal = lumpSum < 0 ? Math.abs(lumpSum) : 0;
             const totalWithdrawalForMonth = withdrawalMonthly + lumpSumWithdrawal;
 
@@ -128,37 +144,30 @@ function simulate() {
                 const drawAmount = Math.min(totalDrawable, totalWithdrawalForMonth);
                 yWithdrawal += drawAmount;
                 if (drawAmount > 0) {
-                    // 배당금 범위 내 인출은 주식 매도가 아니므로 양도세 없음.
-                    // 배당금을 초과하는 인출분만 실제 매도로 간주.
-                    const salePortion = Math.max(0, drawAmount - monthlyDividendsEarned);
-                    if (salePortion > 0) {
-                        const saleFraction = salePortion / totalDrawable;
-                        portfolioState.forEach(p => {
-                            const sold = p.balance * saleFraction;
-                            // 양도소득세는 매매차익(yearReturn)에만 적용 (배당은 이미 과세됨)
-                            const gainRatio = totalDrawable > 0
-                                ? Math.max(0, p.yearReturn / totalDrawable)
-                                : 0;
-                            yRealizedGain += sold * gainRatio;
-                        });
-                    }
-                    // 실제 잔고 차감은 전체 인출액 기준
-                    const drawFraction = drawAmount / totalDrawable;
-                    portfolioState.forEach(p => { p.balance -= p.balance * drawFraction; });
+                    const fraction = drawAmount / totalDrawable;
+                    portfolioState.forEach(p => {
+                        const withdrawn = p.balance * fraction;
+                        const gainRatio = p.balance > 0 ? Math.max(0, (p.balance - p.costBasis) / p.balance) : 0;
+                        const estimatedGain = withdrawn * gainRatio;
+                        yRealizedGain += estimatedGain;
+
+                        p.balance -= withdrawn;
+                        p.costBasis -= p.costBasis * fraction;
+                    });
                 }
             }
         }
 
-        // 양도소득세 계산 (연간 합산)
-        // 한국 해외주식 양도세: 연간 실현 차익 250만원 초과분에 22%
-        const CAPITAL_GAIN_EXEMPTION = 2500000; // 250만원
+        const CAPITAL_GAIN_EXEMPTION = 2500000;
         if (yRealizedGain > CAPITAL_GAIN_EXEMPTION) {
             yCapitalGainTax = (yRealizedGain - CAPITAL_GAIN_EXEMPTION) * 0.22;
-            // 세금만큼 포트폴리오에서 추가 차감
             const taxTotalDrawable = portfolioState.reduce((sum, p) => sum + p.balance, 0);
             if (taxTotalDrawable > 0) {
                 const taxFraction = Math.min(yCapitalGainTax, taxTotalDrawable) / taxTotalDrawable;
-                portfolioState.forEach(p => { p.balance -= p.balance * taxFraction; });
+                portfolioState.forEach(p => {
+                    p.balance -= p.balance * taxFraction;
+                    p.costBasis -= p.costBasis * taxFraction;
+                });
             }
         }
 
