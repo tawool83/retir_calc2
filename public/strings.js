@@ -76,7 +76,7 @@ const STRINGS = {
         "TYPE_LABEL": "유형",
         "TYPE_PORTFOLIO": "포트폴리오 변경",
         "TYPE_MONTHLY": "월 분할(정기) 투자",
-        "TYPE_LUMP": "일시금 투자",
+        "TYPE_LUMP": "일시금 입+/출금-",
         "TYPE_WITHDRAWAL": "월 정기 인출 (변경)",
         "TYPE_INCOME": "월 기타 수입",
         "PRESET_LABEL": "포트폴리오 프리셋",
