@@ -3,7 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>은퇴 계산기</title>
+  <title>은퇴 시뮬레이터 | 현실적인 재정 계획</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="다양한 금융 시나리오와 세금 계산을 통해 당신의 은퇴 계획을 현실적으로 시뮬레이션해 보세요. 동적 이벤트 기반으로 미래 자산을 예측하고, 재정적 독립을 준비할 수 있습니다.">
+  <meta name="keywords" content="은퇴, 은퇴 계산기, 재정 계획, 노후 준비, 자산 관리, 투자 시뮬레이션, 파이어족, FIRE">
+
+  <!-- Open Graph (OG) Tags for Social Media -->
+  <meta property="og:title" content="은퇴 시뮬레이터 | 현실적인 재정 계획">
+  <meta property="og:description" content="다양한 금융 시나리오와 세금 계산을 통해 당신의 은퇴 계획을 현실적으로 시뮬레이션해 보세요.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://[YOUR_DOMAIN_HERE]">
+  <meta property="og:image" content="https://[YOUR_DOMAIN_HERE]/og-preview.png">
+  <meta property="og:site_name" content="은퇴 시뮬레이터">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -26,7 +39,6 @@
       margin: 0;
       font-family: 'Manrope', sans-serif;
       background-color: #f8fafc;
-      /* Default padding for desktop sidebar */
       padding-left: calc(5rem + 2rem);
       transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -83,35 +95,28 @@
       border: none;
     }
     
-    /* Responsive styles for mobile (screens <= 768px) */
     @media screen and (max-width: 768px) {
       body {
-        /* Remove side padding and add top padding for the horizontal bar */
         padding-left: 0;
         padding-top: 5rem; /* Height of the top nav bar */
       }
 
       #sidebar {
-        /* Transform sidebar into a fixed top bar */
         width: 100%;
         height: 5rem;
         top: 0;
         left: 0;
         bottom: auto;
-        
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
-
         padding: 0 1rem;
         gap: 1rem;
-        
         border-radius: 0;
         border-r: none;
         border-b: 1px solid #374151; /* slate-700 */
       }
       
-      /* Disable the hover-to-expand effect on mobile */
       #sidebar:hover {
           width: 100%;
       }
@@ -125,12 +130,10 @@
         width: auto;
       }
 
-      /* Hide text labels on mobile to save space */
       .nav-item .text {
         display: none;
       }
       
-      /* Make nav items icon-only circles/squares */
       .nav-item {
           width: 3rem;   /* size-12 */
           height: 3rem;
@@ -139,7 +142,6 @@
           gap: 0;
       }
 
-      /* Adjust settings container */
       #settings-container {
         width: auto;
         padding: 0;
@@ -149,14 +151,11 @@
 </head>
 <body>
 
-  <!-- Sidebar (Desktop) / Topbar (Mobile) -->
   <nav id="sidebar" class="w-20 hover:w-60 bg-sidebar-dark border-r border-slate-800 flex flex-col items-center py-8 gap-10 fixed h-[calc(100%-2rem)] top-4 left-4 z-50 rounded-2xl">
-    <!-- Logo -->
     <a href="#" class="size-12 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0">
       <span class="material-symbols-outlined text-white text-3xl">account_balance_wallet</span>
     </a>
     
-    <!-- Navigation Links -->
     <div id="nav-links" class="flex flex-col gap-4 flex-1 w-full px-4">
       <a href="retir-calc.html" target="content-frame" class="nav-item active rounded-xl" title="Calculator">
         <span class="icon material-symbols-outlined">calculate</span>
@@ -166,13 +165,16 @@
         <span class="icon material-symbols-outlined">info</span>
         <span class="text font-semibold">소개</span>
       </a>
+       <a href="blog.html" target="content-frame" class="nav-item rounded-xl" title="Guide">
+        <span class="icon material-symbols-outlined">menu_book</span>
+        <span class="text font-semibold">가이드</span>
+      </a>
       <a href="community.html" target="content-frame" class="nav-item rounded-xl" title="Community">
         <span class="icon material-symbols-outlined">forum</span>
         <span class="text font-semibold">커뮤니티</span>
       </a>
     </div>
     
-    <!-- Settings -->
     <div id="settings-container" class="flex flex-col gap-4 w-full px-4">
       <button class="nav-item rounded-xl">
         <span class="icon material-symbols-outlined text-[20px]">settings</span>
@@ -181,10 +183,15 @@
     </div>
   </nav>
 
-  <!-- Main Content -->
   <main id="content">
     <iframe name="content-frame" src="retir-calc.html"></iframe>
   </main>
+
+  <footer class="absolute bottom-4 right-8 text-xs text-slate-500 z-50">
+      <a href="/privacy.html" target="_blank" class="hover:text-primary">개인정보처리방침</a>
+      <span class="mx-2">|</span>
+      <a href="/terms.html" target="_blank" class="hover:text-primary">이용약관</a>
+  </footer>
 
   <script>
     const navLinksContainer = document.getElementById('nav-links');

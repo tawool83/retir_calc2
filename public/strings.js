@@ -52,7 +52,7 @@ const STRINGS = {
         "HEADER_WITHDRAWAL": "연간 인출",
         "HEADER_BALANCE": "연말 잔고",
         "HEADER_PORTFOLIO": "포트폴리오",
-        "HEADER_CASH_FLOW": "순 현금흐름",
+        "HEADER_CASH_FLOW": "현금흐름",
         "TOOLTIP_YEAR_AGE": "시뮬레이션 연도와 해당 연도의 나이입니다.",
         "TOOLTIP_ANNUAL_CONTRIBUTION": "해당 연도에 투자된 총금액 (월 투자금 + 일시금).",
         "TOOLTIP_RETURN": "포트폴리오의 가격 변동으로 인한 연간 수익입니다.",
