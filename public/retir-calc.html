@@ -1,3 +1,15 @@
+
+<script>
+  // iframe 안에서 실행되는지를 확인하고, 그렇지 않으면 메인 페이지로 리디렉션합니다.
+  if (window.self === window.top) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const data = urlParams.get('data');
+    if (data) {
+      // 데이터가 있으면 index.html로 리디렉션하면서 데이터를 전달합니다.
+      window.location.href = `index.html?data=${data}`;
+    }
+  }
+</script>
 <!DOCTYPE html>
 <html class="light" lang="ko">
 <head>

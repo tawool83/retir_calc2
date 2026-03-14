@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -200,6 +201,14 @@
   </footer>
 
   <script>
+    // URL에서 'data' 파라미터를 읽어 iframe의 src에 추가합니다.
+    const urlParams = new URLSearchParams(window.location.search);
+    const data = urlParams.get('data');
+    if (data) {
+      const iframe = document.querySelector('iframe[name="content-frame"]');
+      iframe.src = `retir-calc.html?data=${data}`;
+    }
+
     const navLinksContainer = document.getElementById('nav-links');
     
     navLinksContainer.addEventListener('click', (e) => {
