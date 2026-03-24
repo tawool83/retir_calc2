@@ -1,7 +1,7 @@
 const STRINGS = {
-    "APP_TITLE": "파이어족이 되기 위한 긴 여정 | 미래를 계획하세요",
+    "APP_TITLE": "은퇴 계쇡 세우기 | 미래를 계획하세요",
     "HEADER": {
-        "TITLE": "파이어족을 위한 긴 여정",
+        "TITLE": "은퇴 계쇡 세우기",
         "SUBTITLE": "동적 시나리오를 통해 재정적 미래를 계획하세요."
     },
     "CONFIG": {
