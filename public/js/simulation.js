@@ -127,7 +127,12 @@ function simulate() {
             const yearsElapsed = age - ageNow;
             portfolioState.forEach(p => {
                 const effectiveReturnPct = p.preset.stockGrowthPct != null ? p.preset.stockGrowthPct : p.preset.annualReturnPct;
-                const effectiveDividendPct = p.preset.dividendPct * Math.pow(1 + (p.preset.dividendGrowthPct ?? 0) / 100, yearsElapsed);
+                // 배당 성장률은 주가 성장률 대비 초과분만 yield에 반영
+                // (balance가 이미 stockGrowthPct로 성장하므로, 중복 적용 방지)
+                const effectiveDividendPct = p.preset.dividendPct * Math.pow(
+                    (1 + (p.preset.dividendGrowthPct ?? 0) / 100) / (1 + effectiveReturnPct / 100),
+                    yearsElapsed
+                );
                 const r = p.balance * (effectiveReturnPct / 100 / 12);
                 const d = p.balance * (effectiveDividendPct / 100 / 12) * (1 - state.dividendTaxRate);
                 p.balance += r;
