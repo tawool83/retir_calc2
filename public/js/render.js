@@ -2,6 +2,11 @@
  *  Render table + Chart
  *  ============================= */
 function buildAnnualRow(y) {
+    const yearsFromStart = y.age - (state.results?.ageNow ?? y.age);
+    const inflationFactor = Math.pow(1 + (state.inputs.inflationRate || 0) / 100, yearsFromStart);
+    const realBalance = y.endBalance / inflationFactor;
+    const realCashFlow = y.annualCashFlow / inflationFactor;
+
     const fullPortfolioTitle = y.portfolio.map(p => `${p.preset.name}: ${(p.percentage*100).toFixed(0)}%`).join(', ');
     let portfolioDisplayHtml;
     if (y.portfolio.length === 0) {
@@ -21,14 +26,11 @@ function buildAnnualRow(y) {
 
     let highlight = '';
     const eventsAtAge = state.events.filter(e => e.age === y.age && e.type !== 'portfolio');
-    if (y.age === state.inputs.ageRetire) {
-        highlight = "bg-emerald-50/60 dark:bg-emerald-900/10";
-    } else if (eventsAtAge.length > 0) {
+    if (eventsAtAge.length > 0) {
         highlight = "bg-teal-50/60 dark:bg-teal-900/20";
     }
 
     let ageExtra = [];
-    if (y.age === state.inputs.ageRetire) ageExtra.push('❤️');
     ageExtra.push(...eventsAtAge.map(e => e.icon || ' '));
     const ageExtraHtml = ageExtra.filter(i => i.trim()).join('');
 
@@ -47,9 +49,19 @@ function buildAnnualRow(y) {
         ${y.capitalGainTax > 0 ? `-${fmtMoney(y.capitalGainTax, true)}` : '-'}
       </td>
       <td class="px-2 py-2.5 font-medium text-red-600 dark:text-red-400 hidden">-${fmtMoney(y.annualWithdrawal, true)}</td>
-      <td class="px-2 py-2.5 font-black">${fmtMoney(y.endBalance, true)}</td>
+      <td class="px-2 py-2.5 font-black">
+        <div class="flex flex-col">
+          <span>${fmtMoney(y.endBalance, true)}</span>
+          <span class="text-xs text-slate-400 font-normal">실질 ${fmtMoney(realBalance, true)}</span>
+        </div>
+      </td>
       <td class="px-2 py-2.5 text-center" title="${fullPortfolioTitle}">${portfolioDisplayHtml}</td>
-      <td class="px-2 py-2.5 font-medium text-sky-600 dark:text-sky-300">+${fmtMoney(y.annualCashFlow, true)}</td>
+      <td class="px-2 py-2.5 font-medium text-sky-600 dark:text-sky-300">
+        <div class="flex flex-col">
+          <span>+${fmtMoney(y.annualCashFlow, true)}</span>
+          <span class="text-xs text-slate-400 font-normal">실질 +${fmtMoney(realCashFlow, true)}</span>
+        </div>
+      </td>
     </tr>
   `;
 }
@@ -234,10 +246,8 @@ function calculateSustainableWithdrawal(retirementBalance, retirementAge, portfo
 }
 
 function updateObservation(results) {
-    const retireRow = results.years.find(y => y.age === state.inputs.ageRetire);
     const last = results.years[results.years.length - 1];
     let msg = ``;
-    if (retireRow) msg += getText('OBSERVATION.RETIRE_RESULT', state.inputs.ageRetire, retireRow.year, fmtMoney(retireRow.endBalance, true));
     if (last) msg += getText('OBSERVATION.FINAL_RESULT', state.maxAge, last.year, fmtMoney(last.endBalance, true));
 
     const firstTaxYear = results.years.find(y => y.capitalGainTax > 0);
@@ -246,37 +256,7 @@ function updateObservation(results) {
     }
 
     $("observation").innerHTML = msg || getText('OBSERVATION.NO_RESULT');
-
-    const sustainableWithdrawalEl = $("sustainableWithdrawal");
-    if (retireRow && retireRow.endBalance > 0) {
-        const retirementPortfolioConfig = getActivePortfolio(state.inputs.ageRetire, 1);
-        if (retirementPortfolioConfig.length > 0) {
-            const weightedReturn = retirementPortfolioConfig.reduce((acc, p) => acc + p.percentage * (p.preset.annualReturnPct/100), 0);
-            const weightedDividend = retirementPortfolioConfig.reduce((acc, p) => acc + p.percentage * (p.preset.dividendPct/100), 0);
-            const portfolioForWithdrawal = {
-                annualReturnPct: weightedReturn * 100,
-                dividendPct: weightedDividend * 100
-            };
-
-            const sustainableMonthly = calculateSustainableWithdrawal(retireRow.endBalance, state.inputs.ageRetire, portfolioForWithdrawal);
-
-            const otherMonthlyIncome = state.events
-                .filter(e => e.type === 'income' && e.enabled && (e.age < state.inputs.ageRetire || (e.age === state.inputs.ageRetire && (e.month || 1) <= 1)))
-                .reduce((sum, e) => sum + e.amount, 0);
-
-            const totalMonthly = sustainableMonthly + otherMonthlyIncome;
-
-            if (sustainableMonthly > 0) {
-                sustainableWithdrawalEl.innerHTML = getText('OBSERVATION.SUSTAINABLE_WITHDRAWAL_DETAIL', state.inputs.ageRetire, fmtMoney(sustainableMonthly), fmtMoney(otherMonthlyIncome), fmtMoney(totalMonthly));
-            } else {
-                sustainableWithdrawalEl.innerHTML = getText('OBSERVATION.SUSTAINABLE_WITHDRAWAL_NOT_APPLICABLE');
-            }
-        } else {
-            sustainableWithdrawalEl.innerHTML = "";
-        }
-    } else {
-        sustainableWithdrawalEl.innerHTML = "";
-    }
+    $("sustainableWithdrawal").innerHTML = "";
 }
 
 /** =============================

@@ -35,7 +35,9 @@ function getPortfolioSignature(portfolio) {
 
 function simulate() {
     syncUiToStateFromInputs();
-    const { ageNow, ageRetire, initialInvestment } = state.inputs;
+    const { initialInvestment } = state.inputs;
+    const enabledEvents = state.events.filter(e => e.enabled);
+    const ageNow = enabledEvents.length > 0 ? Math.min(...enabledEvents.map(e => e.age)) : 30;
     const endAge = state.maxAge;
     const startYear = state.startYear;
     const activeEvents = state.events.filter(e => e.enabled);
@@ -245,5 +247,5 @@ function simulate() {
         });
     }
 
-    return { years, startYear, ageNow, endAge, ageRetire };
+    return { years, startYear, ageNow, endAge };
 }

@@ -174,8 +174,8 @@ function openEventDialog(eventId = null) {
     } else {
         title.textContent = getText("EVENT_DIALOG.ADD_TITLE");
         saveBtn.textContent = getText("EVENT_DIALOG.ADD_BUTTON");
-        const ageNow = state.inputs.ageNow;
-        $("dlgAge").value = clamp(ageNow + 5, 0, 120);
+        const minAge = state.events.length > 0 ? Math.min(...state.events.map(e => e.age)) : 30;
+        $("dlgAge").value = clamp(minAge, 0, 120);
         $("dlgMonth").value = 1;
         $("dlgType").value = "portfolio";
         $("dlgLabel").value = "";

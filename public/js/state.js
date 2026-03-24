@@ -50,8 +50,7 @@ const state = {
   presets: [...defaultPresets],
   editingPresetId: null,
   inputs: {
-    ageNow: 30,
-    ageRetire: 65,
+    inflationRate: 3,
     initialInvestment: 0,
     monthlyContribution: 0,
     filterEnabled: false,

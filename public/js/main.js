@@ -2,8 +2,7 @@
  *  UI binding helpers
  *  ============================= */
 function syncStateToUi() {
-  $("ageNow").value = state.inputs.ageNow;
-  $("ageRetire").value = state.inputs.ageRetire;
+  $("inflationRate").value = state.inputs.inflationRate;
   $("filterEnabled").checked = state.inputs.filterEnabled;
   $("filterAgeFrom").value = state.inputs.filterAgeFrom;
   $("filterAgeTo").value = state.inputs.filterAgeTo;
@@ -12,8 +11,7 @@ function syncStateToUi() {
 }
 
 function syncUiToStateFromInputs() {
-  state.inputs.ageNow = clamp(Number($("ageNow").value || 0), 0, 120);
-  state.inputs.ageRetire = clamp(Number($("ageRetire").value || 0), 0, 120);
+  state.inputs.inflationRate = clamp(Number($("inflationRate").value || 0), 0, 100);
   state.inputs.filterEnabled = $("filterEnabled").checked;
   state.inputs.filterAgeFrom = clamp(Number($("filterAgeFrom").value || 0), 0, 120);
   state.inputs.filterAgeTo = clamp(Number($("filterAgeTo").value || 0), 0, 120);
@@ -34,7 +32,7 @@ function updateFilterButton() {
  *  Inputs init
  *  ============================= */
 function initInputs() {
-  const inputsToWatch = ["ageNow", "ageRetire"];
+  const inputsToWatch = ["inflationRate"];
   inputsToWatch.forEach(id => {
       const el = $(id);
       if (!el) return;
