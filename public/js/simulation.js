@@ -131,8 +131,14 @@ function simulate() {
                 // balance가 이미 annualReturnPct로 성장하므로, yield에는 (dg - sg) 초과분만 반영
                 // dividendGrowthPct = 0 이면 기존과 동일하게 고정 yield 사용
                 const dg = p.preset.dividendGrowthPct ?? 0;
+                // 배당 수익률이 총 수익률(주가성장 + 초기배당)을 초과하지 않도록 상한 적용
+                // dg >> sg 인 경우 장기간에서 배당률이 비현실적으로 폭발하는 것을 방지
+                const maxDividendPct = effectiveReturnPct + p.preset.dividendPct;
                 const effectiveDividendPct = dg > 0
-                    ? p.preset.dividendPct * Math.pow((1 + dg / 100) / (1 + effectiveReturnPct / 100), yearsElapsed)
+                    ? Math.min(
+                        p.preset.dividendPct * Math.pow((1 + dg / 100) / (1 + effectiveReturnPct / 100), yearsElapsed),
+                        maxDividendPct
+                      )
                     : p.preset.dividendPct;
                 const r = p.balance * (effectiveReturnPct / 100 / 12);
                 const d = p.balance * (effectiveDividendPct / 100 / 12) * (1 - state.dividendTaxRate);
