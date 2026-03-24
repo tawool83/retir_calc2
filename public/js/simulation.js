@@ -124,13 +124,16 @@ function simulate() {
             }
 
             let monthlyDividends = 0;
+            const yearsElapsed = age - ageNow;
             portfolioState.forEach(p => {
-                const r = p.balance * (p.preset.annualReturnPct / 100 / 12);
-                const d = p.balance * (p.preset.dividendPct / 100 / 12) * (1 - state.dividendTaxRate);
+                const effectiveReturnPct = p.preset.stockGrowthPct != null ? p.preset.stockGrowthPct : p.preset.annualReturnPct;
+                const effectiveDividendPct = p.preset.dividendPct * Math.pow(1 + (p.preset.dividendGrowthPct ?? 0) / 100, yearsElapsed);
+                const r = p.balance * (effectiveReturnPct / 100 / 12);
+                const d = p.balance * (effectiveDividendPct / 100 / 12) * (1 - state.dividendTaxRate);
                 p.balance += r;
                 p.yearReturn += r;
                 yReturn += r;
-                
+
                 // 배당금은 재투자되지 않고, 인출에 우선 사용되기 위해 별도로 처리
                 monthlyDividends += d;
                 p.yearDividend += d;

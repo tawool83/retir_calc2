@@ -10,7 +10,7 @@ function renderPresetList() {
         item.innerHTML = `
             <div class="flex-grow min-w-0">
                 <div class="font-bold truncate">${p.name} ${p.builtin ? getText('COMMON.BUILTIN') : ''}</div>
-                <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">수익 ${p.annualReturnPct}% / 배당 ${p.dividendPct}%</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">수익 ${p.annualReturnPct}% / 배당 ${p.dividendPct}% / 주가성장 ${p.stockGrowthPct ?? 0}% / 배당성장 ${p.dividendGrowthPct ?? 0}%</div>
             </div>
             ${!p.builtin ? `<button data-del-preset="${p.id}" class="text-red-500 hover:text-red-400 shrink-0"><span class="material-symbols-outlined text-base">delete</span></button>` : '<div class="w-8 shrink-0"></div>'}
         `;
@@ -43,6 +43,8 @@ function setPresetEditMode(presetId) {
         $('dlgPresetName').value = preset.name;
         $('dlgPresetReturn').value = preset.annualReturnPct;
         $('dlgPresetDiv').value = preset.dividendPct;
+        $('dlgPresetStockGrowth').value = preset.stockGrowthPct ?? 0;
+        $('dlgPresetDivGrowth').value = preset.dividendGrowthPct ?? 0;
         $('dlgPresetName').disabled = preset.builtin;
     } else {
         title.textContent = getText('PRESET_DIALOG.ADD_TITLE');
@@ -65,6 +67,8 @@ function initPresetManagement() {
         const name = ($("dlgPresetName").value || "").trim();
         const r = parsePct($("dlgPresetReturn").value);
         const d = parsePct($("dlgPresetDiv").value);
+        const sg = parsePct($("dlgPresetStockGrowth").value);
+        const dg = parsePct($("dlgPresetDivGrowth").value);
         if (!name) return;
         if (state.editingPresetId) {
             const index = state.presets.findIndex(p => p.id === state.editingPresetId);
@@ -72,11 +76,13 @@ function initPresetManagement() {
                 const p = state.presets[index];
                 p.annualReturnPct = r;
                 p.dividendPct = d;
+                p.stockGrowthPct = sg;
+                p.dividendGrowthPct = dg;
                 if (!p.builtin) p.name = name;
             }
         } else {
             const id = "u_" + uid().slice(0, 8);
-            state.presets.push({ id, name, annualReturnPct: r, dividendPct: d, builtin: false });
+            state.presets.push({ id, name, annualReturnPct: r, dividendPct: d, stockGrowthPct: sg, dividendGrowthPct: dg, builtin: false });
         }
         setPresetEditMode(null);
         renderPresetList();
