@@ -245,19 +245,6 @@ function calculateSustainableWithdrawal(retirementBalance, retirementAge, portfo
     return mid;
 }
 
-function updateObservation(results) {
-    const last = results.years[results.years.length - 1];
-    let msg = ``;
-    if (last) msg += getText('OBSERVATION.FINAL_RESULT', state.maxAge, last.year, fmtMoney(last.endBalance, true));
-
-    const firstTaxYear = results.years.find(y => y.capitalGainTax > 0);
-    if (firstTaxYear) {
-        msg += " " + getText('OBSERVATION.TAX_WARNING', firstTaxYear.year, fmtMoney(firstTaxYear.capitalGainTax, true));
-    }
-
-    $("observation").innerHTML = msg || getText('OBSERVATION.NO_RESULT');
-    $("sustainableWithdrawal").innerHTML = "";
-}
 
 /** =============================
  *  Recalc + Render
@@ -267,7 +254,6 @@ function recalcAndRender() {
   state.results = results;
   $("rangeLabel").textContent = getText('RESULTS.RANGE_LABEL', results.startYear, results.ageNow, results.endAge, results.endAge);
   renderAnnualTable(results);
-  updateObservation(results);
   renderEventList();
   updateFilterButton();
   if (!$("chartPanel").classList.contains("hidden")) renderChart(state.results);
