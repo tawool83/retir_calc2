@@ -126,13 +126,14 @@ function simulate() {
             let monthlyDividends = 0;
             const yearsElapsed = age - ageNow;
             portfolioState.forEach(p => {
-                const effectiveReturnPct = p.preset.stockGrowthPct != null ? p.preset.stockGrowthPct : p.preset.annualReturnPct;
-                // 배당 성장률은 주가 성장률 대비 초과분만 yield에 반영
-                // (balance가 이미 stockGrowthPct로 성장하므로, 중복 적용 방지)
-                const effectiveDividendPct = p.preset.dividendPct * Math.pow(
-                    (1 + (p.preset.dividendGrowthPct ?? 0) / 100) / (1 + effectiveReturnPct / 100),
-                    yearsElapsed
-                );
+                const effectiveReturnPct = p.preset.annualReturnPct;
+                // dividendGrowthPct > 0 인 경우에만 성장 공식 적용
+                // balance가 이미 annualReturnPct로 성장하므로, yield에는 (dg - sg) 초과분만 반영
+                // dividendGrowthPct = 0 이면 기존과 동일하게 고정 yield 사용
+                const dg = p.preset.dividendGrowthPct ?? 0;
+                const effectiveDividendPct = dg > 0
+                    ? p.preset.dividendPct * Math.pow((1 + dg / 100) / (1 + effectiveReturnPct / 100), yearsElapsed)
+                    : p.preset.dividendPct;
                 const r = p.balance * (effectiveReturnPct / 100 / 12);
                 const d = p.balance * (effectiveDividendPct / 100 / 12) * (1 - state.dividendTaxRate);
                 p.balance += r;

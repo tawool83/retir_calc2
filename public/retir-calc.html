@@ -90,7 +90,7 @@
           <div class="flex flex-col lg:flex-row gap-3">
 
             <!-- Left -->
-            <aside class="w-full lg:w-[484px] flex flex-col gap-3">
+            <aside class="w-full lg:w-[440px] flex flex-col gap-3">
 
               <!-- Config -->
               <div id="config-section" class="bg-white dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
@@ -372,14 +372,10 @@
         <div class="space-y-3">
             <input id="dlgPresetName" type="text" class="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold" data-i18n-key="[placeholder]PRESET_DIALOG.NAME_PLACEHOLDER"/>
             <div class="grid grid-cols-2 gap-3">
-                <input id="dlgPresetReturn" type="number" step="0.1" class="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold" placeholder="수익률(%)"/>
+                <input id="dlgPresetReturn" type="number" step="0.1" class="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold" placeholder="주가성장률(%)"/>
                 <input id="dlgPresetDiv" type="number" step="0.1" class="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold" placeholder="배당률(%)"/>
             </div>
             <div class="grid grid-cols-2 gap-3">
-                <label class="block">
-                    <span class="text-[10px] text-slate-400">주가 성장률(%/년)</span>
-                    <input id="dlgPresetStockGrowth" type="number" step="0.1" class="mt-1 w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold" placeholder="주가 성장률(%)"/>
-                </label>
                 <label class="block">
                     <span class="text-[10px] text-slate-400">배당 성장률(%/년)</span>
                     <input id="dlgPresetDivGrowth" type="number" step="0.1" class="mt-1 w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold" placeholder="배당 성장률(%)"/>
