@@ -186,6 +186,22 @@ function simulate() {
                         });
                     }
                 }
+            } else if (monthlyDividends > 0 && portfolioState.length > 0) {
+                // 인출이 없을 때는 배당금 전액 재투자
+                const totalBalance = portfolioState.reduce((sum, p) => sum + p.balance, 0);
+                if (totalBalance > 0) {
+                    portfolioState.forEach(p => {
+                        const reinvestAmount = monthlyDividends * (p.balance / totalBalance);
+                        p.balance += reinvestAmount;
+                        p.costBasis += reinvestAmount;
+                    });
+                } else {
+                    portfolioState.forEach(p => {
+                        const reinvestAmount = monthlyDividends * p.percentage;
+                        p.balance += reinvestAmount;
+                        p.costBasis += reinvestAmount;
+                    });
+                }
             }
         }
 
