@@ -108,12 +108,40 @@
                       </button>
                   </div>
                 </div>
-                <div class="flex items-center gap-3">
-                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap" data-i18n-key="CONFIG.INFLATION_RATE_LABEL"></label>
-                  <div class="flex items-center gap-1.5">
-                    <input id="inflationRate" class="w-20 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2 px-3 focus:ring-primary focus:border-primary text-sm font-semibold"
-                           type="number" min="0" max="20" step="0.1" value="3"/>
-                    <span class="text-sm text-slate-500">%</span>
+                <div class="space-y-3">
+                  <div class="grid grid-cols-3 gap-3">
+                    <div class="space-y-1">
+                      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n-key="CONFIG.INFLATION_RATE_LABEL"></label>
+                      <div class="flex items-center gap-1">
+                        <input id="inflationRate" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2 px-3 focus:ring-primary focus:border-primary text-sm font-semibold"
+                               type="number" min="0" max="20" step="0.1" value="3"/>
+                        <span class="text-xs text-slate-500 shrink-0">%</span>
+                      </div>
+                    </div>
+                    <div class="space-y-1">
+                      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n-key="CONFIG.AGE_NOW_LABEL"></label>
+                      <div class="flex items-center gap-1">
+                        <input id="retirePlanAgeNow" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2 px-3 focus:ring-primary focus:border-primary text-sm font-semibold"
+                               type="number" min="0" max="120" value="40"/>
+                        <span class="text-xs text-slate-500 shrink-0">세</span>
+                      </div>
+                    </div>
+                    <div class="space-y-1">
+                      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n-key="CONFIG.AGE_RETIRE_LABEL"></label>
+                      <div class="flex items-center gap-1">
+                        <input id="retirePlanAgeRetire" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2 px-3 focus:ring-primary focus:border-primary text-sm font-semibold"
+                               type="number" min="0" max="120" value="65"/>
+                        <span class="text-xs text-slate-500 shrink-0">세</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n-key="CONFIG.TARGET_MONTHLY_CASHFLOW_LABEL"></label>
+                    <div class="flex items-center gap-1.5">
+                      <input id="targetMonthlyCashFlow" class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-2 px-3 focus:ring-primary focus:border-primary text-sm font-semibold"
+                             type="number" min="0" step="100000" placeholder="0"/>
+                      <span class="text-xs text-slate-500 shrink-0">원/월</span>
+                    </div>
                   </div>
                 </div>
 
@@ -146,7 +174,16 @@
             <!-- Right -->
             <section class="flex-1 flex flex-col gap-3">
 
-              <!-- Observation -->
+              <!-- Retirement Plan Summary -->
+              <div class="bg-primary/5 border border-primary/20 p-5 rounded-xl flex items-start gap-4">
+                <div class="bg-primary text-white p-2.5 rounded-lg shadow-sm shrink-0">
+                  <span class="material-symbols-outlined block">savings</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-2" data-i18n-key="RETIREMENT_PLAN.TITLE"></h4>
+                  <div id="retirementPlan"></div>
+                </div>
+              </div>
 
               <!-- Table Card -->
               <div class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col h-full overflow-hidden">

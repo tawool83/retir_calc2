@@ -51,6 +51,9 @@ const state = {
   editingPresetId: null,
   inputs: {
     inflationRate: 3,
+    retirePlanAgeNow: 40,
+    retirePlanAgeRetire: 65,
+    targetMonthlyCashFlow: 0,
     initialInvestment: 0,
     monthlyContribution: 0,
     filterEnabled: false,

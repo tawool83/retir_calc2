@@ -247,6 +247,80 @@ function calculateSustainableWithdrawal(retirementBalance, retirementAge, portfo
 
 
 /** =============================
+ *  Retirement Plan
+ *  ============================= */
+function renderRetirementPlan() {
+    const el = $('retirementPlan');
+    if (!el) return;
+    const { inflationRate, retirePlanAgeNow, retirePlanAgeRetire, targetMonthlyCashFlow } = state.inputs;
+    const ageNow = retirePlanAgeNow, ageRetire = retirePlanAgeRetire;
+
+    if (!targetMonthlyCashFlow || ageRetire <= ageNow) {
+        el.innerHTML = `<p class="text-xs text-slate-500 dark:text-slate-400">${getText('RETIREMENT_PLAN.NO_INPUT')}</p>`;
+        return;
+    }
+
+    const yearsToRetirement = ageRetire - ageNow;
+    const retirementYears = state.maxAge - ageRetire;
+    if (retirementYears <= 0) { el.innerHTML = ''; return; }
+
+    // 은퇴 시점 명목 월 생활비
+    const nominalMonthly = targetMonthlyCashFlow * Math.pow(1 + inflationRate / 100, yearsToRetirement);
+
+    // 은퇴 시점 포트폴리오 수익률
+    const portfolioAtRetirement = getActivePortfolio(ageRetire, 1);
+    let annualReturn = 6;
+    if (portfolioAtRetirement.length > 0) {
+        annualReturn = portfolioAtRetirement.reduce((acc, p) =>
+            acc + p.percentage * (p.preset.annualReturnPct + p.preset.dividendPct), 0);
+    }
+
+    // 실질 월 수익률 (명목 - 물가)
+    const realAnnual = (1 + annualReturn / 100) / (1 + inflationRate / 100) - 1;
+    const realMonthly = Math.pow(1 + realAnnual, 1 / 12) - 1;
+    const n = retirementYears * 12;
+
+    // 필요 은퇴 자산 (실질, 연금 현가)
+    let requiredReal;
+    if (Math.abs(realMonthly) < 0.00001) {
+        requiredReal = targetMonthlyCashFlow * n;
+    } else {
+        requiredReal = targetMonthlyCashFlow * (1 - Math.pow(1 + realMonthly, -n)) / realMonthly;
+    }
+    const requiredNominal = requiredReal * Math.pow(1 + inflationRate / 100, yearsToRetirement);
+
+    // 시나리오에서 은퇴 나이 예상 자산
+    const retirementYearData = state.results?.years?.find(y => y.age === ageRetire);
+    const onTrack = retirementYearData && retirementYearData.endBalance >= requiredNominal;
+    const gap = requiredNominal - (retirementYearData?.endBalance ?? 0);
+
+    el.innerHTML = `
+        <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            <div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 mb-0.5">${getText('RETIREMENT_PLAN.NOMINAL_MONTHLY')}</div>
+                <div class="font-bold">${fmtMoney(nominalMonthly)}</div>
+                <div class="text-xs text-slate-400">${getText('RETIREMENT_PLAN.TODAY_VALUE')} ${fmtMoney(targetMonthlyCashFlow)} · ${getText('RETIREMENT_PLAN.INFLATION_NOTE', inflationRate, yearsToRetirement)}</div>
+            </div>
+            <div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 mb-0.5">${getText('RETIREMENT_PLAN.REQUIRED_CAPITAL')}</div>
+                <div class="font-bold text-primary">${fmtMoney(requiredNominal, true)}</div>
+                <div class="text-xs text-slate-400">${getText('RETIREMENT_PLAN.RETURN_NOTE', annualReturn.toFixed(1), (realAnnual * 100).toFixed(1))}</div>
+            </div>
+            ${retirementYearData ? `
+            <div class="col-span-2 pt-2 border-t border-primary/20">
+                <div class="text-xs text-slate-500 dark:text-slate-400 mb-0.5">${getText('RETIREMENT_PLAN.PROJECTED_ASSET', ageRetire)}</div>
+                <div class="font-bold ${onTrack ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}">
+                    ${fmtMoney(retirementYearData.endBalance, true)}
+                    &nbsp;${onTrack
+                        ? getText('RETIREMENT_PLAN.ON_TRACK')
+                        : `(-${fmtMoney(gap, true)} ${getText('RETIREMENT_PLAN.SHORT')})`}
+                </div>
+            </div>` : ''}
+        </div>
+    `;
+}
+
+/** =============================
  *  Recalc + Render
  *  ============================= */
 function recalcAndRender() {
@@ -254,6 +328,7 @@ function recalcAndRender() {
   state.results = results;
   $("rangeLabel").textContent = getText('RESULTS.RANGE_LABEL', results.startYear, results.ageNow, results.endAge, results.endAge);
   renderAnnualTable(results);
+  renderRetirementPlan();
   renderEventList();
   updateFilterButton();
   if (!$("chartPanel").classList.contains("hidden")) renderChart(state.results);

@@ -11,6 +11,9 @@ const STRINGS = {
         "RESET_BUTTON": "모두 초기화",
         "RESET_CONFIRM": "정말로 모든 설정과 시나리오를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
         "INFLATION_RATE_LABEL": "물가 상승률",
+        "AGE_NOW_LABEL": "현재 나이",
+        "AGE_RETIRE_LABEL": "은퇴 나이",
+        "TARGET_MONTHLY_CASHFLOW_LABEL": "은퇴 후 월 목표 생활비 (오늘 기준)",
         "SHARE_BUTTON": "시나리오",
         "SHARE_SUCCESS": "시나리오 정보를 담은 URL이 복사되었습니다! 새로운 브라우저에서 주소창에 붙여넣기 후 새로고침 해보세요"
     },
@@ -34,6 +37,18 @@ const STRINGS = {
         "PRINCIPAL_LABEL": "누적 원금",
         "RETURN_LABEL": "누적 수익",
         "TOTAL_LABEL": "총계: {0}"
+    },
+    "RETIREMENT_PLAN": {
+        "TITLE": "은퇴 플랜 요약",
+        "NO_INPUT": "현재 나이, 은퇴 나이, 월 목표 생활비를 입력하면 필요 은퇴 자산을 계산합니다.",
+        "NOMINAL_MONTHLY": "은퇴 시점 명목 월 생활비",
+        "REQUIRED_CAPITAL": "필요 은퇴 자산",
+        "TODAY_VALUE": "오늘 기준",
+        "INFLATION_NOTE": "물가 {0}% × {1}년",
+        "RETURN_NOTE": "수익률 {0}%, 실질 {1}%",
+        "PROJECTED_ASSET": "시나리오 {0}세 예상 자산",
+        "ON_TRACK": "✓ 목표 달성",
+        "SHORT": "부족"
     },
     "OBSERVATION": {
         "TITLE": "파이어족 여정 요약",
