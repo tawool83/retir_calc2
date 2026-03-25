@@ -92,13 +92,22 @@
       box-shadow: 0 4px 14px -4px rgba(37, 99, 235, 0.5);
     }
     
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
     #content {
+      flex: 1;
       width: 100%;
-      height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
     iframe {
+      flex: 1;
       width: 100%;
-      height: 100%;
+      min-height: 0;
       border: none;
     }
     
@@ -198,7 +207,7 @@
     <iframe name="content-frame" src="retir-calc.html"></iframe>
   </main>
 
-  <footer class="absolute bottom-4 right-8 text-xs text-slate-500 z-50">
+  <footer class="py-3 text-center text-xs text-slate-500">
       <a href="/pages/privacy.html" target="_blank" class="hover:text-primary">개인정보처리방침</a>
       <span class="mx-2">|</span>
       <a href="/pages/terms.html" target="_blank" class="hover:text-primary">이용약관</a>
