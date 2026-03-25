@@ -99,11 +99,7 @@
 
               <!-- Config -->
               <div id="config-section" class="bg-white dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                  <h2 class="text-lg font-bold flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">tune</span>
-                    <span data-i18n-key="CONFIG.TITLE"></span>
-                  </h2>
+                <div class="flex items-center justify-end mb-4">
                   <div class="flex items-center gap-2">
                      <button id="btnShare" class="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-primary transition-colors px-3 py-2 rounded-lg">
                         <span class="material-symbols-outlined text-sm">share</span> <span data-i18n-key="CONFIG.SHARE_BUTTON"></span>
@@ -158,6 +154,17 @@
 
               </div>
 
+              <!-- Retirement Plan Summary -->
+              <div class="bg-primary/5 border border-primary/20 p-5 rounded-xl flex items-start gap-4">
+                <div class="bg-primary text-white p-2.5 rounded-lg shadow-sm shrink-0">
+                  <span class="material-symbols-outlined block">savings</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-2" data-i18n-key="RETIREMENT_PLAN.TITLE"></h4>
+                  <div id="retirementPlan"></div>
+                </div>
+              </div>
+
               <!-- Events -->
               <div id="events-section" class="bg-white dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                 <div class="flex items-center justify-between mb-4">
@@ -184,17 +191,6 @@
 
             <!-- Right -->
             <section class="flex-1 flex flex-col gap-3 lg:sticky lg:top-5 lg:h-[calc(100vh-40px)]">
-
-              <!-- Retirement Plan Summary -->
-              <div class="bg-primary/5 border border-primary/20 p-5 rounded-xl flex items-start gap-4">
-                <div class="bg-primary text-white p-2.5 rounded-lg shadow-sm shrink-0">
-                  <span class="material-symbols-outlined block">savings</span>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-2" data-i18n-key="RETIREMENT_PLAN.TITLE"></h4>
-                  <div id="retirementPlan"></div>
-                </div>
-              </div>
 
               <!-- Table Card -->
               <div class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col flex-1 min-h-0 overflow-hidden">

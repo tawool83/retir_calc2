@@ -8,7 +8,7 @@ const STRINGS = {
         "TITLE": "기본 설정",
         "AGE_NOW_LABEL": "현재 나이",
         "AGE_RETIRE_LABEL": "파이어족 나이",
-        "RESET_BUTTON": "모두 초기화",
+        "RESET_BUTTON": "초기화",
         "RESET_CONFIRM": "정말로 모든 설정과 시나리오를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
         "INFLATION_RATE_LABEL": "물가 상승률",
         "AGE_NOW_LABEL": "현재 나이",
