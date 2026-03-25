@@ -117,6 +117,17 @@
         padding-top: 5rem; /* Height of the top nav bar */
       }
 
+      #content {
+        flex: none;
+        height: auto;
+      }
+
+      iframe {
+        flex: none;
+        height: auto;
+        min-height: calc(100dvh - 5rem);
+      }
+
       #sidebar {
         width: 100%;
         height: 5rem;
@@ -214,13 +225,37 @@
   </footer>
 
   <script>
+    const iframe = document.querySelector('iframe[name="content-frame"]');
+
     // URL에서 'data' 파라미터를 읽어 iframe의 src에 추가합니다.
     const urlParams = new URLSearchParams(window.location.search);
     const data = urlParams.get('data');
     if (data) {
-      const iframe = document.querySelector('iframe[name="content-frame"]');
       iframe.src = `retir-calc.html?data=${data}`;
     }
+
+    // 모바일에서 iframe 높이를 콘텐츠에 맞게 자동 조절
+    function syncIframeHeight() {
+      if (window.innerWidth > 768) {
+        iframe.style.height = '';
+        return;
+      }
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        const h = doc.documentElement.scrollHeight;
+        if (h > 0) iframe.style.height = h + 'px';
+      } catch(e) {}
+    }
+
+    iframe.addEventListener('load', function() {
+      syncIframeHeight();
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        new ResizeObserver(syncIframeHeight).observe(doc.documentElement);
+      } catch(e) {}
+    });
+
+    window.addEventListener('resize', syncIframeHeight);
 
     const navLinksContainer = document.getElementById('nav-links');
     
