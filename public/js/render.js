@@ -302,10 +302,15 @@ function renderRetirementPlan() {
 
     el.innerHTML = `
         <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-            <div>
-                <div class="text-xs text-slate-500 dark:text-slate-400 mb-0.5">${getText('RETIREMENT_PLAN.NOMINAL_MONTHLY')}</div>
-                <div class="font-bold">${fmtMoney(nominalMonthly)}</div>
-                <div class="text-xs text-slate-400">${getText('RETIREMENT_PLAN.TODAY_VALUE')} ${fmtMoney(targetMonthlyCashFlow)} · ${getText('RETIREMENT_PLAN.INFLATION_NOTE', inflationRate, yearsToRetirement)}</div>
+            <div class="space-y-1">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs text-slate-500 dark:text-slate-400 shrink-0">${getText('RETIREMENT_PLAN.NOMINAL_MONTHLY')} ${getText('RETIREMENT_PLAN.TODAY_VALUE')}</span>
+                    <span class="font-bold text-sm">${fmtMoney(targetMonthlyCashFlow)}</span>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs text-slate-400 shrink-0">${getText('RETIREMENT_PLAN.INFLATION_NOTE', inflationRate, yearsToRetirement)}</span>
+                    <span class="font-bold text-sm">${fmtMoney(nominalMonthly)}</span>
+                </div>
             </div>
             <div>
                 <div class="text-xs text-slate-500 dark:text-slate-400 mb-0.5">${getText('RETIREMENT_PLAN.REQUIRED_CAPITAL')}</div>
