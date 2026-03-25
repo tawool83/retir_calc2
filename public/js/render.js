@@ -301,7 +301,7 @@ function renderRetirementPlan() {
     const gap = requiredNominal - (retirementYearData?.endBalance ?? 0);
 
     el.innerHTML = `
-        <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+        <div class="flex flex-col gap-y-2 text-sm">
             <div class="space-y-1">
                 <div class="flex items-center justify-between gap-2">
                     <span class="text-xs text-slate-500 dark:text-slate-400 shrink-0">${getText('RETIREMENT_PLAN.NOMINAL_MONTHLY')} ${getText('RETIREMENT_PLAN.TODAY_VALUE')}</span>
@@ -312,21 +312,22 @@ function renderRetirementPlan() {
                     <span class="font-bold text-sm">${fmtMoney(nominalMonthly)}</span>
                 </div>
             </div>
-            <div>
-                <div class="text-xs text-slate-500 dark:text-slate-400 mb-0.5">${getText('RETIREMENT_PLAN.REQUIRED_CAPITAL')}</div>
-                <div class="font-bold text-primary">${fmtMoney(requiredNominal, true)}</div>
-                <div class="text-xs text-slate-400">${getText('RETIREMENT_PLAN.RETURN_NOTE', annualReturn.toFixed(1), (realAnnual * 100).toFixed(1))}</div>
-            </div>
-            ${retirementYearData ? `
-            <div class="col-span-2 pt-2 border-t border-primary/20">
-                <div class="text-xs text-slate-500 dark:text-slate-400 mb-0.5">${getText('RETIREMENT_PLAN.PROJECTED_ASSET', ageRetire)}</div>
-                <div class="font-bold ${onTrack ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}">
-                    ${fmtMoney(retirementYearData.endBalance, true)}
-                    &nbsp;${onTrack
-                        ? getText('RETIREMENT_PLAN.ON_TRACK')
-                        : `(-${fmtMoney(gap, true)} ${getText('RETIREMENT_PLAN.SHORT')})`}
+            <div class="grid grid-cols-2 gap-x-4 pt-2 border-t border-primary/20">
+                <div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mb-0.5">${getText('RETIREMENT_PLAN.REQUIRED_CAPITAL')}</div>
+                    <div class="font-bold text-primary">${fmtMoney(requiredNominal, true)}</div>
                 </div>
-            </div>` : ''}
+                ${retirementYearData ? `
+                <div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mb-0.5">${getText('RETIREMENT_PLAN.PROJECTED_ASSET', ageRetire)}</div>
+                    <div class="font-bold ${onTrack ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}">
+                        ${fmtMoney(retirementYearData.endBalance, true)}
+                        &nbsp;${onTrack
+                            ? getText('RETIREMENT_PLAN.ON_TRACK')
+                            : `(-${fmtMoney(gap, true)} ${getText('RETIREMENT_PLAN.SHORT')})`}
+                    </div>
+                </div>` : ''}
+            </div>
         </div>
     `;
 }
