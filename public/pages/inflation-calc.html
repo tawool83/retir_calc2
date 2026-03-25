@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html class="light" lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>물가 상승률 계산기</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#2563eb",
+            "secondary": "#1e40af",
+          },
+          fontFamily: { "display": ["Manrope", "sans-serif"] },
+        },
+      },
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer base { body { font-family: 'Manrope', sans-serif; } }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #2563eb; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen font-display">
+
+<div class="flex justify-center px-4 lg:px-6 py-5">
+  <div class="w-full max-w-3xl flex flex-col gap-4">
+
+    <!-- Header -->
+    <div>
+      <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">물가 상승률 계산기</h1>
+      <p class="text-slate-500 text-sm mt-1">시간이 지남에 따라 돈의 구매력이 어떻게 변하는지 확인해 보세요.</p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+      <h2 class="text-base font-bold flex items-center gap-2 mb-4">
+        <span class="material-symbols-outlined text-primary">tune</span>
+        설정
+      </h2>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider" for="inflationRate">물가 상승률</label>
+          <div class="flex items-center gap-1.5">
+            <input id="inflationRate" type="number" min="0" max="30" step="0.1" value="3"
+              class="w-full bg-slate-50 border-slate-200 rounded-lg py-2.5 px-3 focus:ring-primary focus:border-primary text-sm font-semibold"/>
+            <span class="text-sm text-slate-500 shrink-0">%</span>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider" for="baseAmount">기준 금액</label>
+          <div class="flex items-center gap-1.5">
+            <input id="baseAmount" type="number" min="0" step="10000" value="1000000"
+              class="w-full bg-slate-50 border-slate-200 rounded-lg py-2.5 px-3 focus:ring-primary focus:border-primary text-sm font-semibold"/>
+            <span class="text-sm text-slate-500 shrink-0">원</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary cards -->
+    <div id="summaryCards" class="grid grid-cols-3 gap-3"></div>
+
+    <!-- Table -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="p-5 border-b border-slate-100">
+        <h2 class="text-base font-bold">연도별 시뮬레이션 (5년 단위)</h2>
+        <p class="text-xs text-slate-400 mt-0.5">오늘 기준 금액의 미래 구매력 변화</p>
+      </div>
+      <div class="overflow-x-auto custom-scrollbar">
+        <table class="w-full text-sm text-left">
+          <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-xs tracking-wider">
+            <tr>
+              <th class="px-4 py-3 text-center">경과 연수</th>
+              <th class="px-4 py-3 text-right">동일 구매력 유지 금액</th>
+              <th class="px-4 py-3 text-right">오늘 기준 실질 가치</th>
+              <th class="px-4 py-3 text-right">구매력 하락률</th>
+            </tr>
+          </thead>
+          <tbody id="resultTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function fmtMoney(v) {
+    if (Math.abs(v) >= 1e8) return (v / 1e8).toFixed(2).replace(/\.?0+$/, '') + '억원';
+    if (Math.abs(v) >= 1e4) return (v / 1e4).toFixed(0) + '만원';
+    return v.toFixed(0) + '원';
+  }
+
+  function fmtMoneyFull(v) {
+    return Math.round(v).toLocaleString('ko-KR') + '원';
+  }
+
+  function calculate() {
+    const rate = Math.max(0, parseFloat(document.getElementById('inflationRate').value) || 0) / 100;
+    const base = Math.max(0, parseFloat(document.getElementById('baseAmount').value) || 0);
+
+    // Summary cards: 10년, 30년, 50년 구매력 하락
+    const summaryYears = [10, 30, 50];
+    const summaryCards = document.getElementById('summaryCards');
+    summaryCards.innerHTML = summaryYears.map(y => {
+      const realValue = base / Math.pow(1 + rate, y);
+      const loss = (1 - realValue / base) * 100;
+      return `
+        <div class="bg-primary/5 border border-primary/20 rounded-xl p-4">
+          <div class="text-xs font-bold text-primary uppercase tracking-wider mb-1">${y}년 후</div>
+          <div class="text-lg font-extrabold text-slate-900">${fmtMoney(realValue)}</div>
+          <div class="text-xs text-slate-500 mt-0.5">구매력 <span class="text-red-500 font-bold">${loss.toFixed(1)}%</span> 하락</div>
+        </div>
+      `;
+    }).join('');
+
+    // Table rows: 0, 5, 10, ..., 80
+    const tbody = document.getElementById('resultTable');
+    const rows = [];
+    for (let y = 0; y <= 80; y += 5) {
+      const nominalNeeded = base * Math.pow(1 + rate, y);
+      const realValue = base / Math.pow(1 + rate, y);
+      const lossRate = (1 - realValue / base) * 100;
+      const isHighlight = y % 20 === 0 && y > 0;
+
+      rows.push(`
+        <tr class="${y === 0 ? 'bg-primary/5 font-semibold' : isHighlight ? 'bg-slate-50' : ''} border-t border-slate-100">
+          <td class="px-4 py-3 text-center font-bold ${y === 0 ? 'text-primary' : 'text-slate-700'}">
+            ${y === 0 ? '현재' : y + '년'}
+          </td>
+          <td class="px-4 py-3 text-right font-semibold text-slate-800">
+            ${fmtMoneyFull(nominalNeeded)}
+          </td>
+          <td class="px-4 py-3 text-right font-semibold ${y === 0 ? 'text-slate-800' : lossRate > 50 ? 'text-red-600' : lossRate > 25 ? 'text-orange-500' : 'text-slate-800'}">
+            ${fmtMoneyFull(realValue)}
+          </td>
+          <td class="px-4 py-3 text-right">
+            ${y === 0
+              ? '<span class="text-slate-400 text-xs">기준</span>'
+              : `<span class="inline-flex items-center gap-1 font-bold ${lossRate > 50 ? 'text-red-600' : lossRate > 25 ? 'text-orange-500' : 'text-slate-600'}">
+                  <span class="material-symbols-outlined text-sm">arrow_downward</span>
+                  ${lossRate.toFixed(1)}%
+                </span>`
+            }
+          </td>
+        </tr>
+      `);
+    }
+    tbody.innerHTML = rows.join('');
+  }
+
+  document.getElementById('inflationRate').addEventListener('input', calculate);
+  document.getElementById('baseAmount').addEventListener('input', calculate);
+
+  calculate();
+</script>
+</body>
+</html>

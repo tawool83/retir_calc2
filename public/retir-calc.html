@@ -66,7 +66,7 @@
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #2563eb; }
-    .table-scroll-area { max-height: 700px; overflow-y: auto; }
+    .table-scroll-area { overflow-y: auto; }
     dialog::backdrop { background: rgba(0,0,0,.35); }
     .onboarding-highlight { z-index: 50; position: relative; box-shadow: 0 0 0 4px theme('colors.primary'); transition: box-shadow 0.3s ease-in-out; border-radius: 0.75rem;}
     .selected-icon { background-color: #e0e7ff; border-radius: 50%; box-shadow: 0 0 0 2px #2563eb; }
@@ -178,7 +178,7 @@
             </aside>
 
             <!-- Right -->
-            <section class="flex-1 flex flex-col gap-3">
+            <section class="flex-1 flex flex-col gap-3 lg:sticky lg:top-5 lg:h-[calc(100vh-40px)]">
 
               <!-- Retirement Plan Summary -->
               <div class="bg-primary/5 border border-primary/20 p-5 rounded-xl flex items-start gap-4">
@@ -192,7 +192,7 @@
               </div>
 
               <!-- Table Card -->
-              <div class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col h-full overflow-hidden">
+              <div class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col flex-1 min-h-0 overflow-hidden">
                 <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-900 z-20">
                   <div>
                     <h2 class="text-lg font-bold" data-i18n-key="RESULTS.TITLE"></h2>
