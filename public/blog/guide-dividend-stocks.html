@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배당주 vs 배당성장주: 어떤 전략이 나에게 맞을까? - 은퇴 시뮬레이터</title>
+    <meta name="description" content="높은 배당수익률의 배당주와 배당금이 꾸준히 성장하는 배당성장주의 차이를 그래프로 비교하고, 나에게 맞는 전략을 선택하는 기준을 알아봅니다.">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { primary: '#2563eb' }, fontFamily: { display: ['Manrope', 'sans-serif'] } } }
+        }
+    </script>
+    <style>
+        body { font-family: 'Manrope', sans-serif; }
+        .article-body h2 { font-size: 1.375rem; font-weight: 800; color: #0f172a; margin-top: 2.75rem; margin-bottom: 0.875rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0; }
+        .article-body h3 { font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-top: 1.75rem; margin-bottom: 0.6rem; }
+        .article-body p { font-size: 1.0rem; line-height: 1.875; color: #374151; margin-bottom: 1.1rem; }
+        .article-body ul, .article-body ol { margin: 0.75rem 0 1.25rem 0; padding-left: 1.5rem; }
+        .article-body li { font-size: 1.0rem; line-height: 1.8; color: #374151; margin-bottom: 0.5rem; }
+        .article-body ul > li { list-style-type: disc; }
+        .article-body ol > li { list-style-type: decimal; }
+        .article-body strong { font-weight: 700; color: #111827; }
+        .callout { background: #eff6ff; border-left: 4px solid #2563eb; border-radius: 0.625rem; padding: 1.125rem 1.375rem; margin: 1.5rem 0; }
+        .callout h4 { font-size: 0.9375rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.625rem; }
+        .callout ul { padding-left: 1.25rem; margin: 0; }
+        .callout li { color: #1e40af; font-size: 0.9375rem; }
+        .callout-green { background: #f0fdf4; border-left: 4px solid #16a34a; border-radius: 0.625rem; padding: 1.125rem 1.375rem; margin: 1.5rem 0; }
+        .callout-green h4 { font-size: 0.9375rem; font-weight: 700; color: #14532d; margin-bottom: 0.625rem; }
+        .callout-green li { color: #166534; font-size: 0.9375rem; }
+        .callout-amber { background: #fffbeb; border-left: 4px solid #d97706; border-radius: 0.625rem; padding: 1.125rem 1.375rem; margin: 1.5rem 0; }
+        .callout-amber h4 { font-size: 0.9375rem; font-weight: 700; color: #78350f; margin-bottom: 0.625rem; }
+        .callout-amber li { color: #92400e; font-size: 0.9375rem; }
+        .quote { border-left: 4px solid #2563eb; padding: 0.875rem 1.25rem; margin: 1.5rem 0; background: #f8fafc; border-radius: 0 0.5rem 0.5rem 0; }
+        .quote p { font-style: italic; color: #1e293b; margin: 0; font-size: 1.05rem; line-height: 1.7; }
+        .chart-container { position: relative; height: 300px; margin: 1.5rem 0; }
+        .compare-table th { background: #f1f5f9; font-weight: 700; font-size: 0.875rem; color: #475569; padding: 0.75rem 1rem; text-align: center; }
+        .compare-table td { font-size: 0.9375rem; color: #374151; padding: 0.75rem 1rem; text-align: center; border-top: 1px solid #e2e8f0; }
+        .compare-table tr:hover td { background: #f8fafc; }
+        .tag-yield { background: #fef3c7; color: #92400e; font-weight: 700; font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: 9999px; }
+        .tag-growth { background: #dcfce7; color: #14532d; font-weight: 700; font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: 9999px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow-sm">
+        <div class="max-w-3xl mx-auto px-4 h-14 flex items-center gap-2 text-sm font-semibold">
+            <a href="/index.html" target="_top" class="text-slate-500 hover:text-primary transition-colors">홈</a>
+            <span class="text-slate-300">/</span>
+            <a href="/blog.html" class="text-slate-500 hover:text-primary transition-colors">가이드</a>
+            <span class="text-slate-300">/</span>
+            <span class="text-slate-700 truncate">배당주 vs 배당성장주</span>
+        </div>
+    </nav>
+
+    <main class="max-w-3xl mx-auto px-4 py-12">
+
+        <header class="mb-10">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="px-3 py-1 bg-green-600 text-white text-xs font-bold rounded-full uppercase tracking-wider">배당 투자</span>
+                <span class="text-sm text-slate-400">읽는 시간: 약 8분</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                배당주 vs 배당성장주:<br>어떤 전략이 나에게 맞을까?
+            </h1>
+            <p class="mt-4 text-lg text-slate-500 leading-relaxed">
+                지금 당장 많은 배당금을 받을 것인가, 아니면 처음에는 적어도 해마다 성장하는 배당금을 선택할 것인가. 두 전략의 차이를 그래프로 직접 확인하고 나에게 맞는 길을 찾아봅니다.
+            </p>
+        </header>
+
+        <div class="article-body bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-10">
+
+            <section>
+                <h2>1. 배당주와 배당성장주, 무엇이 다른가?</h2>
+                <p>배당 투자 세계에는 크게 두 가지 접근법이 있습니다. 둘 다 배당금을 받는다는 공통점이 있지만, 그 성격과 전략적 목표가 전혀 다릅니다.</p>
+
+                <div class="overflow-x-auto rounded-xl border border-slate-200 my-6">
+                    <table class="compare-table w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="text-left">구분</th>
+                                <th><span class="tag-yield">배당주</span></th>
+                                <th><span class="tag-growth">배당성장주</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-left font-semibold text-slate-600">초기 배당수익률</td>
+                                <td class="font-bold text-amber-700">높음 (4~6%)</td>
+                                <td class="font-bold text-green-700">낮음 (1~2%)</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left font-semibold text-slate-600">배당 성장률</td>
+                                <td class="text-slate-500">낮음 (1~3%)</td>
+                                <td class="font-bold text-green-700">높음 (7~12%)</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left font-semibold text-slate-600">주가 성장성</td>
+                                <td class="text-slate-500">낮음 (방어주 성격)</td>
+                                <td class="font-bold text-green-700">높음 (성장주 성격)</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left font-semibold text-slate-600">대표 업종</td>
+                                <td>통신, 유틸리티, 리츠</td>
+                                <td>소비재, 헬스케어, IT</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left font-semibold text-slate-600">적합한 투자자</td>
+                                <td>은퇴 후 현금흐름 필요</td>
+                                <td>장기 자산 축적 목표</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p>쉽게 말하면, <strong>배당주</strong>는 지금 당장 많이 받는 전략이고, <strong>배당성장주</strong>는 처음엔 적게 받지만 해마다 불어나는 전략입니다. 어느 쪽이 유리한지는 <strong>당신이 몇 년을 투자할 것인지</strong>에 따라 크게 달라집니다.</p>
+            </section>
+
+            <section>
+                <h2>2. 연간 배당금 비교: 교차점이 핵심</h2>
+                <p>1억 원을 투자한다고 가정해봅시다. 배당주는 초기 배당수익률 5%, 매년 2% 성장. 배당성장주는 초기 배당수익률 1.5%, 매년 10% 성장. 두 전략의 연간 배당금은 어떻게 달라질까요?</p>
+
+                <div class="bg-slate-50 rounded-xl p-4 mb-2">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">시뮬레이션 조건</p>
+                    <p class="text-sm text-slate-600 mb-0">초기 투자금: <strong>1억 원</strong> &nbsp;|&nbsp; <span class="tag-yield">배당주</span> 배당수익률 <strong>5%</strong>, 배당성장률 <strong>2%/년</strong> &nbsp;|&nbsp; <span class="tag-growth">배당성장주</span> 배당수익률 <strong>1.5%</strong>, 배당성장률 <strong>10%/년</strong></p>
+                </div>
+                <div class="chart-container" style="height:320px;">
+                    <canvas id="annualDividendChart"></canvas>
+                </div>
+                <p class="text-sm text-slate-500 text-center -mt-2 mb-4">* 주가 변동 없이 초기 투자금 유지, 배당금 미재투자 기준</p>
+
+                <p>그래프에서 볼 수 있듯, 초기에는 배당주가 압도적으로 유리합니다. 1년차에 배당주는 <strong>500만 원</strong>을 받지만, 배당성장주는 고작 <strong>150만 원</strong>에 불과합니다. 그러나 시간이 지날수록 배당성장주의 배당금이 빠르게 불어납니다.</p>
+
+                <div class="callout">
+                    <h4>배당금 역전 시점 (교차점)</h4>
+                    <ul>
+                        <li style="margin-bottom:0.4rem;">약 <strong>16년차</strong>에 배당성장주의 연간 배당금이 배당주를 추월합니다</li>
+                        <li style="margin-bottom:0.4rem;">16년차 배당주 연간 배당금: 약 <strong>693만 원</strong></li>
+                        <li>16년차 배당성장주 연간 배당금: 약 <strong>688만 원</strong> (이후 계속 역전 확대)</li>
+                    </ul>
+                </div>
+
+                <p>역전 이후에는 격차가 기하급수적으로 벌어집니다. 30년차가 되면 배당주의 연간 배당금은 약 <strong>900만 원</strong>인 반면, 배당성장주는 무려 <strong>2,620만 원</strong>에 달합니다.</p>
+            </section>
+
+            <section>
+                <h2>3. 누적 배당금 총액 비교</h2>
+                <p>연간 배당금이 아닌, 지금까지 받은 <strong>배당금의 총합</strong>을 비교하면 어떨까요? 역전 시점이 훨씬 늦어집니다. 초기 몇 년간 배당주가 크게 앞서나가기 때문입니다.</p>
+
+                <div class="chart-container" style="height:320px;">
+                    <canvas id="cumulativeDividendChart"></canvas>
+                </div>
+                <p class="text-sm text-slate-500 text-center -mt-2 mb-4">* 누적 배당금 수령액 합계 (배당금 미재투자 기준)</p>
+
+                <p>누적 기준으로는 약 <strong>22~23년차</strong>에 배당성장주의 총 수령액이 배당주를 따라잡습니다. 그 이후부터는 배당성장주의 우위가 점점 커집니다. <strong>20년 이상 장기 투자</strong>를 계획한다면, 배당성장주 전략이 전체 배당 수입 측면에서도 유리해집니다.</p>
+            </section>
+
+            <section>
+                <h2>4. 총 자산 가치 비교: 주가 성장까지 포함하면</h2>
+                <p>배당금만 비교하면 배당주가 단기간 유리해 보입니다. 하지만 투자의 진짜 수익은 <strong>배당금 + 주가 상승</strong>입니다. 일반적으로 배당성장주는 이익이 꾸준히 성장하는 우량 기업이므로 주가 성장률도 높습니다.</p>
+
+                <div class="bg-slate-50 rounded-xl p-4 mb-2">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">시뮬레이션 조건 (배당금 재투자 포함)</p>
+                    <p class="text-sm text-slate-600 mb-0"><span class="tag-yield">배당주</span> 총수익률 <strong>연 7%</strong> (주가 2% + 배당 5%) &nbsp;|&nbsp; <span class="tag-growth">배당성장주</span> 총수익률 <strong>연 9.5%</strong> (주가 8% + 배당 1.5%)</p>
+                </div>
+                <div class="chart-container" style="height:320px;">
+                    <canvas id="totalValueChart"></canvas>
+                </div>
+                <p class="text-sm text-slate-500 text-center -mt-2 mb-4">* 배당금 전액 재투자, 복리 효과 포함</p>
+
+                <p>배당금을 재투자하면서 복리 효과를 포함하면, 결과는 훨씬 드라마틱합니다. 30년 후 배당주 포트폴리오는 약 <strong>7.6억 원</strong>으로 성장하지만, 배당성장주 포트폴리오는 무려 <strong>15.2억 원</strong>으로, <strong>약 2배의 차이</strong>가 납니다.</p>
+
+                <div class="quote">
+                    <p>"배당금 재투자를 통한 복리 효과와 주가 성장이 합쳐질 때, 0.5%p의 수익률 차이도 30년이면 어마어마한 차이를 만들어 냅니다."</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>5. 나에게 맞는 전략은?</h2>
+                <p>두 전략 중 어느 것이 절대적으로 우월한 것은 아닙니다. 중요한 것은 <strong>나의 투자 목적과 시간 지평</strong>에 맞는 전략을 선택하는 것입니다.</p>
+
+                <div class="callout-amber">
+                    <h4>배당주 전략이 유리한 경우</h4>
+                    <ul style="padding-left:1.25rem; margin:0;">
+                        <li style="color:#92400e; font-size:0.9375rem; margin-bottom:0.4rem;">은퇴 후 또는 조기 은퇴 직후: 지금 당장 생활비로 쓸 현금 흐름이 필요한 경우</li>
+                        <li style="color:#92400e; font-size:0.9375rem; margin-bottom:0.4rem;">투자 기간이 10~15년 내외로 비교적 짧은 경우</li>
+                        <li style="color:#92400e; font-size:0.9375rem;">변동성이 낮은 안정적인 포트폴리오를 원하는 경우</li>
+                    </ul>
+                </div>
+
+                <div class="callout-green">
+                    <h4>배당성장주 전략이 유리한 경우</h4>
+                    <ul style="padding-left:1.25rem; margin:0;">
+                        <li style="color:#166534; font-size:0.9375rem; margin-bottom:0.4rem;">20년 이상 장기 투자가 가능한 경우 (특히 30~40대 투자자)</li>
+                        <li style="color:#166534; font-size:0.9375rem; margin-bottom:0.4rem;">지금 당장 배당금이 필요하지 않고, 자산을 최대한 불리고 싶은 경우</li>
+                        <li style="color:#166534; font-size:0.9375rem;">인플레이션을 이기는 배당금 성장을 원하는 경우</li>
+                    </ul>
+                </div>
+
+                <h3>현실적인 조합 전략</h3>
+                <p>많은 전문가들은 두 전략을 섞는 것을 권장합니다. 예를 들어 은퇴까지 15년이 남은 50대라면, <strong>배당성장주 60% + 배당주 40%</strong>로 구성하여 성장성을 유지하면서도 일정한 현금 흐름을 확보하는 전략이 현실적입니다. 은퇴가 임박할수록 배당주 비중을 높여 안정성을 강화할 수 있습니다.</p>
+
+                <div class="callout">
+                    <h4>대표적인 배당성장주 ETF 예시</h4>
+                    <ul>
+                        <li style="margin-bottom:0.4rem;"><strong>VIG (Vanguard Dividend Appreciation ETF)</strong>: 10년 이상 배당 성장 기업 추종</li>
+                        <li style="margin-bottom:0.4rem;"><strong>DGRO (iShares Core Dividend Growth ETF)</strong>: 5년 이상 배당 성장 기업 추종</li>
+                        <li><strong>NOBL (ProShares S&P 500 Dividend Aristocrats)</strong>: 25년 이상 연속 배당 성장 기업 (배당귀족)</li>
+                    </ul>
+                </div>
+            </section>
+
+        </div>
+
+        <div class="mt-8 p-6 bg-primary rounded-2xl text-center text-white">
+            <p class="font-bold text-lg">나의 배당 투자 시나리오를 직접 계산해보세요</p>
+            <p class="text-blue-100 text-sm mt-1 mb-4">포트폴리오 배당률과 수익률을 조정하며 은퇴 시뮬레이션을 실행해 보세요.</p>
+            <a href="/index.html" target="_top" class="inline-block px-6 py-2.5 bg-white text-primary font-bold rounded-full text-sm hover:bg-blue-50 transition-colors">시뮬레이터 시작하기 →</a>
+        </div>
+
+        <div class="mt-8">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">관련 가이드</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <a href="guide-dividend-reinvestment.html" class="block p-4 bg-white rounded-xl border border-slate-200 hover:border-primary hover:shadow-md transition-all">
+                    <p class="text-xs text-primary font-bold mb-1">복리 & 배당</p>
+                    <p class="font-bold text-slate-900 text-sm">ETF 배당금 재투자의 마법</p>
+                </a>
+                <a href="guide-asset-allocation.html" class="block p-4 bg-white rounded-xl border border-slate-200 hover:border-primary hover:shadow-md transition-all">
+                    <p class="text-xs text-primary font-bold mb-1">투자 전략</p>
+                    <p class="font-bold text-slate-900 text-sm">자산 배분 101</p>
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const YEARS = 30;
+        const INITIAL = 100_000_000;
+
+        // -- Data Computation --
+
+        // Chart 1: Annual Dividend Income
+        const labels = Array.from({ length: YEARS + 1 }, (_, i) => `${i}년`);
+
+        const highYieldAnnual = labels.map((_, i) => Math.round(INITIAL * 0.05 * Math.pow(1.02, i)));
+        const growthAnnual    = labels.map((_, i) => Math.round(INITIAL * 0.015 * Math.pow(1.10, i)));
+
+        // Chart 2: Cumulative Dividends
+        const highYieldCum = highYieldAnnual.reduce((acc, v, i) => { acc.push((acc[i - 1] || 0) + v); return acc; }, []);
+        const growthCum    = growthAnnual.reduce((acc, v, i) => { acc.push((acc[i - 1] || 0) + v); return acc; }, []);
+
+        // Chart 3: Total Portfolio Value (dividends reinvested)
+        const highYieldTotal = labels.map((_, i) => Math.round(INITIAL * Math.pow(1.07, i)));
+        const growthTotal    = labels.map((_, i) => Math.round(INITIAL * Math.pow(1.095, i)));
+
+        // -- Chart Defaults --
+        Chart.defaults.font.family = "'Manrope', sans-serif";
+        Chart.defaults.font.size = 12;
+
+        const YELLOW = { border: '#d97706', bg: 'rgba(217, 119, 6, 0.12)' };
+        const GREEN  = { border: '#16a34a', bg: 'rgba(22, 163, 74, 0.12)' };
+
+        function manWon(v) {
+            if (v >= 100_000_000) return (v / 100_000_000).toFixed(1) + '억';
+            return Math.round(v / 10_000).toLocaleString() + '만';
+        }
+
+        const commonOptions = (yLabel) => ({
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16 } },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ` ${ctx.dataset.label}: ${manWon(ctx.raw)}원`
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { maxTicksLimit: 7, color: '#94a3b8' }
+                },
+                y: {
+                    grid: { color: '#f1f5f9' },
+                    ticks: {
+                        color: '#94a3b8',
+                        callback: v => manWon(v) + '원'
+                    },
+                    title: { display: true, text: yLabel, color: '#94a3b8', font: { size: 11 } }
+                }
+            }
+        });
+
+        function makeDataset(label, data, color, dashed = false) {
+            return {
+                label,
+                data,
+                borderColor: color.border,
+                backgroundColor: color.bg,
+                borderWidth: 2.5,
+                borderDash: dashed ? [6, 4] : [],
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                fill: true,
+                tension: 0.3
+            };
+        }
+
+        // Chart 1
+        new Chart(document.getElementById('annualDividendChart'), {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    makeDataset('배당주 (연 5% / 성장 2%)', highYieldAnnual, YELLOW),
+                    makeDataset('배당성장주 (연 1.5% / 성장 10%)', growthAnnual, GREEN)
+                ]
+            },
+            options: {
+                ...commonOptions('연간 배당금'),
+                plugins: {
+                    ...commonOptions('연간 배당금').plugins,
+                    annotation: {}
+                }
+            }
+        });
+
+        // Chart 2
+        new Chart(document.getElementById('cumulativeDividendChart'), {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    makeDataset('배당주 누적 수령액', highYieldCum, YELLOW),
+                    makeDataset('배당성장주 누적 수령액', growthCum, GREEN)
+                ]
+            },
+            options: commonOptions('누적 배당금 합계')
+        });
+
+        // Chart 3
+        new Chart(document.getElementById('totalValueChart'), {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    makeDataset('배당주 포트폴리오 (총수익률 7%)', highYieldTotal, YELLOW),
+                    makeDataset('배당성장주 포트폴리오 (총수익률 9.5%)', growthTotal, GREEN)
+                ]
+            },
+            options: commonOptions('총 자산 가치')
+        });
+    </script>
+</body>
+</html>
