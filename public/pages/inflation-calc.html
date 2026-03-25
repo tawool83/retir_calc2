@@ -124,6 +124,7 @@
     }).join('');
 
     // Table rows: 0, 5, 10, ..., 80
+    const currentYear = new Date().getFullYear();
     const tbody = document.getElementById('resultTable');
     const rows = [];
     for (let y = 0; y <= 80; y += 5) {
@@ -135,7 +136,7 @@
       rows.push(`
         <tr class="${y === 0 ? 'bg-primary/5 font-semibold' : isHighlight ? 'bg-slate-50' : ''} border-t border-slate-100">
           <td class="px-4 py-3 text-center font-bold ${y === 0 ? 'text-primary' : 'text-slate-700'}">
-            ${y === 0 ? '현재' : y + '년'}
+            ${(currentYear + y) + '년'}
           </td>
           <td class="px-4 py-3 text-right font-semibold text-slate-800">
             ${fmtMoneyFull(nominalNeeded)}
