@@ -1,7 +1,7 @@
 const STRINGS = {
-    "APP_TITLE": "은퇴 계쇡 세우기 | 미래를 계획하세요",
+    "APP_TITLE": "은퇴 계획 세우기 | 미래를 계획하세요",
     "HEADER": {
-        "TITLE": "은퇴 계쇡 세우기",
+        "TITLE": "은퇴 계획 세우기",
         "SUBTITLE": "동적 시나리오를 통해 재정적 미래를 계획하세요."
     },
     "CONFIG": {
@@ -13,7 +13,9 @@ const STRINGS = {
         "INFLATION_RATE_LABEL": "물가 상승률",
         "AGE_NOW_LABEL": "현재 나이",
         "AGE_RETIRE_LABEL": "은퇴 나이",
-        "TARGET_MONTHLY_CASHFLOW_LABEL": "은퇴 후 월 목표 생활비 (오늘 기준)",
+        "RETIRE_PORTFOLIO_LABEL": "은퇴 후 투자 포트폴리오",
+        "RETIRE_PORTFOLIO_AUTO": "시나리오 자동",
+        "TARGET_MONTHLY_CASHFLOW_LABEL": "은퇴 후 월 목표 생활비 (현재 기준)",
         "SHARE_BUTTON": "시나리오",
         "SHARE_SUCCESS": "시나리오 정보를 담은 URL이 복사되었습니다! 새로운 브라우저에서 주소창에 붙여넣기 후 새로고침 해보세요"
     },

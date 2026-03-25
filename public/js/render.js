@@ -268,11 +268,17 @@ function renderRetirementPlan() {
     const nominalMonthly = targetMonthlyCashFlow * Math.pow(1 + inflationRate / 100, yearsToRetirement);
 
     // 은퇴 시점 포트폴리오 수익률
-    const portfolioAtRetirement = getActivePortfolio(ageRetire, 1);
     let annualReturn = 6;
-    if (portfolioAtRetirement.length > 0) {
-        annualReturn = portfolioAtRetirement.reduce((acc, p) =>
-            acc + p.percentage * (p.preset.annualReturnPct + p.preset.dividendPct), 0);
+    const selectedPresetId = state.inputs.retirePlanPortfolioId;
+    if (selectedPresetId) {
+        const selectedPreset = state.presets.find(p => p.id === selectedPresetId);
+        if (selectedPreset) annualReturn = selectedPreset.annualReturnPct + selectedPreset.dividendPct;
+    } else {
+        const portfolioAtRetirement = getActivePortfolio(ageRetire, 1);
+        if (portfolioAtRetirement.length > 0) {
+            annualReturn = portfolioAtRetirement.reduce((acc, p) =>
+                acc + p.percentage * (p.preset.annualReturnPct + p.preset.dividendPct), 0);
+        }
     }
 
     // 실질 월 수익률 (명목 - 물가)
@@ -328,6 +334,7 @@ function recalcAndRender() {
   state.results = results;
   $("rangeLabel").textContent = getText('RESULTS.RANGE_LABEL', results.startYear, results.ageNow, results.endAge, results.endAge);
   renderAnnualTable(results);
+  populateRetirePlanPortfolioSelect();
   renderRetirementPlan();
   renderEventList();
   updateFilterButton();

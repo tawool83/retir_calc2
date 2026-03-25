@@ -54,6 +54,7 @@ const state = {
     retirePlanAgeNow: 40,
     retirePlanAgeRetire: 65,
     targetMonthlyCashFlow: 0,
+    retirePlanPortfolioId: null,
     initialInvestment: 0,
     monthlyContribution: 0,
     filterEnabled: false,
