@@ -15,7 +15,7 @@ const STRINGS = {
         "AGE_RETIRE_LABEL": "은퇴 나이",
         "RETIRE_PORTFOLIO_LABEL": "은퇴 후 투자 포트폴리오",
         "RETIRE_PORTFOLIO_AUTO": "시나리오 자동",
-        "TARGET_MONTHLY_CASHFLOW_LABEL": "은퇴 후 월 목표 생활비 (현재 기준)",
+        "TARGET_MONTHLY_CASHFLOW_LABEL": "은퇴 후 월 목표 생활비",
         "SHARE_BUTTON": "시나리오",
         "SHARE_SUCCESS": "시나리오 정보를 담은 URL이 복사되었습니다! 새로운 브라우저에서 주소창에 붙여넣기 후 새로고침 해보세요"
     },

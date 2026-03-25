@@ -6,7 +6,7 @@ function populateRetirePlanPortfolioSelect() {
   if (!sel) return;
   const current = state.inputs.retirePlanPortfolioId;
   sel.innerHTML = `<option value="">${getText('CONFIG.RETIRE_PORTFOLIO_AUTO')}</option>` +
-    state.presets.map(p => `<option value="${p.id}">${p.name} (${(p.annualReturnPct + p.dividendPct).toFixed(1)}%)</option>`).join('');
+    state.presets.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
   sel.value = current || "";
 }
 
