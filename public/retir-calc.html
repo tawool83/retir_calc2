@@ -70,6 +70,26 @@
     dialog::backdrop { background: rgba(0,0,0,.35); }
     .onboarding-highlight { z-index: 50; position: relative; box-shadow: 0 0 0 4px theme('colors.primary'); transition: box-shadow 0.3s ease-in-out; border-radius: 0.75rem;}
     .selected-icon { background-color: #e0e7ff; border-radius: 50%; box-shadow: 0 0 0 2px #2563eb; }
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    @media (max-width: 640px) {
+      #eventDialog,
+      #presetDialog {
+        margin: 0;
+        inset: auto 0 0 0;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 1rem 1rem 0 0;
+        max-height: 85dvh;
+        overflow-y: auto;
+      }
+      #eventDialog[open],
+      #presetDialog[open] {
+        animation: slideUp 0.22s ease-out;
+      }
+    }
   </style>
 </head>
 
@@ -99,7 +119,8 @@
 
               <!-- Config -->
               <div id="config-section" class="bg-white dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div class="flex items-center justify-end mb-4">
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-sm font-bold text-slate-700 dark:text-slate-200">설정</h2>
                   <div class="flex items-center gap-2">
                      <button id="btnShare" class="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-primary transition-colors px-3 py-2 rounded-lg">
                         <span class="material-symbols-outlined text-sm">share</span> <span data-i18n-key="CONFIG.SHARE_BUTTON"></span>
