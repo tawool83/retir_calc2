@@ -45,7 +45,6 @@ const STRINGS = {
         "NO_INPUT": "현재 나이, 은퇴 나이, 월 목표 생활비를 입력하면 필요 은퇴 자산을 계산합니다.",
         "NOMINAL_MONTHLY": "월 목표 생활비",
         "REQUIRED_CAPITAL": "필요 은퇴 자산",
-        "TODAY_VALUE": "",
         "INFLATION_NOTE": "물가 반영 월 생활비 (물가 : {0}% × {1}년)",
         "RETURN_NOTE": "수익률 {0}%, 실질 {1}%",
         "PROJECTED_ASSET": "시나리오 {0}세 예상 자산",

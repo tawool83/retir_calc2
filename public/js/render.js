@@ -304,7 +304,7 @@ function renderRetirementPlan() {
         <div class="flex flex-col gap-y-2 text-sm">
             <div class="space-y-1">
                 <div class="flex items-center justify-between gap-2">
-                    <span class="text-xs text-slate-500 dark:text-slate-400 shrink-0">${getText('RETIREMENT_PLAN.NOMINAL_MONTHLY')} ${getText('RETIREMENT_PLAN.TODAY_VALUE')}</span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 shrink-0">${getText('RETIREMENT_PLAN.NOMINAL_MONTHLY')}</span>
                     <span class="font-bold text-sm">${fmtMoney(targetMonthlyCashFlow)}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2">

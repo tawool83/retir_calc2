@@ -77,8 +77,12 @@
     @media (max-width: 640px) {
       #eventDialog,
       #presetDialog {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto;
         margin: 0;
-        inset: auto 0 0 0;
         width: 100%;
         max-width: 100%;
         border-radius: 1rem 1rem 0 0;
@@ -120,7 +124,7 @@
               <!-- Config -->
               <div id="config-section" class="bg-white dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                 <div class="flex items-center justify-between mb-4">
-                  <h2 class="text-sm font-bold text-slate-700 dark:text-slate-200">설정</h2>
+                  <h2 class="text-lg font-bold">설정</h2>
                   <div class="flex items-center gap-2">
                      <button id="btnShare" class="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-primary transition-colors px-3 py-2 rounded-lg">
                         <span class="material-symbols-outlined text-sm">share</span> <span data-i18n-key="CONFIG.SHARE_BUTTON"></span>
