@@ -186,7 +186,7 @@ function openEventDialog(eventId = null) {
         renderIconPicker();
     }
     updateDialogFields();
-    dlg.showModal();
+    showModal(dlg);
 }
 
 function renderIconPicker(selectedIcon = null) {

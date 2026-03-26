@@ -58,7 +58,7 @@ function initPresetManagement() {
     $('btnAddPreset').addEventListener('click', () => {
         setPresetEditMode(null);
         renderPresetList();
-        dlg.showModal();
+        showModal(dlg);
     });
     $('closePresetDlg').addEventListener('click', () => dlg.close());
     $('newPresetForm').addEventListener('submit', (e) => {
