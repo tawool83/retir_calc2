@@ -54,7 +54,6 @@ function createEventCard(ev) {
         </div>
         <div class="flex items-center gap-1">
             <button class="p-2 text-slate-400 hover:text-primary transition-colors shrink-0" data-toggle="${ev.id}" title="${ev.enabled ? getText('EVENT_CARD.TOOLTIP_DISABLE') : getText('EVENT_CARD.TOOLTIP_ENABLE')}"><span class="material-symbols-outlined text-base">${ev.enabled ? 'visibility' : 'visibility_off'}</span></button>
-            <button class="p-2 hidden sm:block text-slate-400 hover:text-primary transition-colors shrink-0" data-edit="${ev.id}" title="${getText('EVENT_CARD.EDIT_TOOLTIP')}"><span class="material-symbols-outlined text-base">edit</span></button>
             <button class="p-2 text-slate-400 hover:text-red-500 transition-colors shrink-0" data-del="${ev.id}" title="${getText('EVENT_CARD.DELETE_TOOLTIP')}"><span class="material-symbols-outlined text-base">delete</span></button>
          </div>
       </div>
@@ -72,7 +71,10 @@ function createEventCard(ev) {
       recalcAndRender();
       saveStateDebounced();
     });
-    node.querySelector("[data-edit]").addEventListener("click", (e) => openEventDialog(ev.id, e));
+    node.addEventListener("click", (e) => {
+        if (e.target.closest('[data-toggle], [data-del]')) return;
+        openEventDialog(ev.id, e);
+    });
 
     // 모바일 롱프레스(800ms)로 수정 팝업 열기
     let pressTimer = null;
@@ -82,12 +84,12 @@ function createEventCard(ev) {
         touchX = e.touches[0].clientX;
         touchY = e.touches[0].clientY;
         node.classList.add('ring-2', 'ring-primary', 'ring-inset');
-        pressTimer = setTimeout(() => {
+        pressTimer = setTimeout(() => {  // 200ms
 
             node.classList.remove('ring-2', 'ring-primary', 'ring-inset');
             if (navigator.vibrate) navigator.vibrate(50);
             openEventDialog(ev.id, { clientX: touchX, clientY: touchY });
-        }, 400);
+        }, 200);
     }, { passive: true });
     const cancelPress = () => {
         clearTimeout(pressTimer);
