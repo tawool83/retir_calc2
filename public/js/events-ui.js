@@ -52,10 +52,10 @@ function createEventCard(ev) {
           <div class="flex items-center gap-2 flex-wrap">${pill} ${monthText}</div>
           <p class="text-sm text-slate-500 mt-1 flex items-center">${subtitle}</p>
         </div>
-        <div class="flex items-center">
-            <button class="text-slate-400 hover:text-primary transition-colors shrink-0" data-toggle="${ev.id}" title="${ev.enabled ? getText('EVENT_CARD.TOOLTIP_DISABLE') : getText('EVENT_CARD.TOOLTIP_ENABLE')}"><span class="material-symbols-outlined text-sm">${ev.enabled ? 'visibility' : 'visibility_off'}</span></button>
-            <button class="text-slate-400 hover:text-primary transition-colors shrink-0" data-edit="${ev.id}" title="${getText('EVENT_CARD.EDIT_TOOLTIP')}"><span class="material-symbols-outlined text-sm">edit</span></button>
-            <button class="text-slate-400 hover:text-red-500 transition-colors shrink-0" data-del="${ev.id}" title="${getText('EVENT_CARD.DELETE_TOOLTIP')}"><span class="material-symbols-outlined text-sm">delete</span></button>
+        <div class="flex items-center gap-3">
+            <button class="p-2 text-slate-400 hover:text-primary transition-colors shrink-0" data-toggle="${ev.id}" title="${ev.enabled ? getText('EVENT_CARD.TOOLTIP_DISABLE') : getText('EVENT_CARD.TOOLTIP_ENABLE')}"><span class="material-symbols-outlined text-base">${ev.enabled ? 'visibility' : 'visibility_off'}</span></button>
+            <button class="p-2 hidden sm:block text-slate-400 hover:text-primary transition-colors shrink-0" data-edit="${ev.id}" title="${getText('EVENT_CARD.EDIT_TOOLTIP')}"><span class="material-symbols-outlined text-base">edit</span></button>
+            <button class="p-2 text-slate-400 hover:text-red-500 transition-colors shrink-0" data-del="${ev.id}" title="${getText('EVENT_CARD.DELETE_TOOLTIP')}"><span class="material-symbols-outlined text-base">delete</span></button>
          </div>
       </div>
     `;
@@ -73,6 +73,28 @@ function createEventCard(ev) {
       saveStateDebounced();
     });
     node.querySelector("[data-edit]").addEventListener("click", (e) => openEventDialog(ev.id, e));
+
+    // 모바일 롱프레스(800ms)로 수정 팝업 열기
+    let pressTimer = null;
+    let touchX = 0, touchY = 0;
+    node.addEventListener('contextmenu', (e) => e.preventDefault());
+    node.addEventListener('touchstart', (e) => {
+        touchX = e.touches[0].clientX;
+        touchY = e.touches[0].clientY;
+        node.classList.add('ring-2', 'ring-primary', 'ring-inset');
+        pressTimer = setTimeout(() => {
+            node.classList.remove('ring-2', 'ring-primary', 'ring-inset');
+            if (navigator.vibrate) navigator.vibrate(50);
+            openEventDialog(ev.id, { clientX: touchX, clientY: touchY });
+        }, 800);
+    }, { passive: true });
+    const cancelPress = () => {
+        clearTimeout(pressTimer);
+        node.classList.remove('ring-2', 'ring-primary', 'ring-inset');
+    };
+    node.addEventListener('touchend', cancelPress);
+    node.addEventListener('touchmove', cancelPress);
+
     return node;
 }
 
