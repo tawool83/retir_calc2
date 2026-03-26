@@ -123,7 +123,7 @@ function renderEventList() {
     const container = document.createElement('div');
     container.className = 'relative';
     const line = document.createElement('div');
-    line.className = 'absolute left-[15px] top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-700';
+    line.className = 'absolute left-[7px] top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-700';
     container.appendChild(line);
     const rowsContainer = document.createElement('div');
     rowsContainer.className = 'relative z-10';
@@ -132,11 +132,11 @@ function renderEventList() {
         const row = document.createElement('div');
         row.className = 'flex items-start gap-4 pt-4 first:pt-0';
         const timelinePart = document.createElement('div');
-        timelinePart.className = 'w-8 flex-shrink-0 flex justify-center pt-3';
+        timelinePart.className = 'w-4 flex-shrink-0 flex justify-center pt-3';
         const dotWrapper = document.createElement('div');
         dotWrapper.className = 'w-3 h-3 bg-primary rounded-full ring-4 ring-white dark:ring-slate-900 relative';
         const ageLabel = document.createElement('span');
-        ageLabel.className = 'absolute -top-1.5 right-full mr-2 text-[10px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap';
+        ageLabel.className = 'absolute top-full mt-0.5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap';
         ageLabel.textContent = `${group.age}세`;
         dotWrapper.appendChild(ageLabel);
         timelinePart.appendChild(dotWrapper);
