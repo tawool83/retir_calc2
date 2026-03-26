@@ -62,9 +62,24 @@ function uid() {
   return (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + "_" + Math.random().toString(16).slice(2);
 }
 
-function showModal(dlg) {
+function showModal(dlg, clientX, clientY) {
     dlg.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+    const panel = dlg.querySelector('[id$="Panel"]');
+    if (!panel) return;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const pw = panel.offsetWidth;
+    const ph = panel.offsetHeight;
+    const margin = 8;
+    let x = (clientX != null) ? clientX : vw / 2 - pw / 2;
+    let y = (clientY != null) ? clientY + 12 : vh / 2 - ph / 2;
+    if (y + ph > vh - margin) y = (clientY != null) ? clientY - ph - 12 : vh / 2 - ph / 2;
+    if (y < margin) y = margin;
+    if (x + pw > vw - margin) x = vw - pw - margin;
+    if (x < margin) x = margin;
+    panel.style.left = x + 'px';
+    panel.style.top  = y + 'px';
 }
 
 function closeModal(dlg) {

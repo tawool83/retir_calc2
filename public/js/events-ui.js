@@ -72,7 +72,7 @@ function createEventCard(ev) {
       recalcAndRender();
       saveStateDebounced();
     });
-    node.querySelector("[data-edit]").addEventListener("click", () => openEventDialog(ev.id));
+    node.querySelector("[data-edit]").addEventListener("click", (e) => openEventDialog(ev.id, e));
     return node;
 }
 
@@ -148,7 +148,7 @@ function renderEventList() {
     }
 }
 
-function openEventDialog(eventId = null) {
+function openEventDialog(eventId = null, triggerEvent = null) {
     const dlg = $("eventDialog");
     const title = $("dlgEventTitle");
     const saveBtn = $("dlgSave");
@@ -186,7 +186,7 @@ function openEventDialog(eventId = null) {
         renderIconPicker();
     }
     updateDialogFields();
-    showModal(dlg);
+    showModal(dlg, triggerEvent?.clientX, triggerEvent?.clientY);
 }
 
 function renderIconPicker(selectedIcon = null) {
@@ -240,7 +240,7 @@ function initEventDialog() {
     const form = $("eventDialogForm");
     const typeSelect = $("dlgType");
 
-    $("btnAddEvent").addEventListener("click", () => openEventDialog());
+    $("btnAddEvent").addEventListener("click", (e) => openEventDialog(null, e));
     $("dlgCloseX").addEventListener("click", () => closeModal(dlg));
     $("dlgCancel").addEventListener("click", () => closeModal(dlg));
     $("eventDialogBackdrop").addEventListener("click", () => closeModal(dlg));

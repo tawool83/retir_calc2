@@ -54,10 +54,10 @@ function setPresetEditMode(presetId) {
 
 function initPresetManagement() {
     const dlg = $('presetDialog');
-    $('btnAddPreset').addEventListener('click', () => {
+    $('btnAddPreset').addEventListener('click', (e) => {
         setPresetEditMode(null);
         renderPresetList();
-        showModal(dlg);
+        showModal(dlg, e.clientX, e.clientY);
     });
     $('closePresetDlg').addEventListener('click', () => closeModal(dlg));
     $('presetDialogBackdrop').addEventListener('click', () => closeModal(dlg));

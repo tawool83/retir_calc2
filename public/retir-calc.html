@@ -72,13 +72,6 @@
     .selected-icon { background-color: #e0e7ff; border-radius: 50%; box-shadow: 0 0 0 2px #2563eb; }
   </style>
   <style>
-    @keyframes slideUp {
-      from { transform: translateY(100%); opacity: 0; }
-      to   { transform: translateY(0);    opacity: 1; }
-    }
-    @media (max-width: 640px) {
-      .modal-panel { animation: slideUp 0.22s ease-out; }
-    }
   </style>
 </head>
 
@@ -312,9 +305,9 @@
 </footer>
 
 <!-- Add Event Dialog -->
-<div id="eventDialog" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+<div id="eventDialog" class="hidden fixed inset-0 z-50">
   <div id="eventDialogBackdrop" class="absolute inset-0 bg-black/35"></div>
-  <div class="relative w-full sm:w-[92vw] sm:max-w-md rounded-t-2xl sm:rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl max-h-[85dvh] overflow-y-auto modal-panel">
+  <div id="eventDialogPanel" class="absolute w-[92vw] max-w-md rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl max-h-[90dvh] overflow-y-auto">
   <form id="eventDialogForm" class="p-5">
     <div class="flex items-center justify-between mb-3">
       <h3 id="dlgEventTitle" class="text-sm font-extrabold"></h3>
@@ -397,9 +390,9 @@
 </div>
 
 <!-- Presets Dialog -->
-<div id="presetDialog" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+<div id="presetDialog" class="hidden fixed inset-0 z-50">
   <div id="presetDialogBackdrop" class="absolute inset-0 bg-black/35"></div>
-  <div class="relative w-full sm:w-[92vw] sm:max-w-md rounded-t-2xl sm:rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl max-h-[85dvh] overflow-y-auto modal-panel">
+  <div id="presetDialogPanel" class="absolute w-[92vw] max-w-md rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl max-h-[90dvh] overflow-y-auto">
     <div class="p-5">
         <div class="flex items-center justify-between mb-3">
             <h3 class="text-sm font-extrabold" data-i18n-key="PRESET_DIALOG.TITLE"></h3>
