@@ -54,7 +54,7 @@ function createEventCard(ev) {
         </div>
         <div class="flex items-center gap-3">
             <button class="p-2 text-slate-400 hover:text-primary transition-colors shrink-0" data-toggle="${ev.id}" title="${ev.enabled ? getText('EVENT_CARD.TOOLTIP_DISABLE') : getText('EVENT_CARD.TOOLTIP_ENABLE')}"><span class="material-symbols-outlined text-base">${ev.enabled ? 'visibility' : 'visibility_off'}</span></button>
-            <button class="p-2 hidden sm:block text-slate-400 hover:text-primary transition-colors shrink-0" data-edit="${ev.id}" title="${getText('EVENT_CARD.EDIT_TOOLTIP')}"><span class="material-symbols-outlined text-base">edit</span></button>
+            <button class="p-2 text-slate-400 hover:text-primary transition-colors shrink-0" data-edit="${ev.id}" title="${getText('EVENT_CARD.EDIT_TOOLTIP')}"><span class="material-symbols-outlined text-base">edit</span></button>
             <button class="p-2 text-slate-400 hover:text-red-500 transition-colors shrink-0" data-del="${ev.id}" title="${getText('EVENT_CARD.DELETE_TOOLTIP')}"><span class="material-symbols-outlined text-base">delete</span></button>
          </div>
       </div>
@@ -83,10 +83,11 @@ function createEventCard(ev) {
         touchY = e.touches[0].clientY;
         node.classList.add('ring-2', 'ring-primary', 'ring-inset');
         pressTimer = setTimeout(() => {
+
             node.classList.remove('ring-2', 'ring-primary', 'ring-inset');
             if (navigator.vibrate) navigator.vibrate(50);
             openEventDialog(ev.id, { clientX: touchX, clientY: touchY });
-        }, 800);
+        }, 400);
     }, { passive: true });
     const cancelPress = () => {
         clearTimeout(pressTimer);
