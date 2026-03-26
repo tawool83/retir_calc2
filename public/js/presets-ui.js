@@ -54,13 +54,14 @@ function setPresetEditMode(presetId) {
 
 function initPresetManagement() {
     const dlg = $('presetDialog');
-    let downTarget = null;
     $('btnAddPreset').addEventListener('click', () => {
         setPresetEditMode(null);
         renderPresetList();
         showModal(dlg);
     });
-    $('closePresetDlg').addEventListener('click', () => dlg.close());
+    $('closePresetDlg').addEventListener('click', () => closeModal(dlg));
+    $('presetDialogBackdrop').addEventListener('click', () => closeModal(dlg));
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !dlg.classList.contains("hidden")) closeModal(dlg); });
     $('newPresetForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const name = ($("dlgPresetName").value || "").trim();
@@ -86,7 +87,5 @@ function initPresetManagement() {
         recalcAndRender();
         saveStateDebounced();
     });
-    dlg.addEventListener("mousedown", e => { downTarget = e.target; });
-    dlg.addEventListener("click", (e) => { if (e.target === dlg && downTarget === dlg) dlg.close(); });
     dlg.addEventListener('close', () => setPresetEditMode(null));
 }

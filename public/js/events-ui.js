@@ -237,12 +237,14 @@ function updateDialogFields() {
 
 function initEventDialog() {
     const dlg = $("eventDialog");
-    const form = dlg.querySelector('form');
+    const form = $("eventDialogForm");
     const typeSelect = $("dlgType");
-    let downTarget = null;
 
     $("btnAddEvent").addEventListener("click", () => openEventDialog());
-    $("dlgCloseX").addEventListener("click", () => dlg.close());
+    $("dlgCloseX").addEventListener("click", () => closeModal(dlg));
+    $("dlgCancel").addEventListener("click", () => closeModal(dlg));
+    $("eventDialogBackdrop").addEventListener("click", () => closeModal(dlg));
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !dlg.classList.contains("hidden")) closeModal(dlg); });
     typeSelect.addEventListener('change', updateDialogFields);
 
     form.addEventListener('submit', (e) => {
@@ -275,10 +277,8 @@ function initEventDialog() {
         state.editingEventId = null;
         recalcAndRender();
         saveStateDebounced();
-        dlg.close();
+        closeModal(dlg);
     });
 
-    dlg.addEventListener("mousedown", e => { downTarget = e.target; });
-    dlg.addEventListener("click", (e) => { if (e.target === dlg && downTarget === dlg) dlg.close(); });
     dlg.addEventListener('close', () => { state.editingEventId = null; });
 }

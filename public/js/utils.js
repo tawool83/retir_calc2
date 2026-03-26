@@ -63,16 +63,12 @@ function uid() {
 }
 
 function showModal(dlg) {
-    dlg.showModal();
-    if (window.innerWidth <= 640) {
-        const s = dlg.style;
-        s.position   = 'fixed';
-        s.inset      = 'auto 0 0 0';
-        s.margin     = '0';
-        s.width      = '100%';
-        s.maxWidth   = '100%';
-        s.borderRadius = '1rem 1rem 0 0';
-        s.maxHeight  = '85dvh';
-        s.overflowY  = 'auto';
-    }
+    dlg.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal(dlg) {
+    dlg.classList.add('hidden');
+    document.body.style.overflow = '';
+    dlg.dispatchEvent(new Event('close'));
 }

@@ -76,12 +76,8 @@
       from { transform: translateY(100%); opacity: 0; }
       to   { transform: translateY(0);    opacity: 1; }
     }
-    body:has(dialog[open]) { overflow: hidden; }
     @media (max-width: 640px) {
-      #eventDialog[open],
-      #presetDialog[open] {
-        animation: slideUp 0.22s ease-out;
-      }
+      .modal-panel { animation: slideUp 0.22s ease-out; }
     }
   </style>
 </head>
@@ -316,8 +312,10 @@
 </footer>
 
 <!-- Add Event Dialog -->
-<dialog id="eventDialog" class="rounded-xl p-0 w-[92vw] max-w-md bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl">
-  <form method="dialog" class="p-5">
+<div id="eventDialog" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+  <div id="eventDialogBackdrop" class="absolute inset-0 bg-black/35"></div>
+  <div class="relative w-full sm:w-[92vw] sm:max-w-md rounded-t-2xl sm:rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl max-h-[85dvh] overflow-y-auto modal-panel">
+  <form id="eventDialogForm" class="p-5">
     <div class="flex items-center justify-between mb-3">
       <h3 id="dlgEventTitle" class="text-sm font-extrabold"></h3>
         <button id="dlgCloseX" type="button" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
@@ -391,14 +389,17 @@
     </div>
 
     <div class="mt-5 flex gap-2 justify-end">
-      <button id="dlgCancel" value="cancel" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700" data-i18n-key="EVENT_DIALOG.CANCEL_BUTTON"></button>
-      <button id="dlgSave" value="ok" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary"></button>
+      <button id="dlgCancel" type="button" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700" data-i18n-key="EVENT_DIALOG.CANCEL_BUTTON"></button>
+      <button id="dlgSave" type="submit" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary"></button>
     </div>
   </form>
-</dialog>
+  </div>
+</div>
 
 <!-- Presets Dialog -->
-<dialog id="presetDialog" class="rounded-xl p-0 w-[92vw] max-w-md bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl">
+<div id="presetDialog" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+  <div id="presetDialogBackdrop" class="absolute inset-0 bg-black/35"></div>
+  <div class="relative w-full sm:w-[92vw] sm:max-w-md rounded-t-2xl sm:rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl max-h-[85dvh] overflow-y-auto modal-panel">
     <div class="p-5">
         <div class="flex items-center justify-between mb-3">
             <h3 class="text-sm font-extrabold" data-i18n-key="PRESET_DIALOG.TITLE"></h3>
@@ -428,7 +429,8 @@
             <button type="submit" id="dlgPresetSave" class="px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-secondary" data-i18n-key="PRESET_DIALOG.SAVE_BUTTON"></button>
         </div>
     </form>
-</dialog>
+  </div>
+</div>
 
 <!-- Portfolio Tooltip -->
 <div id="portfolioTooltip" class="hidden fixed z-50 bg-slate-900 text-white p-4 rounded-xl shadow-lg w-72 text-sm"></div>
