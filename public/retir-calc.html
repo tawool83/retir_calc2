@@ -70,24 +70,24 @@
     dialog::backdrop { background: rgba(0,0,0,.35); }
     .onboarding-highlight { z-index: 50; position: relative; box-shadow: 0 0 0 4px theme('colors.primary'); transition: box-shadow 0.3s ease-in-out; border-radius: 0.75rem;}
     .selected-icon { background-color: #e0e7ff; border-radius: 50%; box-shadow: 0 0 0 2px #2563eb; }
+  </style>
+  <style>
     @keyframes slideUp {
       from { transform: translateY(100%); opacity: 0; }
       to   { transform: translateY(0);    opacity: 1; }
     }
+    body:has(dialog[open]) { overflow: hidden; }
     @media (max-width: 640px) {
       #eventDialog,
       #presetDialog {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        top: auto;
-        margin: 0;
-        width: 100%;
-        max-width: 100%;
-        border-radius: 1rem 1rem 0 0;
-        max-height: 85dvh;
-        overflow-y: auto;
+        position: fixed !important;
+        inset: auto 0 0 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 1rem 1rem 0 0 !important;
+        max-height: 85dvh !important;
+        overflow-y: auto !important;
       }
       #eventDialog[open],
       #presetDialog[open] {
