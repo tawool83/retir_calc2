@@ -252,82 +252,67 @@ function calculateSustainableWithdrawal(retirementBalance, retirementAge, portfo
 function renderRetirementPlan() {
     const el = $('retirementPlan');
     if (!el) return;
-    const { inflationRate, retirePlanAgeNow, retirePlanAgeRetire, targetMonthlyCashFlow } = state.inputs;
+    const { inflationRate, retirePlanAgeNow, retirePlanAgeRetire } = state.inputs;
     const ageNow = retirePlanAgeNow, ageRetire = retirePlanAgeRetire;
 
-    if (!targetMonthlyCashFlow || ageRetire <= ageNow) {
+    if (!ageNow || !ageRetire || ageRetire <= ageNow) {
         el.innerHTML = `<p class="text-xs text-slate-500 dark:text-slate-400">${getText('RETIREMENT_PLAN.NO_INPUT')}</p>`;
         return;
     }
 
-    const yearsToRetirement = ageRetire - ageNow;
-    const retirementYears = state.maxAge - ageRetire;
-    if (retirementYears <= 0) { el.innerHTML = ''; return; }
+    // 연간 성장 예측(시나리오) 데이터에서 은퇴 시점 및 100세 자산 조회
+    const retirementYearData = state.results?.years?.find(y => y.age === ageRetire);
+    const age100Data = state.results?.years?.find(y => y.age === 100);
+    const lastYearData = state.results?.years?.[state.results.years.length - 1];
 
-    // 은퇴 시점 명목 월 생활비
-    const nominalMonthly = targetMonthlyCashFlow * Math.pow(1 + inflationRate / 100, yearsToRetirement);
+    if (!retirementYearData) {
+        el.innerHTML = `<p class="text-xs text-slate-500 dark:text-slate-400">${getText('RETIREMENT_PLAN.NO_INPUT')}</p>`;
+        return;
+    }
 
     // 은퇴 시점 포트폴리오 수익률
     let annualReturn = 6;
-    const selectedPresetId = state.inputs.retirePlanPortfolioId;
-    if (selectedPresetId) {
-        const selectedPreset = state.presets.find(p => p.id === selectedPresetId);
-        if (selectedPreset) annualReturn = selectedPreset.annualReturnPct + selectedPreset.dividendPct;
-    } else {
-        const portfolioAtRetirement = getActivePortfolio(ageRetire, 1);
-        if (portfolioAtRetirement.length > 0) {
-            annualReturn = portfolioAtRetirement.reduce((acc, p) =>
-                acc + p.percentage * (p.preset.annualReturnPct + p.preset.dividendPct), 0);
-        }
+    const portfolioAtRetirement = getActivePortfolio(ageRetire, 1);
+    if (portfolioAtRetirement.length > 0) {
+        annualReturn = portfolioAtRetirement.reduce((acc, p) =>
+            acc + p.percentage * (p.preset.annualReturnPct + p.preset.dividendPct), 0);
     }
 
-    // 실질 월 수익률 (명목 - 물가)
-    const realAnnual = (1 + annualReturn / 100) / (1 + inflationRate / 100) - 1;
-    const realMonthly = Math.pow(1 + realAnnual, 1 / 12) - 1;
-    const n = retirementYears * 12;
+    // 안정적 월 인출액: 명목 자산이 줄지 않는 수준 = 자산 × 월 수익률
+    const monthlyReturn = Math.pow(1 + annualReturn / 100, 1 / 12) - 1;
+    const sustainableMonthly = retirementYearData.endBalance * monthlyReturn;
 
-    // 필요 은퇴 자산 (실질, 연금 현가)
-    let requiredReal;
-    if (Math.abs(realMonthly) < 0.00001) {
-        requiredReal = targetMonthlyCashFlow * n;
-    } else {
-        requiredReal = targetMonthlyCashFlow * (1 - Math.pow(1 + realMonthly, -n)) / realMonthly;
-    }
-    const requiredNominal = requiredReal * Math.pow(1 + inflationRate / 100, yearsToRetirement);
+    // 최종 자산 (100세 또는 마지막 데이터)
+    const finalData = age100Data || lastYearData;
+    const finalAge = finalData?.age;
+    const finalBalance = finalData?.endBalance;
 
-    // 시나리오에서 은퇴 나이 예상 자산
-    const retirementYearData = state.results?.years?.find(y => y.age === ageRetire);
-    const onTrack = retirementYearData && retirementYearData.endBalance >= requiredNominal;
-    const gap = requiredNominal - (retirementYearData?.endBalance ?? 0);
+    const yearsToRetirement = ageRetire - ageNow;
 
     el.innerHTML = `
-        <div class="flex flex-col gap-y-2 text-sm">
-            <div class="space-y-1">
-                <div class="flex items-center justify-between gap-2">
-                    <span class="text-xs text-slate-500 dark:text-slate-400 shrink-0">${getText('RETIREMENT_PLAN.NOMINAL_MONTHLY')}</span>
-                    <span class="font-bold text-sm">${fmtMoney(targetMonthlyCashFlow)}</span>
-                </div>
-                <div class="flex items-center justify-between gap-2">
-                    <span class="text-xs text-slate-400 shrink-0">${getText('RETIREMENT_PLAN.INFLATION_NOTE', inflationRate, yearsToRetirement)}</span>
-                    <span class="font-bold text-sm">${fmtMoney(nominalMonthly)}</span>
-                </div>
+        <div class="flex flex-col gap-y-2.5 text-sm">
+            <div class="text-xs text-slate-500 dark:text-slate-400">
+                현재 나이 <strong class="text-slate-700 dark:text-slate-300">${ageNow}세</strong>에서
+                은퇴 나이 <strong class="text-slate-700 dark:text-slate-300">${ageRetire}세</strong>까지
+                <strong class="text-slate-700 dark:text-slate-300">${yearsToRetirement}년</strong> 투자 예측
             </div>
-            <div class="grid grid-cols-2 gap-x-4 pt-2 border-t border-primary/20">
+            <div class="grid grid-cols-2 gap-x-4 gap-y-2 pt-2 border-t border-primary/20">
                 <div>
-                    <div class="text-xs text-slate-500 dark:text-slate-400 mb-0.5">${getText('RETIREMENT_PLAN.REQUIRED_CAPITAL')}</div>
-                    <div class="font-bold text-primary">${fmtMoney(requiredNominal, true)}</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mb-0.5">은퇴 시점 예상 자산 (${ageRetire}세)</div>
+                    <div class="font-bold text-primary">${fmtMoney(retirementYearData.endBalance, true)}</div>
                 </div>
-                ${retirementYearData ? `
+                ${finalBalance != null ? `
                 <div>
-                    <div class="text-xs text-slate-500 dark:text-slate-400 mb-0.5">${getText('RETIREMENT_PLAN.PROJECTED_ASSET', ageRetire)}</div>
-                    <div class="font-bold ${onTrack ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}">
-                        ${fmtMoney(retirementYearData.endBalance, true)}
-                        &nbsp;${onTrack
-                            ? getText('RETIREMENT_PLAN.ON_TRACK')
-                            : `(-${fmtMoney(gap, true)} ${getText('RETIREMENT_PLAN.SHORT')})`}
-                    </div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mb-0.5">${finalAge}세 총 자산 규모</div>
+                    <div class="font-bold ${finalBalance > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}">${fmtMoney(finalBalance, true)}</div>
                 </div>` : ''}
             </div>
+            ${sustainableMonthly > 0 ? `
+            <div class="pt-2 border-t border-primary/20">
+                <div class="text-xs text-slate-500 dark:text-slate-400 mb-0.5">안정적 월 인출액 <span class="text-slate-400">(자산 유지 기준)</span></div>
+                <div class="font-bold text-blue-600 dark:text-blue-400">${fmtMoney(sustainableMonthly)}/월</div>
+                <div class="text-xs text-slate-400 mt-0.5">수익률 ${annualReturn.toFixed(1)}% 적용 — 이 금액 이하로 인출 시 자산이 감소하지 않습니다</div>
+            </div>` : ''}
         </div>
     `;
 }
@@ -340,7 +325,6 @@ function recalcAndRender() {
   state.results = results;
   $("rangeLabel").textContent = getText('RESULTS.RANGE_LABEL', results.startYear, results.ageNow, results.endAge, results.endAge);
   renderAnnualTable(results);
-  populateRetirePlanPortfolioSelect();
   renderRetirementPlan();
   renderEventList();
   updateFilterButton();

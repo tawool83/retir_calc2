@@ -1,21 +1,10 @@
 /** =============================
  *  UI binding helpers
  *  ============================= */
-function populateRetirePlanPortfolioSelect() {
-  const sel = $("retirePlanPortfolioId");
-  if (!sel) return;
-  const current = state.inputs.retirePlanPortfolioId;
-  sel.innerHTML = `<option value="">${getText('CONFIG.RETIRE_PORTFOLIO_AUTO')}</option>` +
-    state.presets.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-  sel.value = current || "";
-}
-
 function syncStateToUi() {
   $("inflationRate").value = state.inputs.inflationRate;
   $("retirePlanAgeNow").value = state.inputs.retirePlanAgeNow;
   $("retirePlanAgeRetire").value = state.inputs.retirePlanAgeRetire;
-  $("targetMonthlyCashFlow").value = state.inputs.targetMonthlyCashFlow || "";
-  populateRetirePlanPortfolioSelect();
   $("filterEnabled").checked = state.inputs.filterEnabled;
   $("filterAgeFrom").value = state.inputs.filterAgeFrom;
   $("filterAgeTo").value = state.inputs.filterAgeTo;
@@ -27,8 +16,6 @@ function syncUiToStateFromInputs() {
   state.inputs.inflationRate = clamp(Number($("inflationRate").value || 0), 0, 100);
   state.inputs.retirePlanAgeNow = clamp(Number($("retirePlanAgeNow").value || 0), 0, 120);
   state.inputs.retirePlanAgeRetire = clamp(Number($("retirePlanAgeRetire").value || 0), 0, 120);
-  state.inputs.targetMonthlyCashFlow = Math.max(0, Number($("targetMonthlyCashFlow").value || 0));
-  state.inputs.retirePlanPortfolioId = $("retirePlanPortfolioId").value || null;
   state.inputs.filterEnabled = $("filterEnabled").checked;
   state.inputs.filterAgeFrom = clamp(Number($("filterAgeFrom").value || 0), 0, 120);
   state.inputs.filterAgeTo = clamp(Number($("filterAgeTo").value || 0), 0, 120);
@@ -49,7 +36,7 @@ function updateFilterButton() {
  *  Inputs init
  *  ============================= */
 function initInputs() {
-  const inputsToWatch = ["inflationRate", "retirePlanAgeNow", "retirePlanAgeRetire", "targetMonthlyCashFlow", "retirePlanPortfolioId"];
+  const inputsToWatch = ["inflationRate", "retirePlanAgeNow", "retirePlanAgeRetire"];
   inputsToWatch.forEach(id => {
       const el = $(id);
       if (!el) return;

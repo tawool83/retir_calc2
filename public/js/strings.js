@@ -42,7 +42,7 @@ const STRINGS = {
     },
     "RETIREMENT_PLAN": {
         "TITLE": "은퇴 플랜 요약",
-        "NO_INPUT": "현재 나이, 은퇴 나이, 월 목표 생활비를 입력하면 필요 은퇴 자산을 계산합니다.",
+        "NO_INPUT": "현재 나이와 은퇴 나이를 입력하고 시나리오 이벤트를 추가하면 은퇴 플랜 요약이 표시됩니다.",
         "NOMINAL_MONTHLY": "월 목표 생활비",
         "REQUIRED_CAPITAL": "필요 은퇴 자산",
         "INFLATION_NOTE": "물가 반영 월 생활비 (물가 : {0}% × {1}년)",

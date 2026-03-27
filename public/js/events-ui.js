@@ -138,9 +138,11 @@ function renderEventList() {
         const dotWrapper = document.createElement('div');
         dotWrapper.className = 'w-3 h-3 bg-primary rounded-full ring-4 ring-white dark:ring-slate-900 relative';
         const ageLabel = document.createElement('span');
-        ageLabel.className = 'absolute top-full mt-0.5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap flex flex-col items-center';
+        ageLabel.className = 'absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap flex flex-col items-center gap-0.5';
         const yearForAge = state.results ? state.results.startYear + (group.age - state.results.ageNow) : null;
-        ageLabel.innerHTML = yearForAge ? `<span class="text-[9px] font-normal text-slate-400 dark:text-slate-500">${yearForAge}</span><span>${group.age}세</span>` : `${group.age}세`;
+        ageLabel.innerHTML = yearForAge
+            ? `<span class="text-[8px] font-medium text-slate-400 dark:text-slate-500 leading-none">${yearForAge}</span><span class="text-[10px] font-bold bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary px-1 py-0.5 rounded leading-none">${group.age}세</span>`
+            : `<span class="text-[10px] font-bold bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary px-1 py-0.5 rounded leading-none">${group.age}세</span>`;
         dotWrapper.appendChild(ageLabel);
         timelinePart.appendChild(dotWrapper);
         row.appendChild(timelinePart);
