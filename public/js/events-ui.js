@@ -138,8 +138,9 @@ function renderEventList() {
         const dotWrapper = document.createElement('div');
         dotWrapper.className = 'w-3 h-3 bg-primary rounded-full ring-4 ring-white dark:ring-slate-900 relative';
         const ageLabel = document.createElement('span');
-        ageLabel.className = 'absolute top-full mt-0.5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap';
-        ageLabel.textContent = `${group.age}세`;
+        ageLabel.className = 'absolute top-full mt-0.5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap flex flex-col items-center';
+        const yearForAge = state.results ? state.results.startYear + (group.age - state.results.ageNow) : null;
+        ageLabel.innerHTML = yearForAge ? `<span class="text-[9px] font-normal text-slate-400 dark:text-slate-500">${yearForAge}</span><span>${group.age}세</span>` : `${group.age}세`;
         dotWrapper.appendChild(ageLabel);
         timelinePart.appendChild(dotWrapper);
         row.appendChild(timelinePart);
